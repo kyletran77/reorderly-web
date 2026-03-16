@@ -104,7 +104,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = []
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Add React build output if it exists
 _frontend_dist = BASE_DIR / 'frontend' / 'dist'
