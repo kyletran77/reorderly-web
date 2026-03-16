@@ -1,0 +1,119 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "{{ title }}",
+  "description": "{{ description }}",
+  "url": "{{ canonical }}",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "creator": {
+    "@type": "Organization",
+    "name": "Reorderly",
+    "url": "https://reorderly.com"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="tool-page">
+
+  <!-- Tool Header -->
+  <div class="tool-header">
+    <div class="container">
+      <a href="/tools/" class="tool-breadcrumb">← All free tools</a>
+      <h1>{% block tool_title %}{% endblock %}</h1>
+      <p class="tool-subtitle">{% block tool_subtitle %}{% endblock %}</p>
+      <div class="tool-badges">
+        <span class="badge badge-free">Free</span>
+        <span class="badge badge-no-signup">No signup required</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tool Body -->
+  <div class="tool-body">
+    <div class="container tool-container">
+
+      <!-- Main Tool Card -->
+      <div class="tool-card">
+        {% block tool_content %}{% endblock %}
+      </div>
+
+      <!-- CTA -->
+      <div class="tool-cta-box">
+        <div class="tool-cta-inner">
+          <div class="tool-cta-text">
+            <strong>Tired of doing this manually?</strong>
+            <p>Reorderly connects to your Shopify store and handles this automatically — 24/7, without you touching it.</p>
+          </div>
+          <a href="/#waitlist" class="btn btn-primary">Get Reorderly Free →</a>
+        </div>
+      </div>
+
+      <!-- Other Tools -->
+      <div class="other-tools">
+        <h3>More free tools</h3>
+        <div class="tools-mini-grid">
+          {% for tool in tools %}
+            <a href="{{ tool.url }}" class="tool-mini-card">
+              <span class="tool-mini-icon">{{ tool.icon }}</span>
+              <span class="tool-mini-name">{{ tool.name }}</span>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="tool-faq">
+    <div class="container">
+      <h2>Frequently asked questions</h2>
+      {% block tool_faq %}{% endblock %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+// Tool-specific tracking
+// Each tool page fires tool_used when the calculate/generate button is clicked.
+// Tool pages call: window.reorderly.trackTool('Tool Name') from their own JS.
+window.reorderly = window.reorderly || {};
+window.reorderly.trackTool = function(toolName, extra) {
+  var params = { tool_name: toolName || document.title };
+  if (extra) Object.assign(params, extra);
+  window.reorderly.track('tool_used', params);
+};
+
+// Auto-fire tool_view on page load
+window.reorderly.track('tool_view', {
+  tool_name: document.querySelector('h1') ? document.querySelector('h1').textContent.trim() : document.title
+});
+
+// Track clicks on the "Get Reorderly Free" CTA from tool pages specifically
+document.addEventListener('click', function(e) {
+  var cta = e.target.closest('.tool-cta-box .btn-primary');
+  if (cta) {
+    window.reorderly.track('tool_cta_click', {
+      tool_name: document.querySelector('h1') ? document.querySelector('h1').textContent.trim() : document.title,
+      cta_text: cta.textContent.trim()
+    });
+  }
+});
+</script>
+{% endblock %}

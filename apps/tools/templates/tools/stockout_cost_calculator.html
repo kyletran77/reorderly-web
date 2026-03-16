@@ -1,0 +1,104 @@
+{% extends 'tools/base_tool.html' %}
+
+{% block tool_title %}Stockout Cost Calculator{% endblock %}
+{% block tool_subtitle %}Find out exactly how much stockouts are costing your Shopify store. Most merchants are shocked by the number.{% endblock %}
+
+{% block tool_content %}
+<div class="tool-form-section">
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Annual revenue ($)</label>
+      <input type="number" id="annualRevenue" placeholder="e.g. 1000000" min="0" oninput="calculate()" />
+    </div>
+    <div class="form-group">
+      <label>Number of SKUs</label>
+      <input type="number" id="skuCount" placeholder="e.g. 80" min="1" oninput="calculate()" />
+    </div>
+    <div class="form-group">
+      <label>Average stockout events per SKU per year</label>
+      <input type="number" id="stockoutsPerSku" placeholder="e.g. 2" min="0" step="0.5" oninput="calculate()" />
+      <span class="form-hint">Industry average is 1–3 per SKU per year for SMBs</span>
+    </div>
+    <div class="form-group">
+      <label>Average stockout duration (days)</label>
+      <input type="number" id="stockoutDays" placeholder="e.g. 10" min="1" oninput="calculate()" />
+      <span class="form-hint">How long a product is typically out of stock. Average is 7–14 days.</span>
+    </div>
+    <div class="form-group">
+      <label>% of shoppers who buy from competitor when OOS</label>
+      <input type="number" id="churnRate" value="69" min="0" max="100" oninput="calculate()" />
+      <span class="form-hint">Research shows 69% of shoppers go to a competitor when an item is out of stock</span>
+    </div>
+  </div>
+</div>
+
+<div class="tool-result" id="result" style="display:none;">
+  <h3>Your annual stockout cost</h3>
+  <div class="result-big result-red" id="totalCost">—</div>
+  <p class="result-label">estimated lost revenue per year</p>
+
+  <div class="result-breakdown">
+    <div class="breakdown-row"><span>Daily revenue</span><span id="b_daily">—</span></div>
+    <div class="breakdown-row"><span>Revenue per SKU per day</span><span id="b_perSku">—</span></div>
+    <div class="breakdown-row"><span>Total stockout days per year</span><span id="b_totalDays">—</span></div>
+    <div class="breakdown-row"><span>Revenue at risk during stockouts</span><span id="b_atRisk">—</span></div>
+    <div class="breakdown-row"><span>% lost to competitors</span><span id="b_churn">—</span></div>
+    <div class="breakdown-row total"><span>Estimated annual loss</span><span id="b_loss">—</span></div>
+  </div>
+
+  <div class="insight-box">
+    <strong>💡 What this means</strong>
+    <p id="insightText"></p>
+  </div>
+
+  <div class="share-prompt">
+    <strong>Share this result</strong> — most merchants don't realize how much stockouts cost until they see the number.
+  </div>
+</div>
+
+<script>
+function fmt(n) {
+  return '$' + Math.round(n).toLocaleString('en-US');
+}
+
+function calculate() {
+  const rev = parseFloat(document.getElementById('annualRevenue').value);
+  const skus = parseFloat(document.getElementById('skuCount').value);
+  const stockoutsPerSku = parseFloat(document.getElementById('stockoutsPerSku').value);
+  const days = parseFloat(document.getElementById('stockoutDays').value);
+  const churn = parseFloat(document.getElementById('churnRate').value) / 100;
+
+  if (isNaN(rev) || isNaN(skus) || isNaN(stockoutsPerSku) || isNaN(days)) return;
+
+  const dailyRev = rev / 365;
+  const revPerSku = dailyRev / skus;
+  const totalStockoutDays = skus * stockoutsPerSku * days;
+  const atRisk = revPerSku * totalStockoutDays;
+  const loss = atRisk * churn;
+
+  document.getElementById('b_daily').textContent = fmt(dailyRev) + '/day';
+  document.getElementById('b_perSku').textContent = fmt(revPerSku) + '/day';
+  document.getElementById('b_totalDays').textContent = Math.round(totalStockoutDays) + ' days';
+  document.getElementById('b_atRisk').textContent = fmt(atRisk);
+  document.getElementById('b_churn').textContent = Math.round(churn * 100) + '%';
+  document.getElementById('b_loss').textContent = fmt(loss);
+  document.getElementById('totalCost').textContent = fmt(loss);
+
+  const reorderlyROI = Math.round(loss / 1788);
+  document.getElementById('insightText').innerHTML =
+    `Stockouts are costing you approximately <strong>${fmt(loss)}/year</strong>. That's <strong>${(loss/rev*100).toFixed(1)}% of your total revenue</strong> disappearing before it reaches your bank account.<br><br>
+    Reorderly costs $149/month ($1,788/year). Preventing even <strong>10% of your stockout losses</strong> would cover the cost ${reorderlyROI}× over.`;
+
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+{% endblock %}
+
+{% block tool_faq %}
+<div class="faq-list">
+  <details><summary>How accurate is this stockout cost estimate?</summary><p>This is a conservative estimate based on industry research. The actual cost is often higher when you factor in long-term customer churn (9% of customers never return after one stockout), ranking drops on Amazon and Google Shopping, and wasted ad spend driving traffic to unavailable products.</p></details>
+  <details><summary>What percentage of shoppers leave when an item is out of stock?</summary><p>Research consistently shows 69% of online shoppers will go to a competitor when an item is out of stock. Only 9% will wait for the item to come back in stock. The remaining 22% will substitute with another product on your site.</p></details>
+  <details><summary>How do I reduce stockouts?</summary><p>The key steps are: (1) Set reorder points for each SKU based on lead time and daily sales, (2) Monitor inventory daily, (3) Place orders before you hit the reorder point — not after. Reorderly automates all three steps.</p></details>
+  <details><summary>Are stockout costs tax deductible?</summary><p>No — stockout costs are opportunity costs (revenue you didn't earn), not an expense. They don't appear on your P&L, which is why many merchants underestimate them.</p></details>
+</div>
+{% endblock %}

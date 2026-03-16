@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    name: Django + Frontend checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build React frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+
+      - name: Django system check
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY || 'ci-only-insecure-key-not-for-prod' }}
+          DEBUG: 'False'
+          ALLOWED_HOSTS: 'localhost'
+          DATABASE_URL: 'sqlite:///ci.sqlite3'
+        run: python manage.py check
+
+      - name: Django migrations check (no changes pending)
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY || 'ci-only-insecure-key-not-for-prod' }}
+          DEBUG: 'True'
+          DATABASE_URL: 'sqlite:///ci.sqlite3'
+        run: python manage.py migrate --run-syncdb --noinput
+
+      - name: Collect static files
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY || 'ci-only-insecure-key-not-for-prod' }}
+          DEBUG: 'False'
+          DATABASE_URL: 'sqlite:///ci.sqlite3'
+        run: python manage.py collectstatic --noinput
+
+# Railway auto-deploys from GitHub on push to main.
+# No manual deploy step needed — connect the repo in your Railway dashboard once.
+# Dashboard: https://railway.app/new → Deploy from GitHub repo → select this repo

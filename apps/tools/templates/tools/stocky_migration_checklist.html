@@ -1,0 +1,115 @@
+{% extends 'tools/base_tool.html' %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"Is Shopify Stocky shutting down?","acceptedAnswer":{"@type":"Answer","text":"Yes. Shopify officially delisted Stocky from the App Store in February 2026 and confirmed it will stop functioning entirely on August 31, 2026."}},
+    {"@type":"Question","name":"What is the best Stocky alternative?","acceptedAnswer":{"@type":"Answer","text":"Reorderly is the best Stocky alternative for Shopify merchants who want automated purchase order management. It does everything Stocky did, plus adds AI-powered PO email drafting and supplier communication."}},
+    {"@type":"Question","name":"How do I export my data from Stocky?","acceptedAnswer":{"@type":"Answer","text":"In Stocky, go to Reports and export your purchase order history as CSV. Also export your supplier list and product replenishment settings before August 31, 2026."}},
+    {"@type":"Question","name":"What data will I lose when Stocky shuts down?","acceptedAnswer":{"@type":"Answer","text":"You will lose your Stocky purchase order history, supplier contacts stored in Stocky, replenishment rules, and demand forecasting data. Export everything before August 31, 2026."}}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block tool_title %}Shopify Stocky Migration Checklist{% endblock %}
+{% block tool_subtitle %}Stocky shuts down August 31, 2026. Here's everything you need to do — step by step.{% endblock %}
+
+{% block tool_content %}
+<div class="alert-banner">
+  ⚠️ <strong>Stocky is shutting down August 31, 2026.</strong> Shopify delisted it from the App Store in February 2026. If you're still using Stocky, you need to act now.
+</div>
+
+<div class="checklist-section">
+  <h2>Your migration checklist</h2>
+  <p style="color:var(--text-muted); margin-bottom:1.5rem;">Check off each step as you complete it. Your progress is saved in this browser.</p>
+
+  <div class="checklist" id="checklist">
+    <div class="checklist-group">
+      <h3>📦 Step 1: Export your data from Stocky (Do this first)</h3>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Export your full purchase order history (Reports → Export CSV)</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Export your supplier list with contact details</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Note your replenishment rules for each SKU (reorder points, quantities)</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Screenshot or export your demand forecasting data</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Download any custom reports you rely on</label>
+    </div>
+
+    <div class="checklist-group">
+      <h3>🔍 Step 2: Choose a replacement</h3>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Evaluate your core needs: PO management, forecasting, multi-location, or all three?</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> If you need automated PO emails to suppliers → <strong>try Reorderly</strong> (free)</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> If you need advanced forecasting → evaluate Prediko or Inventory Planner</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Sign up for your chosen replacement while Stocky is still running (easier to compare)</label>
+    </div>
+
+    <div class="checklist-group">
+      <h3>⚙️ Step 3: Set up your replacement</h3>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Connect your Shopify store to the new tool</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Import your supplier list from the Stocky export</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Recreate your reorder points for each SKU</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Set up reorder quantities per SKU based on your Stocky data</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Test with one product end-to-end before fully switching</label>
+    </div>
+
+    <div class="checklist-group">
+      <h3>✅ Step 4: Cutover</h3>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Run both tools in parallel for at least 1 week to verify data consistency</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Confirm all in-flight POs are tracked in your new system</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Notify your team of the new workflow</label>
+      <label class="checklist-item"><input type="checkbox" onchange="saveProgress()" /> Uninstall Stocky (or simply let it expire on August 31, 2026)</label>
+    </div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progressBar" style="width:0%"></div>
+  </div>
+  <p id="progressText" style="text-align:center; color:var(--text-muted); font-size:0.875rem;">0 of 19 steps completed</p>
+</div>
+
+<div class="info-box" style="margin-top:2rem;">
+  <h3>Why did Shopify discontinue Stocky?</h3>
+  <p>Shopify acquired Stocky in 2019 as part of their Handshake acquisition. For years it was the go-to free inventory management app for Shopify merchants. In February 2026, Shopify delisted it from the App Store and announced its shutdown, citing a strategic shift toward their native inventory management features and their AI assistant Sidekick for inventory insights.</p>
+  <p>The problem: Shopify's built-in tools don't support automated purchase order <em>emails</em> to suppliers — which is exactly what Stocky's PO module handled. That gap is precisely what Reorderly was built to fill.</p>
+</div>
+
+<script>
+function saveProgress() {
+  const boxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+  const states = Array.from(boxes).map(b => b.checked);
+  localStorage.setItem('stocky_checklist', JSON.stringify(states));
+  updateProgress(states);
+}
+
+function loadProgress() {
+  const saved = localStorage.getItem('stocky_checklist');
+  if (!saved) return;
+  const states = JSON.parse(saved);
+  const boxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+  boxes.forEach((b, i) => { if (states[i]) b.checked = true; });
+  updateProgress(states);
+}
+
+function updateProgress(states) {
+  const done = states.filter(Boolean).length;
+  const total = states.length;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${done} of ${total} steps completed (${pct}%)`;
+}
+
+loadProgress();
+</script>
+{% endblock %}
+
+{% block tool_faq %}
+<div class="faq-list">
+  <details><summary>Is Shopify Stocky shutting down?</summary><p>Yes. Shopify officially delisted Stocky from the App Store in February 2026 and confirmed it will stop functioning entirely on August 31, 2026.</p></details>
+  <details><summary>What is the best Stocky alternative?</summary><p>Reorderly is the best Stocky alternative for merchants who need automated purchase order management. It does everything Stocky did for POs, plus adds AI-powered supplier email drafting and reply tracking.</p></details>
+  <details><summary>How do I export my data from Stocky?</summary><p>In Stocky, go to Reports and export your purchase order history as CSV. Also export your supplier list and note your product replenishment settings before August 31, 2026.</p></details>
+  <details><summary>What data will I lose when Stocky shuts down?</summary><p>You risk losing your PO history, supplier contacts, replenishment rules, and forecasting data stored in Stocky. Export everything now using the checklist above.</p></details>
+  <details><summary>Does Shopify have a built-in replacement for Stocky?</summary><p>Shopify's native inventory tools handle basic stock tracking and low-stock alerts, but do not support automated purchase order emails to suppliers — which is the core of what Stocky's PO module provided. That's the gap Reorderly fills.</p></details>
+</div>
+{% endblock %}

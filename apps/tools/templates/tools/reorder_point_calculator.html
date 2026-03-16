@@ -1,0 +1,98 @@
+{% extends 'tools/base_tool.html' %}
+
+{% block tool_title %}Reorder Point Calculator{% endblock %}
+{% block tool_subtitle %}Calculate exactly when to reorder each SKU so you never stock out. Free, instant, no signup.{% endblock %}
+
+{% block tool_content %}
+<div class="tool-form-section">
+  <div class="formula-box">
+    <strong>Formula:</strong> Reorder Point = (Average Daily Sales × Supplier Lead Time) + Safety Stock
+  </div>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Average daily sales (units)</label>
+      <input type="number" id="dailySales" placeholder="e.g. 5" min="0" step="0.1" oninput="calculate()" />
+      <span class="form-hint">How many units you sell per day on average</span>
+    </div>
+    <div class="form-group">
+      <label>Supplier lead time (days)</label>
+      <input type="number" id="leadTime" placeholder="e.g. 14" min="1" oninput="calculate()" />
+      <span class="form-hint">Days from placing order to receiving stock</span>
+    </div>
+    <div class="form-group">
+      <label>Safety stock (units)</label>
+      <input type="number" id="safetyStock" placeholder="e.g. 20" min="0" oninput="calculate()" />
+      <span class="form-hint">Buffer stock for demand spikes or supplier delays. <a href="/tools/safety-stock-calculator/">Calculate this →</a></span>
+    </div>
+    <div class="form-group">
+      <label>Current stock (optional)</label>
+      <input type="number" id="currentStock" placeholder="e.g. 35" min="0" oninput="calculate()" />
+      <span class="form-hint">Your current inventory level</span>
+    </div>
+  </div>
+</div>
+
+<div class="tool-result" id="result" style="display:none;">
+  <h3>Your reorder point</h3>
+  <div class="result-big" id="reorderPoint">—</div>
+  <p class="result-label">units — reorder when stock hits this level</p>
+
+  <div class="result-breakdown">
+    <div class="breakdown-row"><span>Daily sales</span><span id="b_daily">—</span></div>
+    <div class="breakdown-row"><span>Lead time</span><span id="b_lead">—</span></div>
+    <div class="breakdown-row"><span>Demand during lead time</span><span id="b_demand">—</span></div>
+    <div class="breakdown-row"><span>Safety stock</span><span id="b_safety">—</span></div>
+    <div class="breakdown-row total"><span>Reorder point</span><span id="b_rop">—</span></div>
+  </div>
+
+  <div id="statusBox" class="status-box"></div>
+</div>
+
+<script>
+function calculate() {
+  const daily = parseFloat(document.getElementById('dailySales').value);
+  const lead = parseFloat(document.getElementById('leadTime').value);
+  const safety = parseFloat(document.getElementById('safetyStock').value) || 0;
+  const current = parseFloat(document.getElementById('currentStock').value);
+
+  if (isNaN(daily) || isNaN(lead)) return;
+
+  const demand = daily * lead;
+  const rop = Math.ceil(demand + safety);
+
+  document.getElementById('reorderPoint').textContent = rop + ' units';
+  document.getElementById('b_daily').textContent = daily + ' units/day';
+  document.getElementById('b_lead').textContent = lead + ' days';
+  document.getElementById('b_demand').textContent = Math.ceil(demand) + ' units';
+  document.getElementById('b_safety').textContent = safety + ' units';
+  document.getElementById('b_rop').textContent = rop + ' units';
+
+  let status = '';
+  if (!isNaN(current)) {
+    if (current <= rop) {
+      const urgency = current < rop * 0.5 ? 'status-critical' : 'status-warning';
+      status = `<div class="status-alert ${urgency}">
+        ⚠️ You should reorder now. Current stock (${current}) is at or below your reorder point (${rop}).
+      </div>`;
+    } else {
+      const daysLeft = Math.floor((current - rop) / daily);
+      status = `<div class="status-alert status-ok">
+        ✓ You have ${current} units in stock. Reorder in approximately <strong>${daysLeft} days</strong> when stock reaches ${rop} units.
+      </div>`;
+    }
+  }
+  document.getElementById('statusBox').innerHTML = status;
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+{% endblock %}
+
+{% block tool_faq %}
+<div class="faq-list">
+  <details><summary>What is a reorder point?</summary><p>A reorder point (ROP) is the inventory level at which you should place a new order with your supplier. It's calculated to ensure you receive new stock before running out, accounting for your supplier's lead time and a safety buffer.</p></details>
+  <details><summary>How do I calculate my average daily sales?</summary><p>Divide your total units sold over the last 30–90 days by the number of days in that period. For seasonal products, use a shorter recent window to capture current demand trends.</p></details>
+  <details><summary>What is a good safety stock level?</summary><p>Safety stock depends on the variability of your demand and supplier lead times. A simple starting point is 20–30% of your average demand during lead time. Use our <a href="/tools/safety-stock-calculator/">Safety Stock Calculator</a> for a more precise number.</p></details>
+  <details><summary>How do I automate reorder point monitoring?</summary><p>Reorderly connects to your Shopify store, tracks inventory levels against your reorder points, and automatically sends PO emails to your suppliers when stock hits the threshold — so you never have to check manually.</p></details>
+</div>
+{% endblock %}

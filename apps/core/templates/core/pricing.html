@@ -1,0 +1,155 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="hero hero-sm">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-badge">Free during early access</div>
+      <h1 class="hero-headline">Simple, transparent pricing</h1>
+      <p class="hero-sub">Start free. Upgrade when you&rsquo;re ready. No hidden fees.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="pricing-grid">
+
+      <div class="pricing-card">
+        <div class="pricing-label">Early Access</div>
+        <div class="pricing-price">
+          <span class="price-amount">$0</span>
+          <span class="price-period">/ month</span>
+        </div>
+        <p class="pricing-desc">Everything you need to automate supplier reordering. Free while we&rsquo;re in early access.</p>
+        <ul class="pricing-features">
+          <li><span class="check">&#10003;</span> Up to 500 SKUs</li>
+          <li><span class="check">&#10003;</span> Up to 10 suppliers</li>
+          <li><span class="check">&#10003;</span> Automated PO emails</li>
+          <li><span class="check">&#10003;</span> Supplier reply tracking</li>
+          <li><span class="check">&#10003;</span> PO history log</li>
+          <li><span class="check">&#10003;</span> Stocky migration</li>
+          <li><span class="check">&#10003;</span> Email support</li>
+        </ul>
+        <a href="/#waitlist" class="btn btn-primary btn-block">Get Early Access</a>
+      </div>
+
+      <div class="pricing-card pricing-card-featured">
+        <div class="pricing-badge">Coming soon</div>
+        <div class="pricing-label">Pro</div>
+        <div class="pricing-price">
+          <span class="price-amount">$99</span>
+          <span class="price-period">/ month</span>
+        </div>
+        <p class="pricing-desc">For growing merchants with large catalogs and complex supplier relationships.</p>
+        <ul class="pricing-features">
+          <li><span class="check">&#10003;</span> Unlimited SKUs</li>
+          <li><span class="check">&#10003;</span> Unlimited suppliers</li>
+          <li><span class="check">&#10003;</span> All Early Access features</li>
+          <li><span class="check">&#10003;</span> Draft mode (review before send)</li>
+          <li><span class="check">&#10003;</span> Advanced forecasting</li>
+          <li><span class="check">&#10003;</span> Custom PO templates</li>
+          <li><span class="check">&#10003;</span> Priority support</li>
+          <li><span class="check">&#10003;</span> Slack integration</li>
+        </ul>
+        <a href="/#waitlist" class="btn btn-secondary btn-block">Join waitlist for discount</a>
+      </div>
+
+    </div>
+
+    <div class="pricing-note">
+      <p>Early access members receive a <strong>lifetime 30% discount</strong> when paid plans launch. <a href="/#waitlist">Join the waitlist now.</a></p>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <h2 class="section-heading">Common pricing questions</h2>
+    <div class="faq-list">
+
+      <details class="faq-item">
+        <summary class="faq-question">How long is the free early access period?</summary>
+        <div class="faq-answer">
+          <p>Early access is free for at least the first 6 months. We&rsquo;ll give you 60 days notice before introducing any paid plans, and early access members receive a lifetime discount.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">Do I need a credit card to sign up?</summary>
+        <div class="faq-answer">
+          <p>No credit card required for early access. You won&rsquo;t be asked for payment information until paid plans launch.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">What counts as a SKU?</summary>
+        <div class="faq-answer">
+          <p>A SKU is any unique variant in your Shopify inventory. A t-shirt in 3 colors &times; 4 sizes = 12 SKUs. The early access plan supports up to 500 SKUs, which covers most small to mid-size merchants.</p>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-question">Can I cancel anytime?</summary>
+        <div class="faq-answer">
+          <p>Yes. There are no long-term commitments. Cancel anytime from your account settings. Your data is exportable at any time.</p>
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<section class="section section-cta" id="waitlist">
+  <div class="container">
+    <div class="cta-inner">
+      <h2>Get early access &mdash; free</h2>
+      <p class="cta-sub">Join 847 merchants already automating their supplier reordering.</p>
+      <form class="waitlist-form" id="waitlist-form" novalidate>
+        <div class="waitlist-input-row">
+          <input type="email" name="email" id="waitlist-email" class="waitlist-input" placeholder="you@yourstore.com" required autocomplete="email">
+          <button type="submit" class="btn btn-primary btn-lg">Get Access</button>
+        </div>
+        <div class="waitlist-msg" id="waitlist-msg" role="alert" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+(function() {
+  var form = document.getElementById('waitlist-form');
+  var msg = document.getElementById('waitlist-msg');
+  if (!form) return;
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var email = document.getElementById('waitlist-email').value.trim();
+    if (!email) return;
+    var btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true; btn.textContent = 'Joining...';
+    msg.textContent = ''; msg.className = 'waitlist-msg';
+    fetch('/api/waitlist/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, source: 'pricing' })
+    })
+    .then(function(res) { return res.json().then(function(data) { return { status: res.status, data: data }; }); })
+    .then(function(r) {
+      if (r.status === 201 || r.status === 200) {
+        msg.textContent = r.data.message || "You're on the list!";
+        msg.className = 'waitlist-msg success';
+        form.querySelector('input').value = '';
+      } else {
+        msg.textContent = (r.data.errors && r.data.errors.email) ? r.data.errors.email[0] : 'Something went wrong.';
+        msg.className = 'waitlist-msg error';
+      }
+    })
+    .catch(function() { msg.textContent = 'Network error.'; msg.className = 'waitlist-msg error'; })
+    .finally(function() { btn.disabled = false; btn.textContent = 'Get Access'; });
+  });
+})();
+</script>
+
+{% endblock %}

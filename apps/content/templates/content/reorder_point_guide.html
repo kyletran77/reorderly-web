@@ -1,0 +1,162 @@
+{% extends 'content/base_article.html' %}
+
+{% block article_tag %}Inventory Guide{% endblock %}
+{% block article_date %}March 2026{% endblock %}
+{% block article_read %}7 min read{% endblock %}
+
+{% block article_title %}How to Calculate Reorder Point for Your Shopify Store (Formula + Real Examples){% endblock %}
+
+{% block article_lede %}The reorder point is the inventory level at which you should place a new order with your supplier. Get it wrong and you stockout. Here's the exact formula, three real examples, and a free calculator.{% endblock %}
+
+{% block toc %}
+<ul>
+  <li><a href="#what-is-rop">What is a reorder point?</a></li>
+  <li><a href="#formula">The reorder point formula</a></li>
+  <li><a href="#examples">Three real examples</a></li>
+  <li><a href="#safety-stock">Why safety stock matters</a></li>
+  <li><a href="#lead-time">Getting lead time right</a></li>
+  <li><a href="#seasonal">Adjusting for seasonal demand</a></li>
+  <li><a href="#automate">How to monitor reorder points automatically</a></li>
+</ul>
+{% endblock %}
+
+{% block article_content %}
+
+<h2 id="what-is-rop">What is a reorder point?</h2>
+
+<p>A reorder point (ROP) is the specific inventory level at which you should place a new purchase order with your supplier. It's designed to ensure new stock arrives before you run out — accounting for how long your supplier takes to deliver and how fast you sell.</p>
+
+<p>Think of it like a fuel gauge with a "refill now" indicator. The reorder point is that indicator — not "you're empty," but "order now so you don't run empty before the next delivery arrives."</p>
+
+<p>Most Shopify merchants either don't have reorder points configured, or set them based on gut feel. Both approaches lead to stockouts — 53% of Shopify products experience at least one stockout per year, with an average duration of 35 days. That's 35 days of lost sales and customer churn on that SKU.</p>
+
+<h2 id="formula">The reorder point formula</h2>
+
+<div class="article-formula">
+  Reorder Point = (Average Daily Sales × Supplier Lead Time) + Safety Stock
+</div>
+
+<p>Each component:</p>
+
+<ul>
+  <li><strong>Average Daily Sales:</strong> Your average units sold per day over the last 30–90 days. Use a shorter window for fast-moving or seasonal products.</li>
+  <li><strong>Supplier Lead Time:</strong> The number of days between placing an order and receiving stock. <em>Use actual lead time, not what your supplier claims.</em></li>
+  <li><strong>Safety Stock:</strong> A buffer for demand spikes and supplier delays. Calculated separately (see below).</li>
+</ul>
+
+<p>Use our <a href="/tools/reorder-point-calculator/">free Reorder Point Calculator</a> to compute this for each SKU automatically.</p>
+
+<h2 id="examples">Three real examples</h2>
+
+<h3>Example 1: Stable product, single supplier</h3>
+
+<p><em>Premium Yoga Mat — 80 units/month average, one supplier with 14-day lead time</em></p>
+
+<ul>
+  <li>Average daily sales: 80 ÷ 30 = <strong>2.67 units/day</strong></li>
+  <li>Lead time: <strong>14 days</strong></li>
+  <li>Safety stock: 20 units (for demand spikes)</li>
+  <li>Reorder point: (2.67 × 14) + 20 = 37.4 → <strong>38 units</strong></li>
+</ul>
+
+<p>When your yoga mat inventory hits 38 units, place the reorder. The 20 units of safety stock protects you if demand spikes or your supplier is 3–4 days late.</p>
+
+<h3>Example 2: Fast-moving product, long lead time</h3>
+
+<p><em>Protein Shaker 20oz — 200 units/month, overseas supplier with 28-day lead time</em></p>
+
+<ul>
+  <li>Average daily sales: 200 ÷ 30 = <strong>6.67 units/day</strong></li>
+  <li>Lead time: <strong>28 days</strong></li>
+  <li>Safety stock: 40 units</li>
+  <li>Reorder point: (6.67 × 28) + 40 = 186.76 → <strong>187 units</strong></li>
+</ul>
+
+<p>This is the trap most merchants fall into with overseas suppliers. A reorder point of 187 units feels uncomfortably high — but it reflects reality. At 6.67 units/day over 28 days, you'll sell 187 units while waiting for stock. Order when you hit 187 or you're stocked out before the shipment arrives.</p>
+
+<h3>Example 3: Seasonal product</h3>
+
+<p><em>Jump Rope — 20/month in off-peak, 90/month in peak (January, summer)</em></p>
+
+<p>Seasonal products need two reorder points:</p>
+
+<p><strong>Off-peak ROP:</strong></p>
+<ul>
+  <li>Daily sales: 20 ÷ 30 = 0.67 units/day</li>
+  <li>Lead time: 10 days, safety stock: 10 units</li>
+  <li>ROP: (0.67 × 10) + 10 = <strong>17 units</strong></li>
+</ul>
+
+<p><strong>Peak ROP:</strong></p>
+<ul>
+  <li>Daily sales: 90 ÷ 30 = 3 units/day</li>
+  <li>Lead time: 10 days, safety stock: 20 units</li>
+  <li>ROP: (3 × 10) + 20 = <strong>50 units</strong></li>
+</ul>
+
+<p>Switch to the peak ROP 4–6 weeks before your peak season starts — before demand accelerates, not after.</p>
+
+<h2 id="safety-stock">Why safety stock matters (and how to calculate it)</h2>
+
+<p>Safety stock is the buffer that absorbs variability. Without it, your reorder point assumes two things that are rarely true: (1) your demand is exactly average every day, and (2) your supplier delivers in exactly their stated lead time.</p>
+
+<p>In practice, demand fluctuates. Suppliers run late. An unexpected social media mention can triple your daily sales for a week. Safety stock is what keeps you in stock through all of that.</p>
+
+<p>The simple safety stock formula:</p>
+
+<div class="article-formula">
+  Safety Stock = (Max Daily Sales × Max Lead Time) − (Avg Daily Sales × Avg Lead Time)
+</div>
+
+<p>Example: Max daily sales = 8, max lead time = 18 days, avg daily = 5, avg lead time = 14 days.</p>
+<p>Safety stock = (8 × 18) − (5 × 14) = 144 − 70 = <strong>74 units</strong></p>
+
+<p>That feels like a lot — but if your supplier is ever 4 days late during a demand spike, that buffer is what keeps you selling. Use our <a href="/tools/safety-stock-calculator/">Safety Stock Calculator</a> for both the simple and statistical methods.</p>
+
+<h2 id="lead-time">Getting lead time right — the most common mistake</h2>
+
+<p>Suppliers almost universally quote optimistic lead times. If your supplier says "14 days," they probably mean 14 days under ideal conditions — not during Chinese New Year, not when they have a production backlog, not when there's a port delay.</p>
+
+<p>Analyze your last 10–20 POs. Calculate:</p>
+<ul>
+  <li>Average actual lead time</li>
+  <li>Maximum actual lead time</li>
+  <li>Standard deviation (how much it varies)</li>
+</ul>
+
+<p>Use the <strong>average actual</strong> in your reorder point formula, not the stated lead time. Use the maximum actual to set your safety stock. If you don't have historical data yet, add 25% to your supplier's stated lead time as a conservative estimate until you do.</p>
+
+<p>Our <a href="/tools/supplier-lead-time-tracker/">Supplier Lead Time Tracker</a> helps you log actual vs. stated lead times and calculates a reliability score per supplier.</p>
+
+<h2 id="seasonal">Adjusting reorder points for seasonal demand</h2>
+
+<p>Seasonal adjustment is the piece most merchants skip until they get burned by a holiday stockout. Here's a practical approach:</p>
+
+<ul>
+  <li><strong>4–6 weeks before peak season:</strong> Switch to your peak ROP for all seasonal SKUs</li>
+  <li><strong>During peak:</strong> Monitor daily sales rate actively — if you're selling faster than expected, recalculate your ROP immediately</li>
+  <li><strong>Post-peak:</strong> Switch back to off-peak ROP and consider whether to run down safety stock or hold it for the next peak</li>
+</ul>
+
+<p>For Black Friday/Cyber Monday specifically: most DTC brands place their pre-season POs in August–September. Your supplier's lead time in October–November is often longer than normal because every brand is placing orders simultaneously. Factor in a 30–50% lead time buffer for Q4 orders.</p>
+
+<h2 id="automate">How to monitor reorder points automatically</h2>
+
+<p>Setting reorder points is the analysis work. Monitoring them is the ongoing ops work — and it's where most merchants fall down. Checking 80 SKUs manually every day isn't realistic.</p>
+
+<p>Three options for automated monitoring:</p>
+
+<h3>Option 1: Shopify low stock alerts (free, limited)</h3>
+<p>Shopify can send you an email when a product hits a quantity threshold. Go to <strong>Settings → Notifications → Low inventory</strong>. The downside: it only alerts you — you still have to draft and send the PO manually.</p>
+
+<h3>Option 2: Shopify Flow (Shopify/Plus plans)</h3>
+<p>Flow can trigger more complex automations — internal Slack messages, tagging products, creating tasks. Still doesn't email suppliers directly.</p>
+
+<h3>Option 3: Reorderly (automated POs)</h3>
+<p>Reorderly monitors your inventory 24/7, detects when any SKU hits its reorder point, drafts a professional PO email to your supplier, and sends it automatically. You get notified when POs go out — not when you need to send them. The whole loop closes without you.</p>
+
+<div class="article-callout">
+  <strong>→ Calculate your reorder points now:</strong> Use our <a href="/tools/reorder-point-calculator/">free Reorder Point Calculator</a> — input your daily sales rate, lead time, and safety stock to get the exact number for each SKU. Then <a href="/#waitlist">set up Reorderly</a> to monitor them automatically.
+</div>
+
+{% endblock %}

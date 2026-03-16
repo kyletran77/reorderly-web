@@ -1,0 +1,70 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ title }}",
+  "description": "{{ description }}",
+  "url": "{{ canonical }}",
+  "datePublished": "2026-03-14",
+  "dateModified": "2026-03-14",
+  "author": {
+    "@type": "Organization",
+    "name": "Reorderly",
+    "url": "https://reorderly.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Reorderly",
+    "url": "https://reorderly.com"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="article-page">
+
+  <div class="article-header">
+    <div class="container article-header-inner">
+      <a href="/resources/" class="tool-breadcrumb">← All guides</a>
+      <div class="article-meta">
+        <span class="article-tag">{% block article_tag %}Guide{% endblock %}</span>
+        <span class="article-date">{% block article_date %}March 2026{% endblock %}</span>
+        <span class="article-read">{% block article_read %}7 min read{% endblock %}</span>
+      </div>
+      <h1>{% block article_title %}{% endblock %}</h1>
+      <p class="article-lede">{% block article_lede %}{% endblock %}</p>
+    </div>
+  </div>
+
+  <div class="article-body">
+    <div class="container article-layout">
+
+      <aside class="article-toc">
+        <div class="toc-inner">
+          <strong>In this guide</strong>
+          <nav>{% block toc %}{% endblock %}</nav>
+        </div>
+      </aside>
+
+      <article class="article-content">
+        {% block article_content %}{% endblock %}
+
+        <div class="article-cta">
+          <div class="article-cta-inner">
+            <strong>Automate this with Reorderly</strong>
+            <p>Everything covered in this guide can be handled automatically by Reorderly — 24/7, without manual work.</p>
+            <a href="/#waitlist" class="btn btn-primary">Get early access — free →</a>
+          </div>
+        </div>
+
+      </article>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

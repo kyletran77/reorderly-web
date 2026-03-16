@@ -1,0 +1,159 @@
+{% extends 'tools/base_tool.html' %}
+
+{% block tool_title %}Purchase Order Email Generator{% endblock %}
+{% block tool_subtitle %}Generate a professional PO email to your supplier in 10 seconds. Free, no signup.{% endblock %}
+
+{% block tool_content %}
+<div class="tool-form-section">
+  <h2>Enter your order details</h2>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Your store name</label>
+      <input type="text" id="storeName" placeholder="e.g. Peak Performance Gear" />
+    </div>
+    <div class="form-group">
+      <label>Supplier name</label>
+      <input type="text" id="supplierName" placeholder="e.g. FitGear Wholesale Co." />
+    </div>
+    <div class="form-group">
+      <label>Supplier contact name</label>
+      <input type="text" id="contactName" placeholder="e.g. Sarah Chen" />
+    </div>
+    <div class="form-group">
+      <label>Product name</label>
+      <input type="text" id="productName" placeholder="e.g. Premium Yoga Mat — Black" />
+    </div>
+    <div class="form-group">
+      <label>SKU</label>
+      <input type="text" id="sku" placeholder="e.g. YM-BLK-001" />
+    </div>
+    <div class="form-group">
+      <label>Quantity to order</label>
+      <input type="number" id="quantity" placeholder="e.g. 50" min="1" />
+    </div>
+    <div class="form-group">
+      <label>Unit price (optional)</label>
+      <input type="text" id="unitPrice" placeholder="e.g. $12.50" />
+    </div>
+    <div class="form-group">
+      <label>Requested delivery date</label>
+      <input type="date" id="deliveryDate" />
+    </div>
+    <div class="form-group full-width">
+      <label>Shipping address</label>
+      <input type="text" id="shippingAddress" placeholder="e.g. 123 Warehouse Blvd, Los Angeles, CA 90001" />
+    </div>
+    <div class="form-group full-width">
+      <label>Payment terms (optional)</label>
+      <input type="text" id="paymentTerms" placeholder="e.g. Net 30" />
+    </div>
+  </div>
+
+  <button class="btn btn-primary btn-lg" onclick="generatePOEmail()" style="margin-top:1.5rem;">
+    Generate PO Email →
+  </button>
+</div>
+
+<div class="tool-result" id="result" style="display:none;">
+  <div class="result-header">
+    <h3>Your purchase order email</h3>
+    <button class="btn btn-ghost btn-sm" onclick="copyEmail()">Copy to clipboard</button>
+  </div>
+  <div class="email-preview">
+    <div class="email-field"><strong>Subject:</strong> <span id="emailSubject"></span></div>
+    <div class="email-divider"></div>
+    <div class="email-body" id="emailBody"></div>
+  </div>
+  <p class="result-note">✓ Copy this email and send it directly to your supplier. Or — <a href="/#waitlist">let Reorderly send it automatically</a> next time.</p>
+</div>
+
+<script>
+function pad(n) { return n < 10 ? '0' + n : n; }
+
+function generatePOEmail() {
+  const store = document.getElementById('storeName').value || 'Your Store';
+  const supplier = document.getElementById('supplierName').value || 'Supplier';
+  const contact = document.getElementById('contactName').value || 'Team';
+  const product = document.getElementById('productName').value || 'Product';
+  const sku = document.getElementById('sku').value || 'SKU-001';
+  const qty = document.getElementById('quantity').value || '100';
+  const price = document.getElementById('unitPrice').value;
+  const deliveryRaw = document.getElementById('deliveryDate').value;
+  const address = document.getElementById('shippingAddress').value || '[Your shipping address]';
+  const terms = document.getElementById('paymentTerms').value;
+
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const poNum = 'PO-' + today.getFullYear() + pad(today.getMonth()+1) + pad(today.getDate()) + '-' + sku.replace(/[^A-Z0-9]/gi,'').toUpperCase().slice(0,8);
+
+  let deliveryStr = '[Requested delivery date]';
+  if (deliveryRaw) {
+    const d = new Date(deliveryRaw + 'T00:00:00');
+    deliveryStr = d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  const totalLine = price ? `\nTotal: ${qty} × ${price} = $${(parseFloat(qty) * parseFloat(price.replace(/[^0-9.]/g,''))).toFixed(2)}` : '';
+  const termsLine = terms ? `\nPayment Terms: ${terms}` : '';
+
+  const subject = `Purchase Order ${poNum} — ${product}`;
+
+  const body = `Dear ${contact},
+
+I hope this message finds you well. Please find below our purchase order for your review and processing.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+PURCHASE ORDER: ${poNum}
+Date: ${dateStr}
+━━━━━━━━━━━━━━━━━━━━━━━
+
+From: ${store}
+To: ${supplier}
+
+Product: ${product}
+SKU: ${sku}
+Quantity: ${qty} units${totalLine}
+Requested Delivery: ${deliveryStr}
+Ship To: ${address}${termsLine}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+Please confirm receipt of this order and your expected ship date at your earliest convenience.
+
+If you have any questions or if there are any issues with availability, please contact us immediately.
+
+Thank you for your continued partnership.
+
+Best regards,
+${store} Purchasing Team
+
+---
+This PO was generated with Reorderly · reorderly.com`;
+
+  document.getElementById('emailSubject').textContent = subject;
+  document.getElementById('emailBody').textContent = body;
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function copyEmail() {
+  const subject = document.getElementById('emailSubject').textContent;
+  const body = document.getElementById('emailBody').textContent;
+  const full = 'Subject: ' + subject + '\n\n' + body;
+  navigator.clipboard.writeText(full).then(() => {
+    const btn = event.target;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = 'Copy to clipboard', 2000);
+  });
+}
+</script>
+{% endblock %}
+
+{% block tool_faq %}
+<div class="faq-list">
+  <details><summary>What is a purchase order email?</summary><p>A purchase order (PO) email is a formal request sent to a supplier to order products. It includes the product name, SKU, quantity, requested delivery date, and payment terms. It creates a paper trail for your procurement records.</p></details>
+  <details><summary>How do I send a PO to a supplier?</summary><p>Generate your PO using this tool, then copy the email and send it directly to your supplier's purchasing or sales contact. Keep the PO number for your records so you can track the order status.</p></details>
+  <details><summary>Do I need to create a PDF purchase order?</summary><p>For most small suppliers, an email with the PO details is sufficient. If your supplier requires a formal PDF, use the email body as the content for a simple Word or Google Doc formatted as a PO.</p></details>
+  <details><summary>How can I automate purchase orders?</summary><p>Reorderly monitors your Shopify inventory and automatically generates and sends PO emails to your suppliers when stock hits your reorder threshold — no manual work required.</p></details>
+</div>
+{% endblock %}

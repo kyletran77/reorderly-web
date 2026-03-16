@@ -1,0 +1,122 @@
+{% extends 'tools/base_tool.html' %}
+
+{% block tool_title %}Supplier Lead Time Tracker{% endblock %}
+{% block tool_subtitle %}Track your suppliers' actual vs. stated lead times. Get a reliability score and know who you can trust.{% endblock %}
+
+{% block tool_content %}
+<div class="tool-form-section">
+  <p style="color:var(--text-muted); margin-bottom:1.5rem;">Add your suppliers and log their stated vs. actual lead times. Your data stays in your browser — nothing is sent to our servers.</p>
+
+  <div id="supplierList"></div>
+
+  <button class="btn btn-ghost btn-sm" onclick="addSupplier()" style="margin-top:1rem;">+ Add supplier</button>
+  <button class="btn btn-primary" onclick="calculateScores()" style="margin-top:1rem; margin-left:0.5rem;">Calculate Scores →</button>
+</div>
+
+<div class="tool-result" id="result" style="display:none;">
+  <h3>Supplier reliability scores</h3>
+  <div id="scoresOutput"></div>
+  <p class="result-note">Scores are based on average days late and consistency. A score of 90+ means very reliable. Below 70 means you need buffer stock or a backup supplier.</p>
+</div>
+
+<script>
+let supplierCount = 0;
+
+function addSupplier() {
+  const idx = supplierCount++;
+  const div = document.createElement('div');
+  div.className = 'supplier-block';
+  div.dataset.idx = idx;
+  div.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; margin-top:${idx>0?'2rem':'0'}; ${idx>0?'padding-top:2rem; border-top:1px solid var(--border);':''}">
+      <h4 style="margin:0;">Supplier ${idx+1}</h4>
+      ${idx>0?'<button class="btn btn-ghost btn-sm" onclick="this.closest(\'.supplier-block\').remove()">Remove</button>':''}
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Supplier name</label>
+        <input type="text" class="sup-name" placeholder="e.g. FitGear Wholesale" />
+      </div>
+      <div class="form-group">
+        <label>Stated lead time (days)</label>
+        <input type="number" class="sup-stated" placeholder="e.g. 14" min="1" />
+      </div>
+    </div>
+    <div style="margin-top:0.75rem;">
+      <label style="font-weight:500; font-size:0.875rem; margin-bottom:0.5rem; display:block;">Actual lead times from past orders (days each)</label>
+      <div class="actual-times-row">
+        <input type="number" class="sup-actual" placeholder="Order 1" min="1" style="width:90px;" />
+        <input type="number" class="sup-actual" placeholder="Order 2" min="1" style="width:90px;" />
+        <input type="number" class="sup-actual" placeholder="Order 3" min="1" style="width:90px;" />
+        <input type="number" class="sup-actual" placeholder="Order 4" min="1" style="width:90px;" />
+        <input type="number" class="sup-actual" placeholder="Order 5" min="1" style="width:90px;" />
+      </div>
+    </div>`;
+  document.getElementById('supplierList').appendChild(div);
+}
+
+addSupplier();
+
+function calculateScores() {
+  const blocks = document.querySelectorAll('.supplier-block');
+  let html = '<div class="scores-grid">';
+  let hasData = false;
+
+  blocks.forEach(block => {
+    const name = block.querySelector('.sup-name').value || 'Supplier';
+    const stated = parseFloat(block.querySelector('.sup-stated').value);
+    const actuals = Array.from(block.querySelectorAll('.sup-actual'))
+      .map(i => parseFloat(i.value)).filter(v => !isNaN(v));
+
+    if (isNaN(stated) || actuals.length === 0) return;
+    hasData = true;
+
+    const avg = actuals.reduce((a, b) => a + b, 0) / actuals.length;
+    const avgDaysLate = avg - stated;
+    const maxLate = Math.max(...actuals) - stated;
+    const onTimeCount = actuals.filter(a => a <= stated).length;
+    const onTimePct = Math.round((onTimeCount / actuals.length) * 100);
+
+    // Score: start at 100, penalize for avg lateness and inconsistency
+    const stdDev = actuals.length > 1 ? Math.sqrt(actuals.reduce((s, a) => s + Math.pow(a - avg, 2), 0) / actuals.length) : 0;
+    let score = 100 - (Math.max(0, avgDaysLate) * 4) - (stdDev * 3);
+    score = Math.max(0, Math.min(100, Math.round(score)));
+
+    let scoreClass = score >= 80 ? 'score-good' : score >= 60 ? 'score-medium' : 'score-bad';
+    let verdict = score >= 80 ? '✓ Reliable' : score >= 60 ? '⚠ Needs buffer' : '✗ Find backup';
+    let recommendation = '';
+    if (avgDaysLate > 3) recommendation = `Add ${Math.ceil(avgDaysLate + stdDev)} days buffer when calculating your reorder point for this supplier.`;
+    else if (score >= 80) recommendation = 'This supplier is reliable. No extra buffer needed.';
+    else recommendation = 'Consider finding a backup supplier.';
+
+    html += `<div class="score-card">
+      <div class="score-name">${name}</div>
+      <div class="score-circle ${scoreClass}">${score}</div>
+      <div class="score-label">${verdict}</div>
+      <div class="score-stats">
+        <div><span>Stated lead time</span><span>${stated} days</span></div>
+        <div><span>Avg actual</span><span>${avg.toFixed(1)} days</span></div>
+        <div><span>Avg days late</span><span>${avgDaysLate > 0 ? '+' + avgDaysLate.toFixed(1) : avgDaysLate.toFixed(1)} days</span></div>
+        <div><span>On-time rate</span><span>${onTimePct}%</span></div>
+        <div><span>Orders tracked</span><span>${actuals.length}</span></div>
+      </div>
+      <div class="score-rec">💡 ${recommendation}</div>
+    </div>`;
+  });
+
+  if (!hasData) { alert('Add at least one supplier with a stated lead time and actual delivery data.'); return; }
+  html += '</div>';
+  document.getElementById('scoresOutput').innerHTML = html;
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+{% endblock %}
+
+{% block tool_faq %}
+<div class="faq-list">
+  <details><summary>Why do suppliers miss their stated lead times?</summary><p>Suppliers quote lead times based on ideal conditions. In practice, manufacturing delays, raw material shortages, port congestion, and logistics issues regularly push actual delivery times past stated ones. Tracking actual vs. stated helps you build realistic buffers into your reorder points.</p></details>
+  <details><summary>What is a good supplier reliability score?</summary><p>A score of 85+ means the supplier consistently delivers on time. 70–84 means you need to add a few days of buffer stock. Below 70 means the supplier is a stockout risk and you should either find a backup or significantly increase your safety stock.</p></details>
+  <details><summary>How does this help with reorder points?</summary><p>Once you know your supplier's actual average lead time (and variability), use those numbers — not their stated lead time — in your reorder point and safety stock calculations.</p></details>
+</div>
+{% endblock %}

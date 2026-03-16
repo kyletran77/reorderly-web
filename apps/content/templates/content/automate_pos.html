@@ -1,0 +1,149 @@
+{% extends 'content/base_article.html' %}
+
+{% block article_tag %}How-to Guide{% endblock %}
+{% block article_date %}March 2026{% endblock %}
+{% block article_read %}6 min read{% endblock %}
+
+{% block article_title %}How to Automate Purchase Orders in Shopify (Without Hiring an Ops Manager){% endblock %}
+
+{% block article_lede %}Most Shopify merchants with 50+ SKUs spend 4–6 hours a week writing the same PO emails. Here's how to automate the entire workflow — from reorder detection to supplier confirmation — without adding headcount.{% endblock %}
+
+{% block toc %}
+<ul>
+  <li><a href="#problem">The manual PO problem</a></li>
+  <li><a href="#what-automation-looks-like">What automation actually looks like</a></li>
+  <li><a href="#shopify-native">What Shopify does natively</a></li>
+  <li><a href="#setup">How to set up automated POs</a></li>
+  <li><a href="#suppliers">Getting suppliers to accept email POs</a></li>
+  <li><a href="#common-mistakes">Common mistakes to avoid</a></li>
+</ul>
+{% endblock %}
+
+{% block article_content %}
+
+<h2 id="problem">The manual PO problem</h2>
+
+<p>Here's what manual purchase order management looks like for a typical $1M Shopify brand with 80 SKUs across 5 suppliers:</p>
+
+<ul>
+  <li>Check inventory levels (manually, in Shopify admin or a spreadsheet) — 30 min/week</li>
+  <li>Identify which SKUs need reordering — 20 min/week</li>
+  <li>Draft an email to each supplier with correct product, SKU, quantity, delivery date — 60–90 min/week</li>
+  <li>Track which suppliers have confirmed — 20 min/week, ongoing</li>
+  <li>Follow up with suppliers who haven't responded — 20 min/week</li>
+  <li>Update Shopify with expected delivery dates — 15 min/week</li>
+</ul>
+
+<p>Total: roughly <strong>4–5 hours per week</strong>. That's 200+ hours per year. At a $50/hour ops rate, that's a $10,000/year task. For most merchants, it's the founder doing it — which means it's costing them far more in opportunity cost.</p>
+
+<p>And that's when everything goes right. One missed reorder — maybe you didn't notice a SKU was low, or forgot to follow up with a slow supplier — and you're looking at a stockout that costs multiples of that in lost revenue.</p>
+
+<h2 id="what-automation-looks-like">What automated PO management actually looks like</h2>
+
+<p>A fully automated purchase order workflow works like this:</p>
+
+<ol>
+  <li><strong>Continuous monitoring:</strong> Your inventory levels are checked automatically, 24/7 — not just when you remember to log in.</li>
+  <li><strong>Threshold detection:</strong> When a SKU hits its reorder point (calculated from your lead time and daily sales), the system flags it.</li>
+  <li><strong>PO generation:</strong> A purchase order email is automatically drafted — correct product, SKU, quantity based on your configured reorder amount, your supplier's contact, requested delivery date based on lead time.</li>
+  <li><strong>Automatic sending:</strong> The PO email is sent to your supplier without you touching it. At 2am if that's when the threshold was hit.</li>
+  <li><strong>Confirmation tracking:</strong> When your supplier replies to confirm, the system parses the reply and marks the PO as confirmed.</li>
+  <li><strong>Exception escalation:</strong> If a supplier doesn't respond within your SLA window, you get an alert — not a flood of notifications for everything, just the things that need your attention.</li>
+</ol>
+
+<p>The result: you go from 4–5 hours/week to 15 minutes/week reviewing exceptions. Everything routine runs without you.</p>
+
+<h2 id="shopify-native">What Shopify does natively (and what it doesn't)</h2>
+
+<p>Shopify's built-in inventory features handle the basics:</p>
+<ul>
+  <li>Low stock alerts when a product hits a quantity threshold</li>
+  <li>Manual purchase order creation in Shopify admin (as of 2024)</li>
+  <li>Incoming inventory tracking when you mark a PO as ordered</li>
+</ul>
+
+<p>What Shopify does <em>not</em> do natively:</p>
+<ul>
+  <li>Automatically email a PO to your supplier when stock hits a threshold</li>
+  <li>Track whether your supplier has confirmed receipt of the PO</li>
+  <li>Parse supplier replies to update PO status</li>
+  <li>Suggest reorder quantities based on sales velocity and lead time</li>
+</ul>
+
+<p>Shopify Flow (available on Shopify and Shopify Plus) can send internal notifications and trigger basic automations — but it can't email an external supplier a formatted purchase order. That's the gap.</p>
+
+<h2 id="setup">How to set up automated purchase orders</h2>
+
+<h3>Step 1: Define reorder points for every SKU</h3>
+
+<p>A reorder point (ROP) is the inventory level at which you should place a new order. The formula:</p>
+
+<div class="article-formula">
+  Reorder Point = (Average Daily Sales × Supplier Lead Time) + Safety Stock
+</div>
+
+<p>Example: You sell 5 yoga mats per day. Your supplier takes 14 days. You want 20 units of safety stock.</p>
+<p>ROP = (5 × 14) + 20 = <strong>90 units</strong></p>
+
+<p>When your yoga mat inventory hits 90 units, trigger the reorder. Use our <a href="/tools/reorder-point-calculator/">free Reorder Point Calculator</a> to get the exact number for each SKU.</p>
+
+<h3>Step 2: Set reorder quantities</h3>
+
+<p>For each SKU, decide how much to order when the threshold is hit. Options:</p>
+<ul>
+  <li><strong>Fixed quantity:</strong> Always order 100 units. Simple, predictable.</li>
+  <li><strong>EOQ (Economic Order Quantity):</strong> Calculated amount that minimizes ordering + holding costs. Use our <a href="/tools/eoq-calculator/">EOQ Calculator</a>.</li>
+  <li><strong>Cover X weeks:</strong> Order enough to cover the next 8–12 weeks of projected demand. Best for growing stores.</li>
+</ul>
+
+<h3>Step 3: Configure your supplier list</h3>
+
+<p>For each supplier, you need:</p>
+<ul>
+  <li>Contact name and email address</li>
+  <li>Default lead time (use actual, not stated — track this with our <a href="/tools/supplier-lead-time-tracker/">Lead Time Tracker</a>)</li>
+  <li>Minimum order quantity (MOQ)</li>
+  <li>Payment terms</li>
+  <li>Which SKUs they supply</li>
+</ul>
+
+<h3>Step 4: Connect your automation tool</h3>
+
+<p>Connect Reorderly to your Shopify store. It reads your inventory via the Shopify Admin API and uses your configured thresholds and supplier data to handle the rest automatically.</p>
+
+<h3>Step 5: Run in dry-run mode first</h3>
+
+<p>Before enabling live sending, run in dry-run mode for one week. You'll see exactly what POs would have been sent, to which suppliers, with what contents — without actually sending them. This lets you verify thresholds are right and email drafts look correct before going fully automated.</p>
+
+<h2 id="suppliers">Getting suppliers to accept email POs</h2>
+
+<p>Most suppliers already work via email POs — it's the industry standard for SMB procurement. A few things that help:</p>
+
+<ul>
+  <li><strong>Use a consistent PO number format:</strong> Suppliers process faster when your PO numbers follow a predictable pattern (e.g., PO-20260314-001). Reorderly generates these automatically.</li>
+  <li><strong>Include all the information upfront:</strong> Product name, SKU, quantity, unit price, requested delivery date, shipping address, payment terms. A complete PO email gets confirmed faster than an incomplete one.</li>
+  <li><strong>CC your supplier contact:</strong> If your supplier has multiple people handling orders, CC the backup contact on initial POs to avoid delays from vacations or staff changes.</li>
+  <li><strong>Set a response SLA:</strong> Let suppliers know you expect confirmation within 48 hours. Most will comply once it's clearly communicated.</li>
+</ul>
+
+<p>If your supplier doesn't accept email orders and requires a proprietary portal, Reorderly can still draft the PO content — you just paste it into their portal rather than sending via email. Still saves 80% of the drafting time.</p>
+
+<h2 id="common-mistakes">Common mistakes to avoid</h2>
+
+<h3>Using stated lead times instead of actual lead times</h3>
+<p>Suppliers almost universally overstate how reliable their lead times are. If your supplier says 14 days but actually delivers in 17 days on average, your reorder point is too low. Track actual delivery dates and use those numbers. Our <a href="/tools/supplier-lead-time-tracker/">Supplier Lead Time Tracker</a> calculates this for you.</p>
+
+<h3>Setting reorder thresholds too low</h3>
+<p>The most common mistake. Merchants set thresholds based on what "feels right" rather than the math. A threshold of 10 units when you sell 5/day and your supplier takes 14 days means you're already stocked out before the PO arrives. Do the math for every SKU.</p>
+
+<h3>Ignoring seasonal demand</h3>
+<p>If you sell outdoor gear, your daily sales rate in June is not the same as November. Adjust reorder points seasonally — at minimum, have a "peak season" and "off-peak season" configuration for your top 20 SKUs.</p>
+
+<h3>No safety stock</h3>
+<p>Safety stock is the buffer that protects you against demand spikes and supplier delays. Without it, your reorder point assumes everything goes perfectly. Nothing ever goes perfectly. Calculate safety stock separately and add it to your reorder point. Use our <a href="/tools/safety-stock-calculator/">Safety Stock Calculator</a>.</p>
+
+<div class="article-callout">
+  <strong>→ Want to automate all of this?</strong> Reorderly handles inventory monitoring, reorder threshold detection, PO drafting, and supplier emails automatically. <a href="/#waitlist">Get early access free →</a>
+</div>
+
+{% endblock %}

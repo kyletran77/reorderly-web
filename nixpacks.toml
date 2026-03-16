@@ -1,0 +1,16 @@
+[phases.setup]
+nixPkgs = ["python311", "nodejs_20"]
+
+[phases.install]
+cmds = [
+  "pip install -r requirements.txt",
+  "cd frontend && npm install && npm run build && cd .."
+]
+
+[phases.build]
+cmds = [
+  "python manage.py collectstatic --noinput"
+]
+
+[start]
+cmd = "gunicorn reorderly.wsgi --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 --log-file -"

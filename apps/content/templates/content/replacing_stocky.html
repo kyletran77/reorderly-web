@@ -1,0 +1,160 @@
+{% extends 'content/base_article.html' %}
+
+{% block article_tag %}Migration Guide{% endblock %}
+{% block article_date %}March 2026{% endblock %}
+{% block article_read %}8 min read{% endblock %}
+
+{% block article_title %}Replacing Shopify Stocky Before August 31, 2026: Your Complete Guide{% endblock %}
+
+{% block article_lede %}Shopify is shutting down Stocky on August 31, 2026. Here's exactly what you need to export, what to look for in a replacement, and how to migrate without losing your reorder history or supplier data.{% endblock %}
+
+{% block toc %}
+<ul>
+  <li><a href="#what-happened">What happened to Stocky</a></li>
+  <li><a href="#what-you-lose">What you'll lose if you don't act</a></li>
+  <li><a href="#export">How to export your Stocky data</a></li>
+  <li><a href="#what-to-look-for">What to look for in a replacement</a></li>
+  <li><a href="#alternatives">Stocky alternatives compared</a></li>
+  <li><a href="#migrate">How to migrate to Reorderly</a></li>
+  <li><a href="#timeline">Your migration timeline</a></li>
+</ul>
+{% endblock %}
+
+{% block article_content %}
+
+<h2 id="what-happened">What happened to Shopify Stocky</h2>
+
+<p>In February 2026, Shopify quietly delisted Stocky from the Shopify App Store. No major announcement, no replacement product launched simultaneously — just a notice to existing users that the app would stop functioning on <strong>August 31, 2026</strong>.</p>
+
+<p>Stocky was originally built by a company called Handshake, which Shopify acquired in 2019. For seven years, it served as the de facto free inventory management app for hundreds of thousands of Shopify merchants — handling purchase orders, reorder points, supplier records, and basic demand forecasting.</p>
+
+<p>Shopify's stated reason: a strategic shift toward native inventory features in Shopify admin and AI-powered insights through Sidekick. The reality for merchants: Shopify's built-in inventory tools don't support the feature that made Stocky valuable — <strong>automated purchase order emails to suppliers</strong>. That gap is not being filled by Shopify natively.</p>
+
+<p>If you're still using Stocky today, you have until August 31, 2026 to migrate. After that date, the app stops working entirely.</p>
+
+<h2 id="what-you-lose">What you'll lose if you don't act before August 31</h2>
+
+<p>This isn't just about losing a UI. If you don't export and migrate before the shutdown, you lose:</p>
+
+<ul>
+  <li><strong>Your full purchase order history</strong> — every PO you've ever sent through Stocky, including supplier confirmations and delivery records</li>
+  <li><strong>Your supplier contact database</strong> — names, emails, MOQs, payment terms stored in Stocky</li>
+  <li><strong>Your reorder rules</strong> — the per-SKU thresholds and quantities you've configured over time</li>
+  <li><strong>Your demand forecasting data</strong> — historical velocity data that informs your reorder quantities</li>
+  <li><strong>Your in-flight purchase orders</strong> — any open POs that haven't been confirmed or received yet</li>
+</ul>
+
+<p>Some of this data can be reconstructed from Shopify's order history and your email archives. Most of it can't — especially the supplier-specific configuration and PO history that only lived inside Stocky.</p>
+
+<h2 id="export">How to export your Stocky data (do this now)</h2>
+
+<p>Before you do anything else, export everything from Stocky while it's still running. This takes about 20 minutes.</p>
+
+<h3>Step 1: Export your purchase order history</h3>
+<ol>
+  <li>Open Stocky from your Shopify admin</li>
+  <li>Navigate to <strong>Reports</strong> in the left sidebar</li>
+  <li>Click <strong>Purchase Orders</strong></li>
+  <li>Select "All time" for the date range</li>
+  <li>Click <strong>Export CSV</strong></li>
+  <li>Save the file — name it <code>stocky-po-history-[date].csv</code></li>
+</ol>
+
+<h3>Step 2: Export your supplier list</h3>
+<ol>
+  <li>Navigate to <strong>Suppliers</strong> in Stocky</li>
+  <li>There is no direct export button — <strong>manually copy or screenshot each supplier's details</strong>: name, email, phone, contact name, payment terms, MOQ, lead time</li>
+  <li>Alternatively, paste into a Google Sheet: Supplier Name | Email | Contact | MOQ | Lead Time (days) | Payment Terms | Notes</li>
+</ol>
+
+<h3>Step 3: Record your reorder rules</h3>
+<ol>
+  <li>Navigate to <strong>Products</strong> in Stocky</li>
+  <li>For each product, note the reorder point (minimum) and reorder quantity configured</li>
+  <li>Export via <strong>Reports → Replenishment</strong> if available in your version</li>
+</ol>
+
+<h3>Step 4: Screenshot your demand forecast settings</h3>
+<p>Stocky's forecasting configuration can't be exported as data — screenshot your settings screen for each major SKU so you can replicate the parameters in your new tool.</p>
+
+<h2 id="what-to-look-for">What to look for in a Stocky replacement</h2>
+
+<p>Not all inventory apps fill the same gap. Before evaluating tools, get clear on which features you actually used in Stocky:</p>
+
+<h3>Core features most merchants used:</h3>
+<ul>
+  <li><strong>Reorder point tracking</strong> — knowing when each SKU hits its threshold</li>
+  <li><strong>Purchase order creation</strong> — generating a PO document linked to a supplier</li>
+  <li><strong>Supplier management</strong> — storing supplier contacts, MOQs, lead times</li>
+  <li><strong>Receiving/reconciliation</strong> — marking stock as received when a PO is fulfilled</li>
+</ul>
+
+<h3>What Stocky never did (and you should look for now):</h3>
+<ul>
+  <li><strong>Automated PO emails</strong> — Stocky created POs in its interface but never emailed them to suppliers automatically. You still had to copy-paste and email manually.</li>
+  <li><strong>Supplier reply tracking</strong> — no way to know if your supplier had confirmed the PO</li>
+  <li><strong>AI-powered reorder suggestions</strong> — Stocky's forecasting was basic; modern tools use actual sales velocity</li>
+</ul>
+
+<p>The best time to upgrade is during migration. Don't just replicate Stocky — replace it with something that automates the manual steps Stocky left you doing.</p>
+
+<h2 id="alternatives">Stocky alternatives compared</h2>
+
+<div class="article-table-wrap">
+  <table class="article-table">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>Reorderly</th>
+        <th>Prediko</th>
+        <th>Inventory Planner</th>
+        <th>Shopify Native</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Reorder point tracking</td><td>✓</td><td>✓</td><td>✓</td><td>Basic</td></tr>
+      <tr><td>Supplier management</td><td>✓</td><td>✓</td><td>✓</td><td>✗</td></tr>
+      <tr><td>PO creation</td><td>✓</td><td>✓</td><td>✓</td><td>Manual only</td></tr>
+      <tr><td><strong>Automated PO emails to suppliers</strong></td><td>✓</td><td>✗</td><td>✗</td><td>✗</td></tr>
+      <tr><td>Supplier reply tracking</td><td>✓</td><td>✗</td><td>✗</td><td>✗</td></tr>
+      <tr><td>AI demand forecasting</td><td>✓</td><td>✓</td><td>✓</td><td>Basic</td></tr>
+      <tr><td>Starting price</td><td>Free / $149/mo</td><td>Free / $49/mo</td><td>$99/mo</td><td>Included</td></tr>
+      <tr><td>Stocky import tool</td><td>✓</td><td>✗</td><td>✗</td><td>✗</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The key differentiator: Reorderly is the only tool that actually <em>sends</em> the PO email to your supplier automatically. Every other tool — including Shopify's own features — still requires you to email suppliers manually after creating the PO. That's the step that costs merchants 5+ hours per week.</p>
+
+<h2 id="migrate">How to migrate to Reorderly from Stocky</h2>
+
+<ol>
+  <li><strong>Sign up for Reorderly</strong> — free during early access, no credit card required</li>
+  <li><strong>Connect your Shopify store</strong> — takes 2 minutes via Shopify Admin API</li>
+  <li><strong>Import your suppliers</strong> — upload the CSV from your Stocky export or enter manually</li>
+  <li><strong>Set reorder thresholds</strong> — import from your Stocky replenishment report or configure per SKU</li>
+  <li><strong>Run in parallel for one week</strong> — keep Stocky open, verify Reorderly is catching the same reorder events</li>
+  <li><strong>Go live</strong> — enable automated PO sending, let Reorderly run 24/7</li>
+</ol>
+
+<p>The migration typically takes under 30 minutes for stores with fewer than 200 SKUs. Larger catalogs may take 1-2 hours for the initial configuration.</p>
+
+<h2 id="timeline">Your migration timeline</h2>
+
+<p>The hard deadline is August 31, 2026. Here's how to think about the window:</p>
+
+<ul>
+  <li><strong>Now through April:</strong> Export your Stocky data. Don't procrastinate — the earlier you do this, the more historical data you capture.</li>
+  <li><strong>April–May:</strong> Evaluate replacements, run a parallel test with your top choice.</li>
+  <li><strong>June:</strong> Complete migration and train your team on the new workflow.</li>
+  <li><strong>July–August:</strong> Run exclusively on your new system with Stocky as a backup reference.</li>
+  <li><strong>August 31:</strong> Stocky shuts down. You're already on your new system.</li>
+</ul>
+
+<p>Waiting until August is a real risk. Supplier communication is mission-critical ops — you don't want to discover integration issues when you're 2 weeks from shutdown with no fallback.</p>
+
+<div class="article-callout">
+  <strong>→ Use our free <a href="/tools/stocky-migration-checklist/">Stocky Migration Checklist</a></strong> — 19-step interactive checklist, progress saved automatically. Takes 20 minutes to complete.
+</div>
+
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="tool-page">
+  <div class="tool-header">
+    <div class="container">
+      <div class="section-label">Free resources</div>
+      <h1>Shopify Inventory Guides</h1>
+      <p class="tool-subtitle">Practical guides for Shopify merchants on inventory management, purchase order automation, and supplier ops.</p>
+    </div>
+  </div>
+  <div class="tool-body">
+    <div class="container">
+      <div class="articles-grid">
+        {% for article in articles %}
+        <a href="/resources/{{ article.slug }}/" class="article-card-link">
+          <div class="article-index-card">
+            <div class="article-card-meta">
+              <span class="article-tag">{{ article.tag }}</span>
+              <span class="article-card-read">{{ article.read_time }}</span>
+            </div>
+            <h3>{{ article.title }}</h3>
+            <p>{{ article.description }}</p>
+            <span class="tool-link-label">Read guide →</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      <div class="tool-cta-box" style="margin-top:3rem;">
+        <div class="tool-cta-inner">
+          <div class="tool-cta-text">
+            <strong>Want this all automated?</strong>
+            <p>Reorderly handles reorder points, PO emails, and supplier tracking automatically.</p>
+          </div>
+          <a href="/#waitlist" class="btn btn-primary">Get Reorderly Free →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

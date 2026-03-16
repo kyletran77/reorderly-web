@@ -1,0 +1,166 @@
+{% extends 'tools/base_tool.html' %}
+
+{% block tool_title %}MOQ Negotiation Email Generator{% endblock %}
+{% block tool_subtitle %}Generate a professional email to negotiate minimum order quantities with your supplier. Free, no signup.{% endblock %}
+
+{% block tool_content %}
+<div class="tool-form-section">
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Your name</label>
+      <input type="text" id="yourName" placeholder="e.g. Kyle Johnson" />
+    </div>
+    <div class="form-group">
+      <label>Your store name</label>
+      <input type="text" id="storeName" placeholder="e.g. Peak Performance Gear" />
+    </div>
+    <div class="form-group">
+      <label>Supplier contact name</label>
+      <input type="text" id="contactName" placeholder="e.g. Sarah Chen" />
+    </div>
+    <div class="form-group">
+      <label>Supplier company name</label>
+      <input type="text" id="supplierName" placeholder="e.g. FitGear Wholesale Co." />
+    </div>
+    <div class="form-group">
+      <label>Product name</label>
+      <input type="text" id="productName" placeholder="e.g. Premium Yoga Mats" />
+    </div>
+    <div class="form-group">
+      <label>Supplier's current MOQ</label>
+      <input type="number" id="currentMOQ" placeholder="e.g. 500" min="1" />
+    </div>
+    <div class="form-group">
+      <label>Your target quantity</label>
+      <input type="number" id="targetQty" placeholder="e.g. 100" min="1" />
+    </div>
+    <div class="form-group">
+      <label>Your relationship with supplier</label>
+      <select id="relationship">
+        <option value="new">New — first time ordering</option>
+        <option value="existing">Existing — ordered before</option>
+        <option value="loyal">Loyal — long-term relationship (1+ year)</option>
+      </select>
+    </div>
+    <div class="form-group full-width">
+      <label>Your strongest negotiation point</label>
+      <select id="angle">
+        <option value="trial">I want to test the product before committing to larger orders</option>
+        <option value="growth">My sales are growing fast — I'll be ordering more soon</option>
+        <option value="cash">I can pay upfront / faster payment terms</option>
+        <option value="volume">I'm also interested in other products from your catalog</option>
+        <option value="market">I can help promote your products to my audience</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn btn-primary btn-lg" onclick="generateEmail()" style="margin-top:1.5rem;">Generate Email →</button>
+</div>
+
+<div class="tool-result" id="result" style="display:none;">
+  <div class="result-header">
+    <h3>Your MOQ negotiation email</h3>
+    <button class="btn btn-ghost btn-sm" onclick="copyEmail()">Copy to clipboard</button>
+  </div>
+  <div class="email-preview">
+    <div class="email-field"><strong>Subject:</strong> <span id="emailSubject"></span></div>
+    <div class="email-divider"></div>
+    <div class="email-body" id="emailBody"></div>
+  </div>
+  <p class="result-note">✓ Customize this email before sending. The goal is to start a conversation, not close the deal in one email.</p>
+</div>
+
+<script>
+const ANGLES = {
+  trial: {
+    pitch: "We'd like to place an initial trial order to validate the product with our customers before scaling up. A smaller first order helps us confirm quality and demand before committing to larger volumes.",
+    followup: "If the trial goes well — and we expect it to — our plan is to place orders of [larger qty] units on a monthly basis."
+  },
+  growth: {
+    pitch: "Our store has been growing steadily, and we're forecasting significant volume increases over the next 6 months. We want to start our relationship with you at a scale that matches where we are today, with a clear path to much larger orders.",
+    followup: "Based on our current growth rate, we expect to increase order quantities by 3–4x within 6 months."
+  },
+  cash: {
+    pitch: "We're prepared to pay upfront (or on shorter payment terms) for this order. We understand that cash flow matters for suppliers, and we're happy to structure payment in a way that works well for your team.",
+    followup: "We can discuss payment terms that work for both parties — we're flexible on this."
+  },
+  volume: {
+    pitch: "Beyond this product, we're also evaluating several other items in your catalog for our upcoming season. A successful initial order would open the door to a broader purchasing relationship.",
+    followup: "We'd love to discuss your full product range once we've established the relationship with this first order."
+  },
+  market: {
+    pitch: "Our store has a growing customer base in the [your niche] space, and we actively promote our supplier partners to our audience. A smaller initial order would let us feature your products and help build mutual brand awareness.",
+    followup: "We'd be happy to discuss co-marketing opportunities as the relationship develops."
+  }
+};
+
+function generateEmail() {
+  const name = document.getElementById('yourName').value || 'Kyle';
+  const store = document.getElementById('storeName').value || 'our store';
+  const contact = document.getElementById('contactName').value || 'Team';
+  const supplier = document.getElementById('supplierName').value || 'your company';
+  const product = document.getElementById('productName').value || 'your products';
+  const moq = document.getElementById('currentMOQ').value || '500';
+  const target = document.getElementById('targetQty').value || '100';
+  const rel = document.getElementById('relationship').value;
+  const angle = document.getElementById('angle').value;
+  const a = ANGLES[angle];
+
+  const relIntro = rel === 'new'
+    ? `We recently came across ${supplier} and are very impressed with your ${product} range.`
+    : rel === 'existing'
+    ? `We've enjoyed our past orders from ${supplier} and are looking to continue and grow our purchasing relationship.`
+    : `As a longtime customer of ${supplier}, we've always valued the quality and consistency of your ${product}.`;
+
+  const subject = `MOQ discussion — ${product} — ${store}`;
+
+  const body = `Dear ${contact},
+
+${relIntro}
+
+I'm reaching out to discuss a potential adjustment to the minimum order quantity for ${product}.
+
+We understand your current MOQ is ${moq} units, and we respect the reasons behind that threshold. We'd like to propose an initial order of ${target} units for the following reason:
+
+${a.pitch}
+
+${a.followup}
+
+We're serious about building a strong supplier relationship and want to make this work for both sides. I'd love to hop on a quick call to discuss whether there's a structure that makes sense.
+
+Would you be open to discussing this? I'm flexible on timing.
+
+Thank you for considering our request. Looking forward to your response.
+
+Best regards,
+${name}
+${store}
+
+---
+This email was generated with Reorderly · reorderly.com`;
+
+  document.getElementById('emailSubject').textContent = subject;
+  document.getElementById('emailBody').textContent = body;
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+}
+
+function copyEmail() {
+  const subject = document.getElementById('emailSubject').textContent;
+  const body = document.getElementById('emailBody').textContent;
+  navigator.clipboard.writeText('Subject: ' + subject + '\n\n' + body).then(() => {
+    const btn = event.target;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = 'Copy to clipboard', 2000);
+  });
+}
+</script>
+{% endblock %}
+
+{% block tool_faq %}
+<div class="faq-list">
+  <details><summary>What is a minimum order quantity (MOQ)?</summary><p>MOQ is the smallest quantity a supplier is willing to sell in a single order. Suppliers set MOQs to ensure the order is economically worth their time to process and manufacture.</p></details>
+  <details><summary>Can you always negotiate MOQ?</summary><p>Often yes, especially for new relationships or smaller suppliers. The key is giving the supplier a compelling reason to make an exception — a trial that leads to bigger orders, faster payment, or a multi-product relationship.</p></details>
+  <details><summary>What's the best strategy for MOQ negotiation?</summary><p>Lead with value to the supplier, not just your constraints. Suppliers are more likely to lower MOQ if they believe you'll become a larger customer, pay faster, or provide other value. Avoid framing it as "your MOQ is too high" — frame it as "here's why a smaller first order is good for both of us."</p></details>
+</div>
+{% endblock %}

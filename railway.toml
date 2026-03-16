@@ -1,0 +1,10 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pip install -r requirements.txt && cd frontend && npm install && npm run build && cd .. && python manage.py collectstatic --noinput"
+
+[deploy]
+startCommand = "gunicorn reorderly.wsgi --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 --log-file -"
+healthcheckPath = "/health/"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3

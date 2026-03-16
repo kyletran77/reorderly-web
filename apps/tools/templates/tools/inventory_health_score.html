@@ -1,0 +1,185 @@
+{% extends 'tools/base_tool.html' %}
+
+{% block tool_title %}Inventory Health Score{% endblock %}
+{% block tool_subtitle %}Answer 8 questions and get your Shopify store's inventory health score out of 100, with personalized recommendations.{% endblock %}
+
+{% block tool_content %}
+<div class="tool-form-section" id="quiz">
+  <div class="quiz-progress">
+    <div class="quiz-progress-bar" id="quizProgress" style="width:0%"></div>
+  </div>
+  <p id="quizProgressText" style="font-size:0.875rem; color:var(--text-muted); margin-bottom:1.5rem;">Question 1 of 8</p>
+
+  <div class="quiz-question" id="q1">
+    <h3>How do you currently track inventory reorder points?</h3>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q1" value="0" onchange="nextQ(1)" /> I don't — I reorder when I notice things running low</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="5" onchange="nextQ(1)" /> Manual spreadsheet with reorder point columns</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="8" onchange="nextQ(1)" /> Shopify or app-based low stock alerts</label>
+      <label class="quiz-option"><input type="radio" name="q1" value="12" onchange="nextQ(1)" /> Automated system that tracks and alerts me in real time</label>
+    </div>
+  </div>
+
+  <div class="quiz-question" id="q2" style="display:none;">
+    <h3>How do you send purchase orders to your suppliers?</h3>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q2" value="0" onchange="nextQ(2)" /> Phone call or informal message</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="4" onchange="nextQ(2)" /> Manual email I write from scratch each time</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="8" onchange="nextQ(2)" /> Email template I copy and fill in</label>
+      <label class="quiz-option"><input type="radio" name="q2" value="13" onchange="nextQ(2)" /> Automated — sent without me touching it</label>
+    </div>
+  </div>
+
+  <div class="quiz-question" id="q3" style="display:none;">
+    <h3>How often do you experience stockouts on your top-selling SKUs?</h3>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q3" value="0" onchange="nextQ(3)" /> Multiple times per quarter</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="5" onchange="nextQ(3)" /> Once or twice a quarter</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="9" onchange="nextQ(3)" /> A few times a year</label>
+      <label class="quiz-option"><input type="radio" name="q3" value="13" onchange="nextQ(3)" /> Rarely or never</label>
+    </div>
+  </div>
+
+  <div class="quiz-question" id="q4" style="display:none;">
+    <h3>Do you have safety stock calculated for your SKUs?</h3>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q4" value="0" onchange="nextQ(4)" /> No — I don't have a buffer built in</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="5" onchange="nextQ(4)" /> I keep some extra stock but haven't calculated how much</label>
+      <label class="quiz-option"><input type="radio" name="q4" value="12" onchange="nextQ(4)" /> Yes — calculated for my top SKUs</label>
+    </div>
+  </div>
+
+  <div class="quiz-question" id="q5" style="display:none;">
+    <h3>How do you handle supplier lead time variability?</h3>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q5" value="0" onchange="nextQ(5)" /> I use the supplier's stated lead time and hope for the best</label>
+      <label class="quiz-option"><input type="radio" name="q5" value="5" onchange="nextQ(5)" /> I add a rough buffer but haven't tracked actual vs. stated</label>
+      <label class="quiz-option"><input type="radio" name="q5" value="12" onchange="nextQ(5)" /> I track actual lead times and calculate buffers per supplier</label>
+    </div>
+  </div>
+
+  <div class="quiz-question" id="q6" style="display:none;">
+    <h3>How many hours per week does your team spend on manual reorder tasks?</h3>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q6" value="0" onchange="nextQ(6)" /> 5+ hours/week</label>
+      <label class="quiz-option"><input type="radio" name="q6" value="5" onchange="nextQ(6)" /> 2–5 hours/week</label>
+      <label class="quiz-option"><input type="radio" name="q6" value="9" onchange="nextQ(6)" /> 1–2 hours/week</label>
+      <label class="quiz-option"><input type="radio" name="q6" value="13" onchange="nextQ(6)" /> Less than 1 hour — mostly automated</label>
+    </div>
+  </div>
+
+  <div class="quiz-question" id="q7" style="display:none;">
+    <h3>Do you have a backup supplier for your top 3 SKUs?</h3>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q7" value="0" onchange="nextQ(7)" /> No — single supplier for everything</label>
+      <label class="quiz-option"><input type="radio" name="q7" value="6" onchange="nextQ(7)" /> For some products but not all</label>
+      <label class="quiz-option"><input type="radio" name="q7" value="13" onchange="nextQ(7)" /> Yes — backup supplier identified for key SKUs</label>
+    </div>
+  </div>
+
+  <div class="quiz-question" id="q8" style="display:none;">
+    <h3>How do you forecast demand for future inventory orders?</h3>
+    <div class="quiz-options">
+      <label class="quiz-option"><input type="radio" name="q8" value="0" onchange="calcScore()" /> Gut feel / past experience</label>
+      <label class="quiz-option"><input type="radio" name="q8" value="4" onchange="calcScore()" /> I look at last month's sales manually</label>
+      <label class="quiz-option"><input type="radio" name="q8" value="8" onchange="calcScore()" /> I use Shopify analytics or a spreadsheet to forecast</label>
+      <label class="quiz-option"><input type="radio" name="q8" value="12" onchange="calcScore()" /> AI or software-based demand forecasting</label>
+    </div>
+  </div>
+</div>
+
+<div class="tool-result" id="result" style="display:none;">
+  <h3>Your inventory health score</h3>
+  <div class="score-display">
+    <div class="big-score" id="bigScore">—</div>
+    <div class="score-out-of">/ 100</div>
+  </div>
+  <div class="score-grade" id="scoreGrade"></div>
+  <div id="scoreRecs"></div>
+  <button class="btn btn-ghost" onclick="resetQuiz()" style="margin-top:1.5rem;">Retake quiz</button>
+</div>
+
+<script>
+const answers = {};
+
+function nextQ(qNum) {
+  const val = document.querySelector(`input[name="q${qNum}"]:checked`);
+  if (!val) return;
+  answers[`q${qNum}`] = parseInt(val.value);
+  if (qNum < 8) {
+    document.getElementById('q' + qNum).style.display = 'none';
+    document.getElementById('q' + (qNum + 1)).style.display = 'block';
+    const pct = (qNum / 8) * 100;
+    document.getElementById('quizProgress').style.width = pct + '%';
+    document.getElementById('quizProgressText').textContent = `Question ${qNum + 1} of 8`;
+  }
+}
+
+function calcScore() {
+  const val = document.querySelector('input[name="q8"]:checked');
+  if (!val) return;
+  answers.q8 = parseInt(val.value);
+  document.getElementById('quizProgress').style.width = '100%';
+  document.getElementById('quizProgressText').textContent = 'Complete!';
+
+  const total = Object.values(answers).reduce((a, b) => a + b, 0);
+  const score = Math.min(100, total);
+
+  let grade, gradeClass, recs = [];
+
+  if (score >= 80) {
+    grade = '🟢 Excellent — Your inventory ops are well-managed.';
+    gradeClass = 'grade-good';
+  } else if (score >= 60) {
+    grade = '🟡 Good — Some gaps to address, but solid foundation.';
+    gradeClass = 'grade-medium';
+  } else if (score >= 40) {
+    grade = '🟠 Needs Work — Significant risk of stockouts and wasted ops time.';
+    gradeClass = 'grade-low';
+  } else {
+    grade = '🔴 Critical — Your inventory process is costing you revenue right now.';
+    gradeClass = 'grade-bad';
+  }
+
+  if (answers.q1 <= 5) recs.push('• Set reorder points for every SKU. Use our <a href="/tools/reorder-point-calculator/">Reorder Point Calculator</a> to get exact numbers.');
+  if (answers.q2 <= 4) recs.push('• Automate purchase order emails. Every manual PO takes 10–20 minutes. Reorderly eliminates this entirely.');
+  if (answers.q3 <= 5) recs.push('• Stockouts are your biggest revenue leak. Use our <a href="/tools/stockout-cost-calculator/">Stockout Cost Calculator</a> to see how much this is costing you.');
+  if (answers.q4 <= 5) recs.push('• Calculate safety stock for your top 10 SKUs. Use our <a href="/tools/safety-stock-calculator/">Safety Stock Calculator</a>.');
+  if (answers.q5 <= 5) recs.push('• Start tracking actual vs. stated lead times. Use our <a href="/tools/supplier-lead-time-tracker/">Supplier Lead Time Tracker</a>.');
+  if (answers.q6 <= 5) recs.push('• Reduce manual reorder time. Reorderly handles the full PO workflow automatically.');
+  if (answers.q7 <= 0) recs.push('• Identify backup suppliers for your top 3 SKUs before your primary supplier has an issue.');
+  if (answers.q8 <= 4) recs.push('• Start using data-driven demand forecasting instead of gut feel. Even simple 30-day sales averages beat estimation.');
+
+  document.getElementById('bigScore').textContent = score;
+  document.getElementById('bigScore').className = 'big-score ' + gradeClass;
+  document.getElementById('scoreGrade').innerHTML = `<div class="grade-text ${gradeClass}">${grade}</div>`;
+  document.getElementById('scoreRecs').innerHTML = recs.length > 0
+    ? `<div class="recs-box"><strong>Your top recommendations:</strong><div style="margin-top:0.75rem;">${recs.join('<br/>')}</div></div>`
+    : '<div class="recs-box">✓ No major gaps identified. Consider Reorderly to automate the remaining manual steps.</div>';
+
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('result').style.display = 'block';
+}
+
+function resetQuiz() {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+  for (let i = 1; i <= 8; i++) {
+    const q = document.getElementById('q' + i);
+    if (q) q.style.display = i === 1 ? 'block' : 'none';
+  }
+  document.getElementById('quizProgress').style.width = '0%';
+  document.getElementById('quizProgressText').textContent = 'Question 1 of 8';
+  document.getElementById('quiz').style.display = 'block';
+  document.getElementById('result').style.display = 'none';
+}
+</script>
+{% endblock %}
+
+{% block tool_faq %}
+<div class="faq-list">
+  <details><summary>What is a good inventory health score?</summary><p>80+ is excellent — your inventory processes are well-managed with minimal stockout risk. 60–79 is good but has specific gaps to address. Below 60 means significant improvements are needed to protect your revenue.</p></details>
+  <details><summary>How do I improve my inventory health score?</summary><p>Focus on: (1) setting data-driven reorder points, (2) calculating safety stock, (3) tracking actual supplier lead times, and (4) automating purchase orders. Each of these areas has a direct impact on your score and your revenue.</p></details>
+  <details><summary>How accurate is this score?</summary><p>This is a self-assessment tool based on industry best practices. It gives you a directional read on where your biggest gaps are. The specific recommendations are based on common patterns in Shopify merchant inventory management.</p></details>
+</div>
+{% endblock %}

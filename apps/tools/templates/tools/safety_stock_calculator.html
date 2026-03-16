@@ -1,0 +1,125 @@
+{% extends 'tools/base_tool.html' %}
+
+{% block tool_title %}Safety Stock Calculator{% endblock %}
+{% block tool_subtitle %}Calculate the right buffer stock to protect against demand spikes and supplier delays. Free, instant.{% endblock %}
+
+{% block tool_content %}
+<div class="tool-form-section">
+  <div class="formula-box">
+    <strong>Formula:</strong> Safety Stock = Z × σ(demand) × √(lead time) &nbsp;|&nbsp; Or use our simplified version below.
+  </div>
+
+  <div class="tab-row">
+    <button class="tab-btn active" onclick="switchTab('simple')">Simple method</button>
+    <button class="tab-btn" onclick="switchTab('advanced')">Advanced method</button>
+  </div>
+
+  <div id="tab-simple">
+    <div class="form-grid" style="margin-top:1.5rem;">
+      <div class="form-group">
+        <label>Maximum daily sales (units)</label>
+        <input type="number" id="s_maxSales" placeholder="e.g. 12" min="0" oninput="calcSimple()" />
+        <span class="form-hint">Your highest sales day in the past 90 days</span>
+      </div>
+      <div class="form-group">
+        <label>Average daily sales (units)</label>
+        <input type="number" id="s_avgSales" placeholder="e.g. 6" min="0" step="0.1" oninput="calcSimple()" />
+      </div>
+      <div class="form-group">
+        <label>Maximum lead time (days)</label>
+        <input type="number" id="s_maxLead" placeholder="e.g. 21" min="1" oninput="calcSimple()" />
+        <span class="form-hint">Longest your supplier has ever taken</span>
+      </div>
+      <div class="form-group">
+        <label>Average lead time (days)</label>
+        <input type="number" id="s_avgLead" placeholder="e.g. 14" min="1" oninput="calcSimple()" />
+      </div>
+    </div>
+    <div class="tool-result" id="result-simple" style="display:none;">
+      <h3>Your safety stock</h3>
+      <div class="result-big" id="ss_simple">—</div>
+      <p class="result-label">units of safety stock recommended</p>
+      <div class="result-breakdown">
+        <div class="breakdown-row"><span>Max demand during max lead time</span><span id="ss_maxMax">—</span></div>
+        <div class="breakdown-row"><span>Avg demand during avg lead time</span><span id="ss_avgAvg">—</span></div>
+        <div class="breakdown-row total"><span>Safety stock buffer</span><span id="ss_buffer">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-advanced" style="display:none;">
+    <div class="form-grid" style="margin-top:1.5rem;">
+      <div class="form-group">
+        <label>Average daily sales (units)</label>
+        <input type="number" id="a_avgSales" placeholder="e.g. 6" min="0" step="0.1" oninput="calcAdvanced()" />
+      </div>
+      <div class="form-group">
+        <label>Std deviation of daily demand</label>
+        <input type="number" id="a_stdDemand" placeholder="e.g. 2.5" min="0" step="0.1" oninput="calcAdvanced()" />
+        <span class="form-hint">How much your daily sales vary</span>
+      </div>
+      <div class="form-group">
+        <label>Average lead time (days)</label>
+        <input type="number" id="a_avgLead" placeholder="e.g. 14" min="1" oninput="calcAdvanced()" />
+      </div>
+      <div class="form-group">
+        <label>Service level target</label>
+        <select id="a_service" onchange="calcAdvanced()">
+          <option value="1.28">90% (basic protection)</option>
+          <option value="1.65" selected>95% (recommended)</option>
+          <option value="1.96">97.5% (high protection)</option>
+          <option value="2.33">99% (maximum protection)</option>
+        </select>
+      </div>
+    </div>
+    <div class="tool-result" id="result-advanced" style="display:none;">
+      <h3>Your safety stock (statistical method)</h3>
+      <div class="result-big" id="ss_advanced">—</div>
+      <p class="result-label">units of safety stock recommended</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(tab) {
+  document.getElementById('tab-simple').style.display = tab === 'simple' ? 'block' : 'none';
+  document.getElementById('tab-advanced').style.display = tab === 'advanced' ? 'block' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && tab === 'simple') || (i === 1 && tab === 'advanced'));
+  });
+}
+
+function calcSimple() {
+  const maxS = parseFloat(document.getElementById('s_maxSales').value);
+  const avgS = parseFloat(document.getElementById('s_avgSales').value);
+  const maxL = parseFloat(document.getElementById('s_maxLead').value);
+  const avgL = parseFloat(document.getElementById('s_avgLead').value);
+  if (isNaN(maxS) || isNaN(avgS) || isNaN(maxL) || isNaN(avgL)) return;
+  const ss = Math.ceil((maxS * maxL) - (avgS * avgL));
+  document.getElementById('ss_maxMax').textContent = Math.ceil(maxS * maxL) + ' units';
+  document.getElementById('ss_avgAvg').textContent = Math.ceil(avgS * avgL) + ' units';
+  document.getElementById('ss_buffer').textContent = ss + ' units';
+  document.getElementById('ss_simple').textContent = ss + ' units';
+  document.getElementById('result-simple').style.display = 'block';
+}
+
+function calcAdvanced() {
+  const avg = parseFloat(document.getElementById('a_avgSales').value);
+  const std = parseFloat(document.getElementById('a_stdDemand').value);
+  const lead = parseFloat(document.getElementById('a_avgLead').value);
+  const z = parseFloat(document.getElementById('a_service').value);
+  if (isNaN(avg) || isNaN(std) || isNaN(lead)) return;
+  const ss = Math.ceil(z * std * Math.sqrt(lead));
+  document.getElementById('ss_advanced').textContent = ss + ' units';
+  document.getElementById('result-advanced').style.display = 'block';
+}
+</script>
+{% endblock %}
+
+{% block tool_faq %}
+<div class="faq-list">
+  <details><summary>What is safety stock?</summary><p>Safety stock is extra inventory held as a buffer against unexpected demand spikes or supplier delays. It's the difference between running out of stock and staying in business through supply chain disruptions.</p></details>
+  <details><summary>How much safety stock should I hold?</summary><p>It depends on the variability of your demand and supplier lead times. Higher variability = more safety stock needed. The simple method above (max demand - average demand) is a good practical starting point for most Shopify merchants.</p></details>
+  <details><summary>Is holding safety stock expensive?</summary><p>There's a cost to holding excess inventory (typically 20–30% of inventory value annually for carrying costs). But the cost of a stockout — lost sales, customer churn, ad waste — almost always exceeds the carrying cost of safety stock.</p></details>
+</div>
+{% endblock %}

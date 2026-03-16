@@ -1,0 +1,113 @@
+{% extends 'tools/base_tool.html' %}
+
+{% block tool_title %}Days of Supply Calculator{% endblock %}
+{% block tool_subtitle %}See exactly how many days of stock you have left before a stockout. Add multiple SKUs for a full picture.{% endblock %}
+
+{% block tool_content %}
+<div class="tool-form-section">
+  <div id="skuRows">
+    <div class="sku-row" data-idx="0">
+      <div class="form-grid sku-grid">
+        <div class="form-group">
+          <label>SKU / Product name</label>
+          <input type="text" class="sku-name" placeholder="e.g. Premium Yoga Mat" oninput="calculateAll()" />
+        </div>
+        <div class="form-group">
+          <label>Current stock (units)</label>
+          <input type="number" class="sku-stock" placeholder="e.g. 35" min="0" oninput="calculateAll()" />
+        </div>
+        <div class="form-group">
+          <label>Daily sales (units/day)</label>
+          <input type="number" class="sku-sales" placeholder="e.g. 4" min="0.1" step="0.1" oninput="calculateAll()" />
+        </div>
+        <div class="form-group">
+          <label>Reorder point (units)</label>
+          <input type="number" class="sku-rop" placeholder="e.g. 20" min="0" oninput="calculateAll()" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-ghost btn-sm" onclick="addSKU()" style="margin-top:1rem;">+ Add another SKU</button>
+</div>
+
+<div class="tool-result" id="result" style="display:none;">
+  <h3>Days of supply by SKU</h3>
+  <div id="dosTable"></div>
+  <p class="result-note">🔴 Critical = less than 7 days &nbsp;|&nbsp; 🟡 Low = 7–14 days &nbsp;|&nbsp; 🟢 OK = 14+ days</p>
+</div>
+
+<script>
+let skuCount = 1;
+
+function addSKU() {
+  const idx = skuCount++;
+  const row = document.createElement('div');
+  row.className = 'sku-row';
+  row.dataset.idx = idx;
+  row.innerHTML = `
+    <div class="form-grid sku-grid" style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);">
+      <div class="form-group"><label>SKU / Product name</label><input type="text" class="sku-name" placeholder="e.g. Resistance Band Set" oninput="calculateAll()" /></div>
+      <div class="form-group"><label>Current stock (units)</label><input type="number" class="sku-stock" placeholder="e.g. 12" min="0" oninput="calculateAll()" /></div>
+      <div class="form-group"><label>Daily sales (units/day)</label><input type="number" class="sku-sales" placeholder="e.g. 2" min="0.1" step="0.1" oninput="calculateAll()" /></div>
+      <div class="form-group"><label>Reorder point (units)</label><input type="number" class="sku-rop" placeholder="e.g. 10" min="0" oninput="calculateAll()" /></div>
+    </div>`;
+  document.getElementById('skuRows').appendChild(row);
+}
+
+function calculateAll() {
+  const rows = document.querySelectorAll('.sku-row');
+  const results = [];
+  rows.forEach(row => {
+    const name = row.querySelector('.sku-name').value || 'SKU';
+    const stock = parseFloat(row.querySelector('.sku-stock').value);
+    const sales = parseFloat(row.querySelector('.sku-sales').value);
+    const rop = parseFloat(row.querySelector('.sku-rop').value) || 0;
+    if (!isNaN(stock) && !isNaN(sales) && sales > 0) {
+      const dos = stock / sales;
+      const daysToRop = rop > 0 ? Math.max(0, (stock - rop) / sales) : null;
+      results.push({ name, stock, sales, dos, rop, daysToRop });
+    }
+  });
+
+  if (results.length === 0) return;
+
+  results.sort((a, b) => a.dos - b.dos);
+
+  let html = '<table class="dos-table"><thead><tr><th>Product</th><th>Stock</th><th>Daily Sales</th><th>Days of Supply</th><th>Reorder In</th><th>Status</th></tr></thead><tbody>';
+  results.forEach(r => {
+    let status, statusClass;
+    if (r.dos < 7) { status = '🔴 Critical'; statusClass = 'status-critical'; }
+    else if (r.dos < 14) { status = '🟡 Low'; statusClass = 'status-warning'; }
+    else { status = '🟢 OK'; statusClass = 'status-ok-text'; }
+    const reorderIn = r.daysToRop !== null ? (r.daysToRop < 0.5 ? 'Now!' : Math.round(r.daysToRop) + ' days') : '—';
+    html += `<tr class="${r.dos < 7 ? 'row-critical' : ''}">
+      <td>${r.name}</td>
+      <td>${r.stock} units</td>
+      <td>${r.sales}/day</td>
+      <td><strong>${Math.round(r.dos)} days</strong></td>
+      <td>${reorderIn}</td>
+      <td class="${statusClass}">${status}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+
+  const critical = results.filter(r => r.dos < 7).length;
+  const low = results.filter(r => r.dos >= 7 && r.dos < 14).length;
+  if (critical > 0) {
+    html += `<div class="status-alert status-critical" style="margin-top:1rem;">⚠️ ${critical} SKU${critical>1?'s':''} need${critical===1?'s':''} to be reordered immediately.</div>`;
+  }
+
+  document.getElementById('dosTable').innerHTML = html;
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+{% endblock %}
+
+{% block tool_faq %}
+<div class="faq-list">
+  <details><summary>What is days of supply?</summary><p>Days of supply (DOS) is the number of days your current inventory will last at your current sales rate. A DOS of 14 means you have 14 days before you run out of stock. Most merchants aim to keep at least 30–45 days of supply on hand for their top SKUs.</p></details>
+  <details><summary>What is a healthy days of supply target?</summary><p>It depends on your supplier lead time. A good rule of thumb: your target DOS should be at least 2× your supplier's lead time plus your safety stock. If your supplier takes 14 days, you want at least 30–35 days of supply as a buffer.</p></details>
+  <details><summary>How often should I check days of supply?</summary><p>Ideally daily for fast-moving SKUs, and at least weekly for slower SKUs. Reorderly monitors this automatically and alerts you — or better yet, places the order — when a SKU gets close to the reorder point.</p></details>
+</div>
+{% endblock %}

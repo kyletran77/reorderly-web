@@ -1,0 +1,86 @@
+{% extends 'tools/base_tool.html' %}
+
+{% block tool_title %}EOQ Calculator — Economic Order Quantity{% endblock %}
+{% block tool_subtitle %}Find the optimal order quantity that minimizes your total inventory costs. Free, instant.{% endblock %}
+
+{% block tool_content %}
+<div class="tool-form-section">
+  <div class="formula-box">
+    <strong>Formula:</strong> EOQ = √(2 × Annual Demand × Order Cost / Holding Cost per Unit)
+  </div>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Annual demand (units/year)</label>
+      <input type="number" id="demand" placeholder="e.g. 1200" min="1" oninput="calculate()" />
+      <span class="form-hint">How many units you sell per year</span>
+    </div>
+    <div class="form-group">
+      <label>Cost per order ($)</label>
+      <input type="number" id="orderCost" placeholder="e.g. 25" min="0" step="0.01" oninput="calculate()" />
+      <span class="form-hint">Cost to place one purchase order (your time, shipping setup, admin)</span>
+    </div>
+    <div class="form-group">
+      <label>Unit cost ($)</label>
+      <input type="number" id="unitCost" placeholder="e.g. 12.50" min="0" step="0.01" oninput="calculate()" />
+      <span class="form-hint">Your cost to purchase one unit from supplier</span>
+    </div>
+    <div class="form-group">
+      <label>Annual holding cost rate (%)</label>
+      <input type="number" id="holdingRate" value="25" min="1" max="100" oninput="calculate()" />
+      <span class="form-hint">Typically 20–30% of unit cost per year (storage, insurance, capital)</span>
+    </div>
+  </div>
+</div>
+
+<div class="tool-result" id="result" style="display:none;">
+  <h3>Your optimal order quantity</h3>
+  <div class="result-big" id="eoqVal">—</div>
+  <p class="result-label">units per order</p>
+
+  <div class="result-breakdown">
+    <div class="breakdown-row"><span>Orders per year</span><span id="b_orders">—</span></div>
+    <div class="breakdown-row"><span>Order frequency</span><span id="b_freq">—</span></div>
+    <div class="breakdown-row"><span>Annual ordering cost</span><span id="b_orderCost">—</span></div>
+    <div class="breakdown-row"><span>Annual holding cost</span><span id="b_holdCost">—</span></div>
+    <div class="breakdown-row total"><span>Total annual inventory cost</span><span id="b_total">—</span></div>
+  </div>
+
+  <div class="insight-box" id="insight"></div>
+</div>
+
+<script>
+function calculate() {
+  const D = parseFloat(document.getElementById('demand').value);
+  const S = parseFloat(document.getElementById('orderCost').value);
+  const C = parseFloat(document.getElementById('unitCost').value);
+  const h_pct = parseFloat(document.getElementById('holdingRate').value) / 100;
+  if (isNaN(D) || isNaN(S) || isNaN(C) || isNaN(h_pct)) return;
+
+  const H = C * h_pct;
+  const eoq = Math.ceil(Math.sqrt((2 * D * S) / H));
+  const ordersPerYear = D / eoq;
+  const daysPerOrder = Math.round(365 / ordersPerYear);
+  const annualOrder = ordersPerYear * S;
+  const annualHold = (eoq / 2) * H;
+  const totalCost = annualOrder + annualHold;
+
+  document.getElementById('eoqVal').textContent = eoq + ' units';
+  document.getElementById('b_orders').textContent = ordersPerYear.toFixed(1) + ' orders/year';
+  document.getElementById('b_freq').textContent = 'Every ~' + daysPerOrder + ' days';
+  document.getElementById('b_orderCost').textContent = '$' + annualOrder.toFixed(0);
+  document.getElementById('b_holdCost').textContent = '$' + annualHold.toFixed(0);
+  document.getElementById('b_total').textContent = '$' + totalCost.toFixed(0);
+
+  document.getElementById('insight').innerHTML = `<strong>💡 What this means</strong><p>Order <strong>${eoq} units</strong> approximately every <strong>${daysPerOrder} days</strong> to minimize your total inventory costs. Ordering more or less than this increases your total annual cost.</p>`;
+  document.getElementById('result').style.display = 'block';
+}
+</script>
+{% endblock %}
+
+{% block tool_faq %}
+<div class="faq-list">
+  <details><summary>What is Economic Order Quantity (EOQ)?</summary><p>EOQ is the optimal order size that minimizes the total cost of ordering and holding inventory. It balances two opposing costs: ordering too often (high ordering costs) vs. ordering too much at once (high holding costs).</p></details>
+  <details><summary>What should I use as my holding cost rate?</summary><p>Most businesses use 20–30% of unit cost annually. This includes warehouse storage (rent per sq ft × space used), insurance, spoilage risk, and the opportunity cost of capital tied up in inventory.</p></details>
+  <details><summary>Does EOQ apply to all products?</summary><p>EOQ works best for products with relatively stable demand. For highly seasonal products, you may want to calculate EOQ separately for peak and off-peak seasons.</p></details>
+</div>
+{% endblock %}

@@ -1,0 +1,246 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }}</title>
+  <meta name="description" content="{{ description }}">
+  <link rel="canonical" href="{{ canonical }}">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="{{ title }}">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:image" content="{{ og_image|default:'https://reorderly.com/static/images/og-image.png' }}">
+  <meta property="og:url" content="{{ canonical }}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Reorderly">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ title }}">
+  <meta name="twitter:description" content="{{ description }}">
+  <meta name="twitter:image" content="{{ og_image|default:'https://reorderly.com/static/images/og-image.png' }}">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+
+  <!-- Google Search Console -->
+  {% if gsc_verification %}
+  <meta name="google-site-verification" content="{{ gsc_verification }}">
+  {% endif %}
+
+  <!-- Structured Data -->
+  {% block structured_data %}
+    {% include 'core/components/structured_data.html' %}
+  {% endblock %}
+
+  <!-- Google Analytics 4 -->
+  {% if ga4_id %}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga4_id }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '{{ ga4_id }}', {
+      page_path: window.location.pathname
+    });
+  </script>
+  {% endif %}
+
+  <!-- Microsoft Clarity (heatmaps + session recordings) -->
+  {% if clarity_id %}
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "{{ clarity_id }}");
+  </script>
+  {% endif %}
+
+  <!-- Sentry error tracking -->
+  {% if sentry_dsn %}
+  <script
+    src="https://js.sentry-cdn.com/{{ sentry_dsn }}.min.js"
+    crossorigin="anonymous">
+  </script>
+  {% endif %}
+</head>
+<body data-page="{{ request.path }}">
+  {% include 'core/components/nav.html' %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include 'core/components/footer.html' %}
+
+  <script>
+  (function() {
+
+    // ─── Nav scroll ───────────────────────────────────────
+    var nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', function() {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    });
+    var burger = document.getElementById('nav-burger');
+    if (burger) {
+      burger.addEventListener('click', function() {
+        nav.classList.toggle('open');
+      });
+    }
+
+    // ─── Global analytics helper ──────────────────────────
+    window.reorderly = window.reorderly || {};
+    window.reorderly.track = function(event_name, params) {
+      params = params || {};
+      params.page = window.location.pathname;
+      // GA4
+      if (typeof gtag !== 'undefined') {
+        gtag('event', event_name, params);
+      }
+      // Clarity custom event
+      if (typeof clarity !== 'undefined') {
+        try { clarity('event', event_name); } catch(e) {}
+      }
+    };
+
+    // ─── CTA click tracking ───────────────────────────────
+    // Tracks any .btn-primary or .btn-secondary click
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.btn-primary, .btn-secondary, .btn-ghost');
+      if (!btn) return;
+      var label = (btn.textContent || '').trim().replace(/\s+/g, ' ').substring(0, 60);
+      var href = btn.getAttribute('href') || '';
+      window.reorderly.track('cta_click', {
+        button_text: label,
+        button_href: href,
+        button_type: btn.classList.contains('btn-primary') ? 'primary'
+                   : btn.classList.contains('btn-secondary') ? 'secondary' : 'ghost'
+      });
+    });
+
+    // ─── Scroll depth tracking ────────────────────────────
+    var scrollMilestones = [25, 50, 75, 100];
+    var scrollFired = {};
+    window.addEventListener('scroll', function() {
+      var docH = document.documentElement.scrollHeight - window.innerHeight;
+      if (docH <= 0) return;
+      var pct = Math.round((window.scrollY / docH) * 100);
+      scrollMilestones.forEach(function(m) {
+        if (pct >= m && !scrollFired[m]) {
+          scrollFired[m] = true;
+          window.reorderly.track('scroll_depth', { percent: m });
+        }
+      });
+    }, { passive: true });
+
+    // ─── Section visibility (which sections get seen) ─────
+    if ('IntersectionObserver' in window) {
+      var sections = document.querySelectorAll('section[id], div[id="waitlist"]');
+      var sectionFired = {};
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting && !sectionFired[entry.target.id]) {
+            sectionFired[entry.target.id] = true;
+            window.reorderly.track('section_view', { section: entry.target.id });
+          }
+        });
+      }, { threshold: 0.3 });
+      sections.forEach(function(s) { observer.observe(s); });
+    }
+
+    // ─── Waitlist form ────────────────────────────────────
+    var waitlistForm = document.getElementById('waitlist-form');
+    if (waitlistForm) {
+
+      // Auto-populate source from current page path
+      var sourceInput = waitlistForm.querySelector('input[name="source"]');
+      if (!sourceInput) {
+        sourceInput = document.createElement('input');
+        sourceInput.type = 'hidden';
+        sourceInput.name = 'source';
+        waitlistForm.appendChild(sourceInput);
+      }
+      sourceInput.value = window.location.pathname.replace(/\/$/, '') || '/';
+
+      // Track form start (first interaction)
+      var formStartFired = false;
+      waitlistForm.addEventListener('focusin', function() {
+        if (!formStartFired) {
+          formStartFired = true;
+          window.reorderly.track('waitlist_start', {
+            source: sourceInput.value
+          });
+        }
+      });
+
+      // Submit handler
+      waitlistForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var email = waitlistForm.querySelector('input[name="email"]');
+        var shopifyStore = waitlistForm.querySelector('input[name="shopify_store"]');
+        var skuCount = waitlistForm.querySelector('input[name="sku_count"]');
+        var msgEl = document.getElementById('waitlist-msg');
+
+        var payload = {
+          email: email ? email.value.trim() : '',
+          shopify_store: shopifyStore ? shopifyStore.value.trim() : '',
+          sku_count: skuCount ? skuCount.value.trim() : '',
+          source: sourceInput.value
+        };
+
+        if (!payload.email) return;
+
+        fetch('/api/waitlist/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify(payload)
+        })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, status: r.status, data: d }; }); })
+        .then(function(res) {
+          if (msgEl) {
+            msgEl.textContent = res.data.message || (res.ok ? 'You\'re on the list!' : 'Something went wrong.');
+            msgEl.className = 'waitlist-msg ' + (res.ok ? 'waitlist-msg-success' : 'waitlist-msg-error');
+          }
+          if (res.ok || res.status === 200) {
+            // Fire conversion event
+            window.reorderly.track('waitlist_submit', {
+              source: payload.source,
+              has_store: !!payload.shopify_store,
+              sku_count: payload.sku_count || 'not_provided'
+            });
+            // GA4 conversion
+            if (typeof gtag !== 'undefined') {
+              gtag('event', 'conversion', { send_to: '{{ ga4_id }}' });
+            }
+            if (email) email.value = '';
+          }
+        })
+        .catch(function() {
+          if (msgEl) {
+            msgEl.textContent = 'Network error. Please try again.';
+            msgEl.className = 'waitlist-msg waitlist-msg-error';
+          }
+        });
+      });
+    }
+
+    // ─── CSRF helper ─────────────────────────────────────
+    function getCookie(name) {
+      var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+      return v ? v[2] : null;
+    }
+
+  })();
+  </script>
+
+  {% block page_scripts %}{% endblock %}
+</body>
+</html>

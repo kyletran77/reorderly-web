@@ -1,0 +1,44 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="tool-page">
+  <div class="tool-header">
+    <div class="container">
+      <h1>Free Shopify Inventory Tools</h1>
+      <p class="tool-subtitle">10 free tools for Shopify merchants — no signup, no credit card, instant results.</p>
+      <div class="tool-badges">
+        <span class="badge badge-free">All free</span>
+        <span class="badge badge-no-signup">No signup required</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tool-body">
+    <div class="container">
+      <div class="tools-grid">
+        {% for tool in tools %}
+        <a href="{{ tool.url }}" class="tool-card-link">
+          <div class="tool-index-card">
+            <div class="tool-index-icon">{{ tool.icon }}</div>
+            <h3>{{ tool.name }}</h3>
+            <p>{{ tool.description }}</p>
+            <span class="tool-link-label">Use free tool →</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+
+      <div class="tool-cta-box" style="margin-top:3rem;">
+        <div class="tool-cta-inner">
+          <div class="tool-cta-text">
+            <strong>Want all of this automated?</strong>
+            <p>Reorderly replaces every one of these manual tasks — monitoring inventory, calculating reorder points, and sending POs to suppliers automatically.</p>
+          </div>
+          <a href="/#waitlist" class="btn btn-primary">Get Reorderly Free →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
