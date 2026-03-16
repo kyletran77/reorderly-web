@@ -1,11 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.permissions import AllowAny
 from .models import WaitlistEntry
 from .serializers import WaitlistEntrySerializer
 
 
 class WaitlistView(APIView):
+    authentication_classes = []  # No auth — public endpoint, disables CSRF enforcement
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = WaitlistEntrySerializer(data=request.data)
 
