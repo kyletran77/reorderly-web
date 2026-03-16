@@ -18,8 +18,8 @@ _railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN', '')
 if _railway_domain and _railway_domain not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(_railway_domain)
 
-# Allow all onrender.com subdomains
-ALLOWED_HOSTS += ['.onrender.com']
+# Allow all onrender.com subdomains and custom domain
+ALLOWED_HOSTS += ['.onrender.com', 'reorderly.me', 'www.reorderly.me']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -128,7 +128,7 @@ if _csrf_origins:
 elif _railway_domain:
     CSRF_TRUSTED_ORIGINS = [f'https://{_railway_domain}']
 else:
-    CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+    CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com', 'https://reorderly.me', 'https://www.reorderly.me']
 
 # Production security settings
 if not DEBUG:
