@@ -127,6 +127,8 @@ if _csrf_origins:
     CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(',') if o.strip()]
 elif _railway_domain:
     CSRF_TRUSTED_ORIGINS = [f'https://{_railway_domain}']
+else:
+    CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
 
 # Production security settings
 if not DEBUG:
