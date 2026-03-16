@@ -1,3 +1,4 @@
+import os
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -34,3 +35,16 @@ class WaitlistView(APIView):
             {'errors': serializer.errors},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class WaitlistAdminView(APIView):
+    """Simple read-only admin endpoint — protected by secret key env var."""
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        secret = request.query_params.get('key', '')
+        if secret != os.environ.get('ADMIN_SECRET', ''):
+            return Response({'error': 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+        entries = WaitlistEntry.objects.all().values('email', 'shopify_store', 'sku_count', 'source', 'created_at')
+        return Response({'count': len(entries), 'entries': list(entries)})
