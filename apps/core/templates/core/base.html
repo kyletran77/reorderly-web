@@ -181,54 +181,18 @@
         }
       });
 
-      // Submit handler
-      waitlistForm.addEventListener('submit', function(e) {
-        e.preventDefault();
+      // Submit handler — analytics only, form submission handled by page-level script
+      waitlistForm.addEventListener('submit', function() {
         var email = waitlistForm.querySelector('input[name="email"]');
-        var shopifyStore = waitlistForm.querySelector('input[name="shopify_store"]');
-        var skuCount = waitlistForm.querySelector('input[name="sku_count"]');
-        var msgEl = document.getElementById('waitlist-msg');
-
-        var payload = {
-          email: email ? email.value.trim() : '',
-          shopify_store: shopifyStore ? shopifyStore.value.trim() : '',
-          sku_count: skuCount ? skuCount.value.trim() : '',
-          source: sourceInput.value
-        };
-
-        if (!payload.email) return;
-
-        fetch('/api/waitlist/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-          body: JSON.stringify(payload)
-        })
-        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, status: r.status, data: d }; }); })
-        .then(function(res) {
-          if (msgEl) {
-            msgEl.textContent = res.data.message || (res.ok ? 'You\'re on the list!' : 'Something went wrong.');
-            msgEl.className = 'waitlist-msg ' + (res.ok ? 'waitlist-msg-success' : 'waitlist-msg-error');
-          }
-          if (res.ok || res.status === 200) {
-            // Fire conversion event
-            window.reorderly.track('waitlist_submit', {
-              source: payload.source,
-              has_store: !!payload.shopify_store,
-              sku_count: payload.sku_count || 'not_provided'
-            });
-            // GA4 conversion
-            if (typeof gtag !== 'undefined') {
-              gtag('event', 'conversion', { send_to: '{{ ga4_id }}' });
-            }
-            if (email) email.value = '';
-          }
-        })
-        .catch(function() {
-          if (msgEl) {
-            msgEl.textContent = 'Network error. Please try again.';
-            msgEl.className = 'waitlist-msg waitlist-msg-error';
-          }
+        if (!email || !email.value.trim()) return;
+        window.reorderly.track('waitlist_submit', {
+          source: sourceInput.value,
+          has_store: false,
+          sku_count: 'not_provided'
         });
+        if (typeof gtag !== 'undefined') {
+          gtag('event', 'conversion', { send_to: '{{ ga4_id }}' });
+        }
       });
     }
 
