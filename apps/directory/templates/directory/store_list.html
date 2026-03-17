@@ -78,17 +78,13 @@
         <div class="dir-card__top">
           <span class="dir-card__cat">{{ store.category_name }}</span>
           {% if store.shopify_plus %}<span class="dir-card__badge dir-card__badge--plus">Plus</span>{% endif %}
+          {% if store.location %}<span class="dir-card__country">{{ store.location }}</span>{% endif %}
         </div>
         <h2 class="dir-card__name">{{ store.name }}</h2>
-        <p class="dir-card__desc">{{ store.description|truncatechars:120 }}</p>
+        <p class="dir-card__desc">{{ store.description|truncatechars:100 }}</p>
         <div class="dir-card__stats">
-          {% if store.annual_revenue_est %}<span><strong>{{ store.annual_revenue_est }}</strong> est. ARR</span>{% endif %}
+          {% if store.annual_revenue_est %}<span><strong>{{ store.annual_revenue_est }}</strong> ARR</span>{% endif %}
           {% if store.sku_count %}<span><strong>{{ store.sku_count }}</strong> SKUs</span>{% endif %}
-          {% if store.supplier_count %}<span><strong>{{ store.supplier_count }}</strong> suppliers</span>{% endif %}
-        </div>
-        <div class="dir-card__stats" style="margin-top:0.25rem">
-          {% if store.founded_year %}<span>Est. {{ store.founded_year }}</span>{% endif %}
-          {% if store.location %}<span>{{ store.location }}</span>{% endif %}
         </div>
       </a>
       {% endfor %}
