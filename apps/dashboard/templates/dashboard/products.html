@@ -1,0 +1,35 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Products & Rules{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Products & Reorder Rules</h1>
+    <p class="page-subtitle">Set reorder points and quantities for each SKU.</p>
+  </div>
+  <a href="/app/products/sync/" class="btn btn-primary">Sync from Shopify</a>
+</div>
+{% if rules %}
+<div class="section-card">
+  <table class="data-table">
+    <thead><tr><th>SKU</th><th>Product</th><th>Supplier</th><th>Reorder Point</th><th>Reorder Qty</th><th>Unit Cost</th></tr></thead>
+    <tbody>
+      {% for r in rules %}
+      <tr>
+        <td class="font-mono">{{ r.sku }}</td>
+        <td>{{ r.product_title }}{% if r.variant_title %} <span class="text-muted">/ {{ r.variant_title }}</span>{% endif %}</td>
+        <td>{% if r.supplier %}{{ r.supplier.name }}{% else %}<span class="text-muted">None</span>{% endif %}</td>
+        <td>{{ r.reorder_point }}</td>
+        <td>{{ r.reorder_quantity }}</td>
+        <td>{% if r.unit_cost %}${{ r.unit_cost }}{% else %}—{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <p>No reorder rules yet. Sync your products from Shopify to set them up.</p>
+  <a href="/app/products/sync/" class="btn btn-primary" style="margin-top:16px">Sync Products from Shopify</a>
+</div>
+{% endif %}
+{% endblock %}

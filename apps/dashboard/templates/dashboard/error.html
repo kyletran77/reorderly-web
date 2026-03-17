@@ -1,0 +1,13 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Error — Reorderly</title>
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}"></head>
+<body class="error-body">
+  <div class="error-card">
+    <h1 style="font-size:20px;margin-bottom:12px">Something went wrong</h1>
+    <p style="color:#6b7280;margin-bottom:24px">{{ message }}</p>
+    <a href="/shopify/install/" class="btn btn-primary">Try Again</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Suppliers{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Suppliers</h1>
+  <a href="/app/suppliers/new/" class="btn btn-primary">+ Add Supplier</a>
+</div>
+{% if suppliers %}
+<div class="section-card">
+  <table class="data-table">
+    <thead><tr><th>Name</th><th>Email</th><th>Lead Time</th><th>Payment Terms</th><th>SKUs</th><th></th></tr></thead>
+    <tbody>
+      {% for s in suppliers %}
+      <tr>
+        <td><strong>{{ s.name }}</strong>{% if s.contact_name %}<br><span class="text-muted">{{ s.contact_name }}</span>{% endif %}</td>
+        <td><a href="mailto:{{ s.email }}">{{ s.email }}</a></td>
+        <td>{{ s.lead_time_days }} days</td>
+        <td>{{ s.payment_terms }}</td>
+        <td>{{ s.product_rules.count }}</td>
+        <td>
+          <a href="/app/suppliers/{{ s.id }}/edit/" class="table-link">Edit</a>
+          <form method="post" action="/app/suppliers/{{ s.id }}/delete/" style="display:inline">
+            {% csrf_token %}<button type="submit" class="table-link" style="background:none;border:none;color:#ef4444;cursor:pointer;margin-left:12px" onclick="return confirm('Remove this supplier?')">Remove</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <p>No suppliers yet. Add your first supplier to get started.</p>
+  <a href="/app/suppliers/new/" class="btn btn-primary" style="margin-top:16px">Add Supplier</a>
+</div>
+{% endif %}
+{% endblock %}

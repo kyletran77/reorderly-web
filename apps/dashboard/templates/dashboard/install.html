@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect Your Shopify Store — Reorderly</title>
+  <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body class="install-body">
+  <div class="install-card">
+    <a href="/" class="install-logo">
+      <span>⟳</span> Reorderly
+    </a>
+    <h1 class="install-title">Connect your Shopify store</h1>
+    <p class="install-sub">Enter your store URL to get started. Takes about 60 seconds.</p>
+    <form method="get" action="/shopify/install/" class="install-form">
+      <div class="install-input-row">
+        <input type="text" name="shop" placeholder="your-store" class="input install-input" required autofocus>
+        <span class="install-suffix">.myshopify.com</span>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full btn-lg">Connect Store →</button>
+    </form>
+    <p class="install-fine">We only request read access to your inventory. You can revoke at any time.</p>
+  </div>
+</body>
+</html>

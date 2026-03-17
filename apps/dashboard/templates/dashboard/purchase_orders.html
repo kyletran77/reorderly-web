@@ -1,0 +1,62 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Purchase Orders{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Purchase Orders</h1>
+  <div class="header-actions">
+    <form method="post" action="/app/run-check/">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary">Run Inventory Check</button>
+    </form>
+  </div>
+</div>
+
+<div class="filter-bar">
+  {% for value, label in status_choices %}
+    <a href="?status={{ value }}" class="filter-chip {% if status_filter == value %}active{% endif %}">{{ label }}</a>
+  {% endfor %}
+  <a href="?" class="filter-chip {% if not status_filter %}active{% endif %}">All</a>
+</div>
+
+{% if purchase_orders %}
+<div class="section-card">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>PO Number</th>
+        <th>Supplier</th>
+        <th>Items</th>
+        <th>Status</th>
+        <th>Total</th>
+        <th>Date</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for po in purchase_orders %}
+      <tr>
+        <td class="font-mono">{{ po.po_number }}</td>
+        <td>{{ po.supplier.name }}</td>
+        <td class="text-muted">{{ po.line_items.count }} SKU{% if po.line_items.count != 1 %}s{% endif %}</td>
+        <td><span class="status-badge status-{{ po.status }}">{{ po.get_status_display }}</span></td>
+        <td>{% if po.total_cost and po.total_cost > 0 %}${{ po.total_cost }}{% else %}—{% endif %}</td>
+        <td class="text-muted">{{ po.created_at|date:"M j, Y" }}</td>
+        <td><a href="/app/purchase-orders/{{ po.id }}/" class="table-link">View →</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <p>No purchase orders {% if status_filter %}with status "{{ status_filter }}"{% else %}yet{% endif %}.</p>
+  {% if not status_filter %}
+  <form method="post" action="/app/run-check/" style="margin-top:16px">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Run Inventory Check</button>
+  </form>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

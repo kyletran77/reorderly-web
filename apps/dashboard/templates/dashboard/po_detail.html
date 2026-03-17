@@ -1,0 +1,128 @@
+{% extends "dashboard/base.html" %}
+{% block title %}{{ po.po_number }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <a href="/app/purchase-orders/" class="back-link">← Purchase Orders</a>
+    <h1 class="page-title">{{ po.po_number }}</h1>
+  </div>
+  <span class="status-badge status-{{ po.status }} status-badge--lg">{{ po.get_status_display }}</span>
+</div>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <div class="section-card">
+      <h2 class="section-card-title">Line Items</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Product</th>
+            <th>Ordered</th>
+            <th>Received</th>
+            <th>Unit Cost</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in po.line_items.all %}
+          <tr>
+            <td class="font-mono">{{ item.sku }}</td>
+            <td>
+              {{ item.product_title }}
+              {% if item.variant_title %}<span class="text-muted"> / {{ item.variant_title }}</span>{% endif %}
+            </td>
+            <td>{{ item.quantity_ordered }}</td>
+            <td>
+              {{ item.quantity_received }}
+              {% if item.is_fully_received %}
+                <span class="check-icon">✓</span>
+              {% endif %}
+            </td>
+            <td>{% if item.unit_cost %}${{ item.unit_cost }}{% else %}—{% endif %}</td>
+            <td>{% if item.total_cost %}${{ item.total_cost }}{% else %}—{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        {% if po.total_cost and po.total_cost > 0 %}
+        <tfoot>
+          <tr>
+            <td colspan="5" class="text-right"><strong>Total</strong></td>
+            <td><strong>${{ po.total_cost }}</strong></td>
+          </tr>
+        </tfoot>
+        {% endif %}
+      </table>
+    </div>
+
+    {% if po.email_body %}
+    <div class="section-card">
+      <h2 class="section-card-title">PO Email</h2>
+      <pre class="email-preview">{{ po.email_body }}</pre>
+    </div>
+    {% endif %}
+
+    {% if po.status == 'sent' or po.status == 'partially_received' %}
+    <div class="section-card">
+      <h2 class="section-card-title">Mark as Received</h2>
+      <p class="text-muted" style="margin-bottom:16px">Enter quantities actually received. Supports partial receives.</p>
+      <form method="post" action="/app/purchase-orders/{{ po.id }}/receive/">
+        {% csrf_token %}
+        {% for item in po.line_items.all %}
+        <div class="receive-row">
+          <label>{{ item.sku }} — {{ item.product_title }}</label>
+          <div class="receive-input-group">
+            <span class="text-muted">Ordered: {{ item.quantity_ordered }} &nbsp;|&nbsp; Received: </span>
+            <input type="number" name="received_{{ item.id }}" value="{{ item.quantity_received }}" min="0" max="{{ item.quantity_ordered }}" class="input input-sm">
+          </div>
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary" style="margin-top:16px">Save Received Quantities</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="detail-sidebar">
+    <div class="section-card">
+      <h3 class="section-card-title">Supplier</h3>
+      <div class="info-list">
+        <div class="info-row"><span>Name</span><strong>{{ po.supplier.name }}</strong></div>
+        <div class="info-row"><span>Email</span><a href="mailto:{{ po.supplier.email }}">{{ po.supplier.email }}</a></div>
+        {% if po.supplier.contact_name %}<div class="info-row"><span>Contact</span><span>{{ po.supplier.contact_name }}</span></div>{% endif %}
+        <div class="info-row"><span>Payment</span><span>{{ po.supplier.payment_terms }}</span></div>
+        <div class="info-row"><span>Lead Time</span><span>{{ po.supplier.lead_time_days }} days</span></div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h3 class="section-card-title">Actions</h3>
+      <div class="action-stack">
+        {% if po.is_editable %}
+        <form method="post" action="/app/purchase-orders/{{ po.id }}/approve/">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-full">✅ Approve PO</button>
+        </form>
+        {% endif %}
+        {% if po.status == 'approved' or po.status == 'draft' %}
+        <form method="post" action="/app/purchase-orders/{{ po.id }}/send/">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-ghost btn-full">📧 Send to {{ po.supplier.name }}</button>
+        </form>
+        {% endif %}
+      </div>
+      {% if po.approved_at %}
+      <div class="info-list" style="margin-top:12px">
+        <div class="info-row"><span>Approved</span><span>{{ po.approved_at|date:"M j, Y g:i A" }}</span></div>
+      </div>
+      {% endif %}
+      {% if po.sent_at %}
+      <div class="info-list" style="margin-top:8px">
+        <div class="info-row"><span>Sent</span><span>{{ po.sent_at|date:"M j, Y g:i A" }}</span></div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
