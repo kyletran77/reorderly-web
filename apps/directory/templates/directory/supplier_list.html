@@ -69,18 +69,14 @@
           <span class="dir-card__country">{{ s.country_name }}</span>
         </div>
         <h2 class="dir-card__name">{{ s.name }}</h2>
-        <p class="dir-card__desc">{{ s.description|truncatechars:120 }}</p>
-        {% if s.products %}
-        <p class="dir-card__products">{{ s.products|truncatechars:80 }}</p>
-        {% endif %}
+        <p class="dir-card__desc">{{ s.description|truncatechars:100 }}</p>
         <div class="dir-card__stats">
-          {% if s.us_importers %}<span title="US companies that import from this supplier"><strong>{{ s.us_importers }}</strong> US importers</span>{% endif %}
-          {% if s.annual_shipments %}<span title="Estimated annual shipments to the US"><strong>{{ s.annual_shipments }}</strong>/yr shipments</span>{% endif %}
+          {% if s.us_importers %}<span><strong>{{ s.us_importers }}</strong> US importers</span>{% endif %}
+          {% if s.annual_shipments %}<span><strong>{{ s.annual_shipments }}</strong>/yr shipments</span>{% endif %}
         </div>
         {% if s.notable_brands %}
         <div class="dir-card__brands">
-          Used by:
-          {% for brand in s.notable_brands|slice:":3" %}
+          {% for brand in s.notable_brands|slice:":2" %}
           <span class="dir-card__brand-tag">{{ brand }}</span>
           {% endfor %}
         </div>
