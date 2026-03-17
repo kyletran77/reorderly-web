@@ -860,57 +860,129 @@ ul { list-style: none; }
 .footer {
   background: #111827;
   color: rgba(255,255,255,0.7);
-  padding: 64px 0 32px;
+  padding: 72px 0 36px;
 }
 
 .footer-inner {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 48px;
-  padding-bottom: 48px;
+  gap: 64px;
+  padding-bottom: 56px;
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
+.footer-brand {
+  flex: 0 0 280px;
+}
+
 .footer-logo {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: #fff;
   letter-spacing: -0.3px;
   text-decoration: none;
-  display: block;
-  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 .footer-logo:hover { color: #fff; text-decoration: none; }
+
+.footer-logo-icon {
+  font-size: 22px;
+  color: #2dd4bf;
+}
 
 .footer-tagline {
   font-size: 14px;
   color: rgba(255,255,255,0.5);
-  line-height: 1.6;
-  max-width: 320px;
+  line-height: 1.65;
+  margin-bottom: 20px;
 }
 
-.footer-nav ul {
+.footer-social {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
+  gap: 12px;
 }
 
-.footer-nav a {
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.footer-social-link:hover {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  text-decoration: none;
+}
+
+.footer-cols {
+  display: flex;
+  gap: 56px;
+}
+
+.footer-col h4.footer-col-heading {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 16px;
+}
+
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-col a {
   font-size: 14px;
   color: rgba(255,255,255,0.6);
   text-decoration: none;
   transition: color 0.15s;
 }
-.footer-nav a:hover { color: #fff; text-decoration: none; }
+.footer-col a:hover { color: #fff; text-decoration: none; }
 
 .footer-bottom {
   padding-top: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .footer-bottom p {
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.35);
+}
+
+.footer-bottom-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-bottom-links a {
+  font-size: 13px;
+  color: rgba(255,255,255,0.35);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.footer-bottom-links a:hover { color: rgba(255,255,255,0.7); text-decoration: none; }
+
+.footer-bottom-links span {
+  color: rgba(255,255,255,0.2);
 }
 
 /* ===========================
@@ -968,7 +1040,22 @@ ul { list-style: none; }
 
   .footer-inner {
     flex-direction: column;
+    gap: 40px;
+  }
+
+  .footer-brand {
+    flex: none;
+  }
+
+  .footer-cols {
     gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   .pricing-grid {
@@ -2096,3 +2183,60 @@ ul { list-style: none; }
   margin: 0;
 }
 
+
+/* ===========================
+   Legal Pages (Privacy/Terms)
+   =========================== */
+.legal-body {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-bottom: 64px;
+}
+
+.legal-body p {
+  margin-bottom: 16px;
+  color: var(--text);
+  line-height: 1.75;
+}
+
+.legal-body h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 40px 0 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.legal-body h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 24px 0 8px;
+}
+
+.legal-body ul {
+  list-style: disc;
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+
+.legal-body ul li {
+  margin-bottom: 8px;
+  color: var(--text);
+  line-height: 1.65;
+}
+
+.legal-body a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+/* ===========================
+   Feature icon SVG polish
+   =========================== */
+.feature-icon svg {
+  width: 28px;
+  height: 28px;
+  color: var(--primary);
+}

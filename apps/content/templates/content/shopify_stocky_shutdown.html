@@ -1,0 +1,156 @@
+{% extends 'content/base_article.html' %}
+
+{% block article_tag %}Urgent Guide{% endblock %}
+{% block article_date %}March 2026{% endblock %}
+{% block article_read %}6 min read{% endblock %}
+
+{% block article_title %}Shopify Stocky Shutdown: What Every Merchant Must Do Before August 31, 2026{% endblock %}
+
+{% block article_lede %}Shopify removed Stocky from the App Store in February 2026 and will shut it down completely on August 31, 2026. Here's exactly what's happening, what you'll lose, and the steps to take right now before the deadline.{% endblock %}
+
+{% block toc %}
+<ul>
+  <li><a href="#whats-happening">What's actually happening</a></li>
+  <li><a href="#key-dates">Key dates and deadlines</a></li>
+  <li><a href="#what-you-lose">What you'll lose on August 31</a></li>
+  <li><a href="#do-right-now">What to do right now</a></li>
+  <li><a href="#alternatives">Your replacement options</a></li>
+  <li><a href="#dont-wait">Why you shouldn't wait</a></li>
+</ul>
+{% endblock %}
+
+{% block article_content %}
+
+<h2 id="whats-happening">What's actually happening with Shopify Stocky</h2>
+
+<p>Shopify Stocky — the free inventory management and purchase order app used by hundreds of thousands of Shopify merchants — is being permanently shut down. Shopify removed it from the App Store on <strong>February 2, 2026</strong>, meaning no new merchants can install it. Existing users received notices that <strong>the app will stop working entirely on August 31, 2026</strong>.</p>
+
+<p>Stocky was originally a product called "Handshake," acquired by Shopify in 2019. For seven years it handled a critical gap in Shopify's native toolset: purchase order creation, supplier management, reorder point tracking, and basic demand forecasting. Shopify never fully integrated these features into its core admin, and now it's discontinuing the third-party solution without a native equivalent.</p>
+
+<p>Shopify has pointed merchants toward its Purchases feature (basic PO creation, no supplier email automation) and a list of third-party apps. Neither fills the full gap that Stocky covered.</p>
+
+<div class="article-callout article-callout--warning">
+  <strong>⚠️ Important:</strong> "August 31" is not a soft deadline. The app will stop functioning — not just stop receiving updates. Any in-progress purchase orders, supplier workflows, or inventory counts that depend on Stocky will break on that date.
+</div>
+
+<h2 id="key-dates">Key dates you need to know</h2>
+
+<ul>
+  <li><strong>February 2, 2026:</strong> Stocky removed from the Shopify App Store. No new installs allowed.</li>
+  <li><strong>Now through August 2026:</strong> Existing installs continue to work (with reduced support).</li>
+  <li><strong>August 31, 2026:</strong> Stocky shuts down completely. All functionality stops.</li>
+</ul>
+
+<p>That gives you roughly <strong>5 months</strong> from today (March 2026) to export your data and migrate to a replacement. That sounds like a lot of time — but merchants who wait until July will be competing for onboarding slots at the same apps at the same time, during peak summer operations for most retail businesses.</p>
+
+<h2 id="what-you-lose">What you'll lose on August 31 if you haven't migrated</h2>
+
+<p>This isn't just losing access to a UI. Here's what disappears on August 31:</p>
+
+<h3>Your purchase order history</h3>
+<p>Every PO you've ever created through Stocky — sent dates, quantities, supplier confirmations, receiving records — lives in Stocky's database. When the app shuts down, that history is gone. For some merchants this is years of procurement records that may have accounting or audit implications.</p>
+
+<h3>Your supplier database</h3>
+<p>Every supplier you've set up in Stocky — with their contact email, MOQs, lead times, payment terms, and notes — needs to be manually exported and re-entered into your new system. There's no automatic transfer.</p>
+
+<h3>Your reorder thresholds</h3>
+<p>If you've spent time calibrating reorder points and order quantities for each SKU, that configuration lives in Stocky and has to be exported before shutdown.</p>
+
+<h3>Any open purchase orders</h3>
+<p>POs you've created but not yet received — if they're still open when Stocky shuts down, you lose visibility into them from within the app. Your supplier may still ship the goods, but you'll have no tracking record.</p>
+
+<h2 id="do-right-now">What to do right now (takes about 30 minutes)</h2>
+
+<h3>Step 1: Export your purchase order history</h3>
+<ol>
+  <li>Open Stocky from your Shopify admin</li>
+  <li>Go to <strong>Reports → Purchase Orders</strong></li>
+  <li>Set date range to <strong>All time</strong></li>
+  <li>Click <strong>Export CSV</strong> — save as <code>stocky-po-history.csv</code></li>
+</ol>
+
+<h3>Step 2: Document your suppliers</h3>
+<ol>
+  <li>Go to <strong>Suppliers</strong> in Stocky</li>
+  <li>For each supplier, copy: name, email, contact name, phone, payment terms, MOQ, lead time</li>
+  <li>Paste into a Google Sheet — this becomes your migration import file</li>
+</ol>
+
+<h3>Step 3: Export your reorder rules</h3>
+<ol>
+  <li>Go to <strong>Reports → Replenishment</strong> in Stocky</li>
+  <li>Export the replenishment report — it contains your per-SKU reorder points and quantities</li>
+  <li>If export isn't available, screenshot or manually document the thresholds for your top 20 SKUs at minimum</li>
+</ol>
+
+<h3>Step 4: Start evaluating replacements now</h3>
+<p>Give yourself 4–6 weeks to evaluate a replacement before you have to fully commit. That means starting <em>today</em>, not in June.</p>
+
+<div class="article-callout">
+  <strong>→ Use our free <a href="/tools/stocky-migration-checklist/">Stocky Migration Checklist</a></strong> — a 19-step interactive checklist that walks you through every export step and helps you evaluate replacements. Free, no signup.
+</div>
+
+<h2 id="alternatives">Your replacement options</h2>
+
+<p>Here are the most relevant options for merchants coming off Stocky:</p>
+
+<div class="article-table-wrap">
+  <table class="article-table">
+    <thead>
+      <tr>
+        <th>App</th>
+        <th>Best for</th>
+        <th>Starting price</th>
+        <th>Automated PO emails</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Reorderly</strong></td>
+        <td>Merchants who want POs handled automatically, without daily manual work</td>
+        <td>Free → $149/mo</td>
+        <td>✓ Yes</td>
+      </tr>
+      <tr>
+        <td>Prediko</td>
+        <td>Forecasting-focused merchants with DTC brands</td>
+        <td>Free → $49/mo</td>
+        <td>✗ No</td>
+      </tr>
+      <tr>
+        <td>Inventory Planner</td>
+        <td>Large catalogs needing demand forecasting</td>
+        <td>$99/mo+</td>
+        <td>✗ No</td>
+      </tr>
+      <tr>
+        <td>Sumtracker</td>
+        <td>Multi-channel inventory sync</td>
+        <td>$29/mo</td>
+        <td>✗ No</td>
+      </tr>
+      <tr>
+        <td>Shopify Purchases (native)</td>
+        <td>Very basic PO needs, already on Shopify Plus</td>
+        <td>Included</td>
+        <td>✗ No</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The key differentiator to look for: <strong>automated PO emails.</strong> Stocky let you create POs, but you still had to email them to suppliers yourself. Every alternative listed above except Reorderly has the same gap. If you're replacing Stocky, it's worth getting a tool that closes the loop automatically.</p>
+
+<h2 id="dont-wait">Why you shouldn't wait until summer</h2>
+
+<p>Three real risks if you wait until July or August to migrate:</p>
+
+<p><strong>1. Supplier disruption during your busiest period.</strong> Most retail businesses have high-volume seasons (back-to-school, holiday, summer). Switching your procurement workflow mid-season is high-risk. Migrate now, when operations are quieter.</p>
+
+<p><strong>2. Everyone else will be migrating at the same time.</strong> Thousands of Stocky merchants will all start evaluating replacements in June and July. Onboarding support will be stretched at every competing app. You'll get better setup help if you start now.</p>
+
+<p><strong>3. Your data window is closing.</strong> The longer you wait to export from Stocky, the more historical context you lose. Demand forecasting in your new tool will be less accurate if it has to start from scratch versus importing 2+ years of purchase history.</p>
+
+<p>The merchants who handle this well are the ones who treat it as routine infrastructure maintenance done early — not a crisis solved at the deadline. You have the time. Use it.</p>
+
+{% endblock %}
