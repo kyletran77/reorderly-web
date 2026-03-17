@@ -7,11 +7,16 @@
   <title>{{ title }}</title>
   <meta name="description" content="{{ description }}">
   <link rel="canonical" href="{{ canonical }}">
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
+  <link rel="alternate icon" type="image/png" href="{% static 'images/favicon.svg' %}">
+  <meta name="theme-color" content="#0d9488">
+
 
   <!-- Open Graph -->
   <meta property="og:title" content="{{ title }}">
   <meta property="og:description" content="{{ description }}">
-  <meta property="og:image" content="{{ og_image|default:'https://reorderly.com/static/images/og-image.png' }}">
+  <meta property="og:image" content="{{ og_image|default:'https://reorderly.me/static/images/og-image.png' }}">
   <meta property="og:url" content="{{ canonical }}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Reorderly">
@@ -20,7 +25,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{ title }}">
   <meta name="twitter:description" content="{{ description }}">
-  <meta name="twitter:image" content="{{ og_image|default:'https://reorderly.com/static/images/og-image.png' }}">
+  <meta name="twitter:image" content="{{ og_image|default:'https://reorderly.me/static/images/og-image.png' }}">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,6 +34,7 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+  {% block extra_css %}{% endblock %}
 
   <!-- Google Search Console -->
   {% if gsc_verification %}

@@ -1,0 +1,168 @@
+{% extends 'content/base_article.html' %}
+
+{% block article_tag %}How-to Guide{% endblock %}
+{% block article_date %}March 2026{% endblock %}
+{% block article_read %}5 min read{% endblock %}
+
+{% block article_title %}How to Send a Purchase Order to a Supplier in Shopify (2026){% endblock %}
+
+{% block article_lede %}Shopify doesn't have a native way to email purchase orders to suppliers. Here's how to set up the full PO workflow — from creating orders to getting them to your suppliers automatically.{% endblock %}
+
+{% block toc %}
+<ul>
+  <li><a href="#the-gap">The gap in Shopify's native PO tools</a></li>
+  <li><a href="#manual-process">The manual process (and why it breaks down)</a></li>
+  <li><a href="#what-po-needs">What a supplier PO email needs to include</a></li>
+  <li><a href="#automate-it">How to automate PO emails to suppliers</a></li>
+  <li><a href="#setup-steps">Step-by-step setup</a></li>
+  <li><a href="#template">PO email template you can use today</a></li>
+</ul>
+{% endblock %}
+
+{% block article_content %}
+
+<h2 id="the-gap">The gap in Shopify's native PO tools</h2>
+
+<p>If you've tried to send a purchase order to a supplier directly from Shopify, you've already found the gap: <strong>Shopify doesn't send PO emails.</strong></p>
+
+<p>Shopify's built-in Purchases feature (under <em>Products → Purchase Orders</em>) lets you create a purchase order and receive items against it. But there's no "Send to Supplier" button. No email. No PDF export. You create the PO in Shopify, and then you're on your own to get it to your supplier.</p>
+
+<p>This means most Shopify merchants end up doing one of two things:</p>
+<ol>
+  <li>Manually copying PO details into an email every time they need to reorder</li>
+  <li>Managing purchase orders in a spreadsheet or separate app outside Shopify</li>
+</ol>
+
+<p>Both approaches work — until they don't. At higher order volumes, manual PO emails become the bottleneck. SKUs run out because someone forgot to reorder. Suppliers get inconsistent formats. There's no record of what was sent when.</p>
+
+<h2 id="manual-process">The manual process (and why it breaks down)</h2>
+
+<p>Here's how most merchants currently handle supplier POs without automation:</p>
+
+<ol>
+  <li>Notice a product is running low (by checking inventory manually or getting a Shopify low-stock alert)</li>
+  <li>Decide how much to order</li>
+  <li>Write an email to the supplier with product names, SKUs, quantities, and requested delivery date</li>
+  <li>Wait for supplier confirmation</li>
+  <li>When goods arrive, manually update inventory in Shopify</li>
+</ol>
+
+<p>This works fine when you have 5–10 SKUs and one or two suppliers. It breaks down when:</p>
+<ul>
+  <li>You have 30+ SKUs that need regular replenishment</li>
+  <li>Different products come from different suppliers with different lead times</li>
+  <li>You're traveling, sick, or distracted and miss a reorder window</li>
+  <li>You need a record of what was ordered, when, and for how much</li>
+</ul>
+
+<div class="article-callout article-callout--warning">
+  <strong>Note:</strong> Shopify Stocky handled this workflow for hundreds of thousands of merchants — but <a href="/resources/shopify-stocky-shutdown/">Stocky is being shut down on August 31, 2026</a>. Merchants who relied on it need a new solution.
+</div>
+
+<h2 id="what-po-needs">What a supplier PO email needs to include</h2>
+
+<p>Before automating anything, it helps to know what a complete purchase order email should contain. Your supplier needs enough information to fulfill the order without follow-up questions:</p>
+
+<ul>
+  <li><strong>PO number</strong> — a unique reference ID for tracking</li>
+  <li><strong>Order date</strong> — when the PO was issued</li>
+  <li><strong>Expected delivery date</strong> — based on the supplier's lead time</li>
+  <li><strong>Line items</strong> — product name, SKU, quantity ordered, unit cost</li>
+  <li><strong>Total order value</strong></li>
+  <li><strong>Shipping address</strong> — where to send the goods</li>
+  <li><strong>Payment terms</strong> — Net 30, due on receipt, etc.</li>
+  <li><strong>Your contact information</strong></li>
+</ul>
+
+<p>Most manual PO emails miss at least two or three of these. Suppliers deal with it, but it creates unnecessary back-and-forth and slows down fulfillment.</p>
+
+<h2 id="automate-it">How to automate PO emails to suppliers</h2>
+
+<p>The cleanest way to automate supplier PO emails for a Shopify store is to use an inventory management app that:</p>
+
+<ol>
+  <li>Stores your supplier information (email, lead time, MOQ, payment terms)</li>
+  <li>Monitors your inventory levels against per-SKU reorder points</li>
+  <li>Creates a purchase order when a SKU hits its reorder threshold</li>
+  <li>Emails the PO to the supplier automatically</li>
+</ol>
+
+<p>This is what Shopify Stocky <em>almost</em> did — it handled steps 1–3, but step 4 still required you to manually send the email. A full automation loop needs all four.</p>
+
+<p><strong>Reorderly</strong> handles all four steps. You set up your suppliers once, configure reorder rules per SKU, and the app monitors inventory levels daily. When a trigger fires, it drafts a professional PO email (using your supplier's specific details) and sends it automatically. You get a Slack notification when a PO goes out, and you can review everything from the dashboard.</p>
+
+<h2 id="setup-steps">Step-by-step setup with Reorderly</h2>
+
+<h3>Step 1: Add your suppliers</h3>
+<p>In Reorderly's Suppliers section, add each supplier with their email address, lead time, minimum order quantity, and payment terms. This information gets pulled into every PO automatically.</p>
+
+<h3>Step 2: Sync your products and set reorder rules</h3>
+<p>Connect your Shopify store. Reorderly imports all your products and variants. For each SKU, set:</p>
+<ul>
+  <li><strong>Reorder point</strong> — the inventory level that triggers a new PO (e.g., "order more when we hit 15 units")</li>
+  <li><strong>Reorder quantity</strong> — how many units to order each time</li>
+  <li><strong>Assigned supplier</strong> — which supplier this SKU comes from</li>
+</ul>
+
+<h3>Step 3: Enable automation</h3>
+<p>Turn on automated reorder checks. Reorderly will monitor your inventory levels daily and fire POs when thresholds are hit. Each PO is emailed directly to the assigned supplier with all required details filled in.</p>
+
+<h3>Step 4: Review and receive</h3>
+<p>When goods arrive, mark the PO as received in Reorderly. For partial shipments, you can receive line items individually and track what's still outstanding.</p>
+
+<h2 id="template">PO email template you can use today</h2>
+
+<p>If you want to improve your manual PO emails right now before setting up any automation, here's a template that covers everything your supplier needs:</p>
+
+<div class="article-callout">
+<strong>Subject:</strong> Purchase Order #[PO-NUMBER] — [YOUR COMPANY NAME]
+
+<br><br>
+
+Hi [Supplier Contact Name],
+
+<br><br>
+
+Please find our purchase order below. Kindly confirm receipt and expected ship date.
+
+<br><br>
+
+<strong>Purchase Order #[PO-NUMBER]</strong><br>
+Order Date: [DATE]<br>
+Requested Delivery: [DATE + LEAD TIME]<br>
+Payment Terms: [NET 30 / DUE ON RECEIPT / ETC]
+
+<br><br>
+
+<strong>Line Items:</strong><br>
+- [Product Name] / SKU: [SKU] / Qty: [QTY] / Unit Cost: $[PRICE] / Total: $[LINE TOTAL]<br>
+[Additional line items as needed]
+
+<br><br>
+
+<strong>Order Total: $[TOTAL]</strong>
+
+<br><br>
+
+Ship to:<br>
+[YOUR COMPANY NAME]<br>
+[SHIPPING ADDRESS]
+
+<br><br>
+
+Please reply to confirm receipt of this order and provide a tracking number when shipped.
+
+<br><br>
+
+Thank you,<br>
+[YOUR NAME]<br>
+[YOUR EMAIL] | [YOUR PHONE]
+</div>
+
+<p>This template works. But maintaining it across dozens of suppliers and hundreds of orders per year is where manual starts to cost real time. That's the point where automation pays for itself.</p>
+
+<div class="article-callout">
+  <strong>→ <a href="/">Try Reorderly free</a></strong> — set up automated PO emails to your suppliers in about 20 minutes. No credit card required.
+</div>
+
+{% endblock %}

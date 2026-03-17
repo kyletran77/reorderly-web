@@ -1,0 +1,254 @@
+{% extends 'content/base_article.html' %}
+
+{% block article_tag %}Buyer's Guide{% endblock %}
+{% block article_date %}March 2026{% endblock %}
+{% block article_read %}9 min read{% endblock %}
+
+{% block article_title %}Best Shopify Inventory Management Apps in 2026 (Honest Comparison){% endblock %}
+
+{% block article_lede %}With Shopify Stocky shutting down August 31, 2026, hundreds of thousands of merchants need a replacement. We tested every major option so you don't have to — here's the honest breakdown.{% endblock %}
+
+{% block toc %}
+<ul>
+  <li><a href="#how-we-evaluated">How we evaluated these apps</a></li>
+  <li><a href="#quick-comparison">Quick comparison table</a></li>
+  <li><a href="#reorderly">Reorderly</a></li>
+  <li><a href="#prediko">Prediko</a></li>
+  <li><a href="#inventory-planner">Inventory Planner</a></li>
+  <li><a href="#sumtracker">Sumtracker</a></li>
+  <li><a href="#native-shopify">Shopify's native tools</a></li>
+  <li><a href="#verdict">Who should use what</a></li>
+</ul>
+{% endblock %}
+
+{% block article_content %}
+
+<h2 id="how-we-evaluated">How we evaluated these apps</h2>
+
+<p>We looked at five criteria that actually matter for day-to-day inventory operations:</p>
+
+<ul>
+  <li><strong>Purchase order creation</strong> — Can you create POs and send them to suppliers?</li>
+  <li><strong>Automated PO emails</strong> — Does it send the email to your supplier automatically, or do you have to do it manually?</li>
+  <li><strong>Reorder point alerts</strong> — Does it monitor inventory levels and flag when you need to reorder?</li>
+  <li><strong>Demand forecasting</strong> — Does it predict future demand based on sales history?</li>
+  <li><strong>Multi-location support</strong> — Can it handle inventory across multiple warehouses or retail locations?</li>
+</ul>
+
+<p>We also considered price, ease of setup, and how well each app fits into an existing Shopify workflow without requiring a major operational overhaul.</p>
+
+<div class="article-callout article-callout--warning">
+  <strong>⚠️ Context:</strong> This guide is written specifically for merchants evaluating replacements for Shopify Stocky. If you're not coming off Stocky, some of these comparisons may weight features differently than your situation requires.
+</div>
+
+<h2 id="quick-comparison">Quick comparison</h2>
+
+<div class="article-table-wrap">
+  <table class="article-table">
+    <thead>
+      <tr>
+        <th>App</th>
+        <th>PO Creation</th>
+        <th>Auto PO Emails</th>
+        <th>Reorder Alerts</th>
+        <th>Forecasting</th>
+        <th>Starting Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Reorderly</strong></td>
+        <td>✓</td>
+        <td>✓ Yes</td>
+        <td>✓</td>
+        <td>Basic</td>
+        <td>Free → $149/mo</td>
+      </tr>
+      <tr>
+        <td>Prediko</td>
+        <td>✓</td>
+        <td>✗ Manual</td>
+        <td>✓</td>
+        <td>Strong</td>
+        <td>Free → $49/mo</td>
+      </tr>
+      <tr>
+        <td>Inventory Planner</td>
+        <td>✓</td>
+        <td>✗ Manual</td>
+        <td>✓</td>
+        <td>Very strong</td>
+        <td>$99/mo+</td>
+      </tr>
+      <tr>
+        <td>Sumtracker</td>
+        <td>✓</td>
+        <td>✗ Manual</td>
+        <td>✓</td>
+        <td>None</td>
+        <td>$29/mo</td>
+      </tr>
+      <tr>
+        <td>Shopify Purchases</td>
+        <td>Basic only</td>
+        <td>✗ Manual</td>
+        <td>✗</td>
+        <td>None</td>
+        <td>Included</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p>The column that separates these apps most meaningfully is <strong>automated PO emails</strong>. Every app in this list can help you create a purchase order. Only one actually sends it to your supplier without you having to do it manually. That gap is significant if you're running a busy store with 10+ SKUs that need regular replenishment.</p>
+
+<h2 id="reorderly">Reorderly</h2>
+
+<p><strong>Best for: merchants who want their reorder workflow to run itself</strong></p>
+
+<p>Reorderly is built around one core idea: when a SKU hits its reorder point, the purchase order should be created <em>and</em> emailed to the supplier automatically — without the merchant having to log in, approve, or click anything.</p>
+
+<p>The setup takes about 20 minutes: connect your Shopify store, add your suppliers, set reorder thresholds per SKU, and turn on automation. After that, Reorderly monitors your inventory levels daily and fires POs when needed. You get notified via Slack when a PO goes out, and you can review everything from the dashboard.</p>
+
+<p><strong>What it does well:</strong></p>
+<ul>
+  <li>Full PO automation — create, draft, and email in one workflow</li>
+  <li>AI-drafted PO emails that sound professional and include the right details</li>
+  <li>Supplier management with lead times, MOQs, and payment terms</li>
+  <li>Slack integration for PO notifications</li>
+  <li>QuickBooks sync for bill creation when POs are received</li>
+  <li>Clean, simple UI — no learning curve</li>
+</ul>
+
+<p><strong>What it doesn't do (yet):</strong></p>
+<ul>
+  <li>Advanced demand forecasting (it uses reorder points, not ML-based predictions)</li>
+  <li>Multi-channel inventory sync (Shopify only)</li>
+  <li>Kitting or bundle inventory</li>
+</ul>
+
+<p><strong>Pricing:</strong> Free plan available. Paid plans start at $49/mo for growing stores, $149/mo for high-volume merchants with full automation and integrations.</p>
+
+<p><strong>Bottom line:</strong> If the main thing you want is to stop manually emailing suppliers every time you run low, Reorderly is the fastest path to that outcome.</p>
+
+<div class="article-callout">
+  <strong>→ <a href="/">Try Reorderly free</a></strong> — no credit card required, connects to Shopify in minutes.
+</div>
+
+<h2 id="prediko">Prediko</h2>
+
+<p><strong>Best for: DTC brands who want forecasting + planning visibility</strong></p>
+
+<p>Prediko has become a popular Stocky replacement for brands that care about demand forecasting and inventory planning. It pulls your sales history, accounts for seasonality and growth trends, and tells you what to order and when.</p>
+
+<p><strong>What it does well:</strong></p>
+<ul>
+  <li>Strong demand forecasting with seasonality adjustments</li>
+  <li>Reorder alerts based on predicted run-out dates, not just static thresholds</li>
+  <li>Clean visual interface showing days of stock remaining</li>
+  <li>Free plan that's genuinely useful for smaller stores</li>
+</ul>
+
+<p><strong>What it doesn't do:</strong></p>
+<ul>
+  <li>No automated PO emails — you create the PO in Prediko, then email it yourself</li>
+  <li>Supplier management is basic compared to Stocky</li>
+  <li>No accounting integrations on lower plans</li>
+</ul>
+
+<p><strong>Pricing:</strong> Free plan available. Paid starts at $49/mo.</p>
+
+<p><strong>Bottom line:</strong> Great tool for planning and visibility. But if you want the email to actually go to your supplier automatically, you'll still need to do that step manually.</p>
+
+<h2 id="inventory-planner">Inventory Planner</h2>
+
+<p><strong>Best for: large catalogs with complex forecasting needs</strong></p>
+
+<p>Inventory Planner is the most sophisticated forecasting tool in this list. It's been around since 2015, supports multi-channel inventory (Shopify, Amazon, Walmart, wholesale), and has deep integrations with QuickBooks, Xero, and most 3PLs.</p>
+
+<p><strong>What it does well:</strong></p>
+<ul>
+  <li>Best-in-class demand forecasting, including channel-level and location-level</li>
+  <li>Handles complex scenarios: seasonal products, new launches, multi-channel</li>
+  <li>Strong accounting integrations</li>
+  <li>Wide ecosystem of 3PL and WMS integrations</li>
+</ul>
+
+<p><strong>What it doesn't do:</strong></p>
+<ul>
+  <li>No automated PO emails — manual send only</li>
+  <li>Steep learning curve; not plug-and-play like Stocky was</li>
+  <li>Expensive for smaller merchants ($99/mo minimum)</li>
+</ul>
+
+<p><strong>Pricing:</strong> Starts at $99/mo, scales with revenue.</p>
+
+<p><strong>Bottom line:</strong> Overkill for most merchants replacing Stocky. Worth it if you're doing $1M+ revenue, managing 500+ SKUs, or selling across multiple channels where forecasting accuracy directly impacts cash flow.</p>
+
+<h2 id="sumtracker">Sumtracker</h2>
+
+<p><strong>Best for: multi-channel sellers who need inventory sync</strong></p>
+
+<p>Sumtracker's core strength is syncing inventory counts across multiple sales channels in real time — Shopify, Amazon, eBay, Etsy, WooCommerce. If you're selling the same SKUs in multiple places, Sumtracker prevents overselling by keeping counts in sync.</p>
+
+<p><strong>What it does well:</strong></p>
+<ul>
+  <li>Real-time multi-channel inventory sync</li>
+  <li>Basic PO creation</li>
+  <li>Affordable pricing</li>
+</ul>
+
+<p><strong>What it doesn't do:</strong></p>
+<ul>
+  <li>No automated PO emails</li>
+  <li>No demand forecasting</li>
+  <li>Limited supplier management features</li>
+</ul>
+
+<p><strong>Pricing:</strong> Starts at $29/mo.</p>
+
+<p><strong>Bottom line:</strong> If multi-channel sync is your primary problem, Sumtracker solves it efficiently. If your main issue is reordering and supplier communication, it's not the right fit.</p>
+
+<h2 id="native-shopify">Shopify's native tools (Purchases feature)</h2>
+
+<p>Shopify's answer to losing Stocky is its built-in <strong>Purchases</strong> feature, available in Shopify admin under <em>Products → Purchase Orders</em>.</p>
+
+<p>It lets you create a basic purchase order and receive items against it. That's about it.</p>
+
+<p><strong>What it does:</strong></p>
+<ul>
+  <li>Create and receive purchase orders</li>
+  <li>Track incoming inventory</li>
+</ul>
+
+<p><strong>What it doesn't do:</strong></p>
+<ul>
+  <li>No reorder point monitoring</li>
+  <li>No automated PO creation or emails</li>
+  <li>No supplier database with lead times, MOQs, or payment terms</li>
+  <li>No demand forecasting</li>
+  <li>No accounting integrations</li>
+</ul>
+
+<p><strong>Pricing:</strong> Included with all Shopify plans.</p>
+
+<p><strong>Bottom line:</strong> Fine if you only need to track a handful of manual orders. Not a real replacement for what Stocky provided — it's more of a receiving log than a procurement tool.</p>
+
+<h2 id="verdict">Who should use what</h2>
+
+<p>Here's the simple version:</p>
+
+<ul>
+  <li><strong>You want automation and simplicity:</strong> Reorderly. Set your reorder rules once, let it run.</li>
+  <li><strong>You want the best demand forecasting:</strong> Prediko (smaller stores) or Inventory Planner (larger operations).</li>
+  <li><strong>You sell across multiple channels and need inventory sync:</strong> Sumtracker.</li>
+  <li><strong>You only need basic PO receiving and are already on Shopify Plus:</strong> Use the native Purchases feature and save the money.</li>
+</ul>
+
+<p>The one thing worth calling out again: if you're currently spending time every week manually emailing purchase orders to suppliers, that's a cost that most merchants don't track. Automating it is faster, more reliable, and means fewer missed reorders. It's worth prioritizing in whatever tool you pick.</p>
+
+<div class="article-callout">
+  <strong>→ Use our free <a href="/tools/stocky-migration-checklist/">Stocky Migration Checklist</a></strong> to export your Stocky data, evaluate replacements, and complete your migration before the August 31 deadline.
+</div>
+
+{% endblock %}
