@@ -1,0 +1,113 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">{{ store.shop_name|default:store.shop_domain }}</p>
+  </div>
+  <form method="post" action="/app/run-check/">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Run Inventory Check
+    </button>
+  </form>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card {% if pending_pos > 0 %}stat-card--alert{% endif %}">
+    <div class="stat-label">Pending Approval</div>
+    <div class="stat-value">{{ pending_pos }}</div>
+    <a href="/app/purchase-orders/?status=pending_approval" class="stat-link">View POs →</a>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Sent This Month</div>
+    <div class="stat-value">{{ sent_this_month }}</div>
+    <a href="/app/purchase-orders/?status=sent" class="stat-link">View sent →</a>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Active Suppliers</div>
+    <div class="stat-value">{{ total_suppliers }}</div>
+    <a href="/app/suppliers/" class="stat-link">Manage →</a>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Tracked SKUs</div>
+    <div class="stat-value">{{ active_rules }}</div>
+    <a href="/app/products/" class="stat-link">Manage →</a>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-card-header">
+    <h2 class="section-card-title">Recent Purchase Orders</h2>
+    <a href="/app/purchase-orders/" class="btn btn-ghost">View all</a>
+  </div>
+  {% if recent_pos %}
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>PO Number</th>
+          <th>Supplier</th>
+          <th>Status</th>
+          <th>Total</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for po in recent_pos %}
+        <tr>
+          <td class="font-mono">{{ po.po_number }}</td>
+          <td>{{ po.supplier.name }}</td>
+          <td><span class="status-badge status-{{ po.status }}">{{ po.get_status_display }}</span></td>
+          <td>{% if po.total_cost %}${{ po.total_cost }}{% else %}—{% endif %}</td>
+          <td class="text-muted">{{ po.created_at|date:"M j, Y" }}</td>
+          <td><a href="/app/purchase-orders/{{ po.id }}/" class="table-link">View →</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="empty-state">
+      <p>No purchase orders yet.</p>
+      <p>Run an inventory check to auto-draft POs for any SKUs below their reorder point.</p>
+      <form method="post" action="/app/run-check/" style="margin-top:16px">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Run First Check</button>
+      </form>
+    </div>
+  {% endif %}
+</div>
+
+{% if not total_suppliers %}
+<div class="onboarding-banner">
+  <div class="onboarding-steps">
+    <div class="onboarding-step {% if total_suppliers %}done{% endif %}">
+      <span class="step-num">1</span>
+      <div>
+        <strong>Add a supplier</strong>
+        <p>Set up who you order from and their email.</p>
+        <a href="/app/suppliers/new/" class="btn btn-sm btn-primary">Add Supplier</a>
+      </div>
+    </div>
+    <div class="onboarding-step {% if active_rules %}done{% endif %}">
+      <span class="step-num">2</span>
+      <div>
+        <strong>Set reorder rules</strong>
+        <p>Tell Reorderly when to reorder and how much.</p>
+        <a href="/app/products/sync/" class="btn btn-sm btn-ghost">Sync Products</a>
+      </div>
+    </div>
+    <div class="onboarding-step">
+      <span class="step-num">3</span>
+      <div>
+        <strong>Run a check</strong>
+        <p>Reorderly will draft POs for anything below threshold.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

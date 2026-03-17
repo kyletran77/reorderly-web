@@ -1,0 +1,101 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Integrations{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Integrations</h1>
+  <p class="page-subtitle">Connect Reorderly to your existing tools. Nothing gets replaced — we just plug in.</p>
+</div>
+
+<div class="integrations-grid">
+
+  <!-- Slack -->
+  <div class="integration-card {% if connected.slack %}connected{% endif %}">
+    <div class="integration-header">
+      <div class="integration-icon integration-icon--slack">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/></svg>
+      </div>
+      <div>
+        <h3 class="integration-name">Slack</h3>
+        {% if connected.slack %}<span class="connected-badge">Connected</span>{% endif %}
+      </div>
+    </div>
+    <p class="integration-desc">Get notified when Reorderly drafts a new PO. Approve or review directly from Slack — no need to log in.</p>
+    {% if connected.slack %}
+      <div class="integration-connected-info">
+        <span class="text-muted">Webhook configured ✓</span>
+      </div>
+    {% else %}
+    <form method="post" action="/app/integrations/slack/connect/" class="integration-form">
+      {% csrf_token %}
+      <input type="url" name="webhook_url" class="input" placeholder="https://hooks.slack.com/services/..." required>
+      <input type="text" name="channel" class="input" placeholder="Channel (e.g. #reorders)" value="#reorderly">
+      <p class="input-hint">Get your webhook URL from Slack → Apps → Incoming Webhooks</p>
+      <button type="submit" class="btn btn-primary">Connect Slack</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <!-- QuickBooks -->
+  <div class="integration-card {% if connected.quickbooks %}connected{% endif %}">
+    <div class="integration-header">
+      <div class="integration-icon integration-icon--qb">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 4.5a3 3 0 1 1 0 6 3 3 0 0 1 0-6zm-4.5 9h9a4.5 4.5 0 0 1-9 0z"/></svg>
+      </div>
+      <div>
+        <h3 class="integration-name">QuickBooks Online</h3>
+        {% if connected.quickbooks %}<span class="connected-badge">Connected</span>{% endif %}
+      </div>
+    </div>
+    <p class="integration-desc">When a PO is sent, Reorderly automatically creates a Bill in QuickBooks. Your accounting stays in sync without any manual entry.</p>
+    {% if connected.quickbooks %}
+      <div class="integration-connected-info">
+        <span class="text-muted">QuickBooks connected ✓</span>
+      </div>
+    {% else %}
+    <a href="/app/integrations/quickbooks/" class="btn btn-primary">Connect QuickBooks</a>
+    {% endif %}
+  </div>
+
+  <!-- Zapier -->
+  <div class="integration-card {% if connected.zapier %}connected{% endif %}">
+    <div class="integration-header">
+      <div class="integration-icon integration-icon--zapier">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm1.03 16.8l-1.03 3.56-1.03-3.56L7.41 12l3.56 1.03L12 16.8l1.03-4.77L16.59 12l-3.56-1.03z"/></svg>
+      </div>
+      <div>
+        <h3 class="integration-name">Zapier</h3>
+        {% if connected.zapier %}<span class="connected-badge">Connected</span>{% endif %}
+      </div>
+    </div>
+    <p class="integration-desc">Connect Reorderly to 6,000+ apps via Zapier. Triggers fire on <code>po.drafted</code>, <code>po.sent</code>, and <code>po.received</code> events.</p>
+    {% if connected.zapier %}
+      <div class="integration-connected-info">
+        <span class="text-muted">Webhook configured ✓</span>
+      </div>
+    {% else %}
+    <form method="post" action="/app/integrations/zapier/connect/" class="integration-form">
+      {% csrf_token %}
+      <input type="url" name="webhook_url" class="input" placeholder="https://hooks.zapier.com/hooks/catch/..." required>
+      <p class="input-hint">Create a Zap with "Webhooks by Zapier" as the trigger, copy the webhook URL here.</p>
+      <button type="submit" class="btn btn-primary">Connect Zapier</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <!-- Xero (coming soon) -->
+  <div class="integration-card integration-card--soon">
+    <div class="integration-header">
+      <div class="integration-icon integration-icon--xero">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.95 15.536L14.414 12l2.536-3.536a.75.75 0 1 0-1.414-.828L12 10.758 8.464 7.636a.75.75 0 1 0-1.414.828L9.586 12l-2.536 3.536a.75.75 0 1 0 1.414.828L12 13.242l3.536 3.122a.75.75 0 1 0 1.414-.828z"/></svg>
+      </div>
+      <div>
+        <h3 class="integration-name">Xero</h3>
+        <span class="coming-soon-badge">Coming Soon</span>
+      </div>
+    </div>
+    <p class="integration-desc">Auto-create Bills in Xero when POs are sent. Same workflow as QuickBooks — choose whichever you use.</p>
+  </div>
+
+</div>
+{% endblock %}
