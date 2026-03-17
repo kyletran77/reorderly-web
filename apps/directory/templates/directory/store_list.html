@@ -1,0 +1,120 @@
+{% extends 'directory/base_directory.html' %}
+{% load static %}
+
+{% block dir_content %}
+<div class="dir-browse">
+
+  <aside class="dir-sidebar">
+    <form method="get" class="dir-filter-form">
+      <div class="dir-filter-section">
+        <h3 class="dir-filter-title">Search</h3>
+        <input type="text" name="q" value="{{ query }}" placeholder="Store name or niche..." class="dir-filter-input">
+      </div>
+
+      <div class="dir-filter-section">
+        <h3 class="dir-filter-title">Category</h3>
+        <div class="dir-filter-list">
+          <label class="dir-filter-opt {% if not category_filter %}dir-filter-opt--active{% endif %}">
+            <input type="radio" name="category" value="" {% if not category_filter %}checked{% endif %}>
+            All Categories
+          </label>
+          {% for cat in cat_counts %}
+          <label class="dir-filter-opt {% if category_filter == cat.code %}dir-filter-opt--active{% endif %}">
+            <input type="radio" name="category" value="{{ cat.code }}" {% if category_filter == cat.code %}checked{% endif %}>
+            {{ cat.label }} <span class="dir-filter-count">{{ cat.count }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="dir-filter-section">
+        <h3 class="dir-filter-title">Revenue Tier</h3>
+        <div class="dir-filter-list">
+          <label class="dir-filter-opt {% if not revenue_filter %}dir-filter-opt--active{% endif %}">
+            <input type="radio" name="revenue" value="" {% if not revenue_filter %}checked{% endif %}>
+            All Tiers
+          </label>
+          {% for value, label in store.REVENUE_CHOICES|default_if_none:"" %}
+          {% empty %}
+          <label class="dir-filter-opt {% if revenue_filter == 'startup' %}dir-filter-opt--active{% endif %}">
+            <input type="radio" name="revenue" value="startup" {% if revenue_filter == 'startup' %}checked{% endif %}>
+            Under $1M ARR
+          </label>
+          <label class="dir-filter-opt {% if revenue_filter == 'growing' %}dir-filter-opt--active{% endif %}">
+            <input type="radio" name="revenue" value="growing" {% if revenue_filter == 'growing' %}checked{% endif %}>
+            $1M–$10M ARR
+          </label>
+          <label class="dir-filter-opt {% if revenue_filter == 'scaleup' %}dir-filter-opt--active{% endif %}">
+            <input type="radio" name="revenue" value="scaleup" {% if revenue_filter == 'scaleup' %}checked{% endif %}>
+            $10M–$50M ARR
+          </label>
+          <label class="dir-filter-opt {% if revenue_filter == 'enterprise' %}dir-filter-opt--active{% endif %}">
+            <input type="radio" name="revenue" value="enterprise" {% if revenue_filter == 'enterprise' %}checked{% endif %}>
+            $50M+ ARR
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <button type="submit" class="dir-filter-submit">Apply Filters</button>
+      {% if category_filter or revenue_filter or query %}
+      <a href="/directory/stores/" class="dir-filter-clear">Clear filters</a>
+      {% endif %}
+    </form>
+  </aside>
+
+  <main class="dir-main">
+    <div class="dir-main-header">
+      <div>
+        <h1 class="dir-main-title">Top Shopify Stores</h1>
+        <p class="dir-main-count">{{ total }} store{{ total|pluralize }} found</p>
+      </div>
+    </div>
+
+    {% if stores %}
+    <div class="dir-grid">
+      {% for store in stores %}
+      <a href="{{ store.get_absolute_url }}" class="dir-card">
+        <div class="dir-card__top">
+          <span class="dir-card__cat">{{ store.category_name }}</span>
+          {% if store.shopify_plus %}<span class="dir-card__badge dir-card__badge--plus">Plus</span>{% endif %}
+        </div>
+        <h2 class="dir-card__name">{{ store.name }}</h2>
+        <p class="dir-card__desc">{{ store.description|truncatechars:120 }}</p>
+        <div class="dir-card__stats">
+          {% if store.annual_revenue_est %}<span><strong>{{ store.annual_revenue_est }}</strong> est. ARR</span>{% endif %}
+          {% if store.sku_count %}<span><strong>{{ store.sku_count }}</strong> SKUs</span>{% endif %}
+          {% if store.supplier_count %}<span><strong>{{ store.supplier_count }}</strong> suppliers</span>{% endif %}
+        </div>
+        <div class="dir-card__stats" style="margin-top:0.25rem">
+          {% if store.founded_year %}<span>Est. {{ store.founded_year }}</span>{% endif %}
+          {% if store.location %}<span>{{ store.location }}</span>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    <div class="dir-pagination">
+      {% if page > 1 %}
+      <a href="?page={{ page|add:'-1' }}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if revenue_filter %}&revenue={{ revenue_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}" class="dir-page-btn">← Previous</a>
+      {% endif %}
+      <span class="dir-page-info">Page {{ page }}</span>
+      {% if has_next %}
+      <a href="?page={{ page|add:'1' }}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if revenue_filter %}&revenue={{ revenue_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}" class="dir-page-btn">Next →</a>
+      {% endif %}
+    </div>
+
+    {% else %}
+    <div class="dir-empty">
+      <p>No stores found matching your filters. <a href="/directory/stores/">Clear all filters</a></p>
+    </div>
+    {% endif %}
+
+    <div class="dir-inline-cta">
+      <strong>Building a Shopify store?</strong>
+      Reorderly automates your supplier purchase orders so you never run out of stock.
+      <a href="/" class="dir-inline-cta__link">Try free →</a>
+    </div>
+  </main>
+</div>
+{% endblock %}

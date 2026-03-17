@@ -1,0 +1,124 @@
+{% extends 'directory/base_directory.html' %}
+{% load static %}
+
+{% block dir_content %}
+<section class="dir-hero">
+  <div class="dir-hero__inner">
+    <div class="dir-hero__badge">Free Shopify Directory</div>
+    <h1 class="dir-hero__title">The Shopify Supplier &amp; Store Directory</h1>
+    <p class="dir-hero__sub">Browse verified overseas suppliers used by top Shopify brands, plus discover the best DTC stores in every niche. Powered by US customs import data.</p>
+    <div class="dir-hero__stats">
+      <div class="dir-stat">
+        <span class="dir-stat__num">{{ supplier_count }}+</span>
+        <span class="dir-stat__label">Verified Suppliers</span>
+      </div>
+      <div class="dir-stat">
+        <span class="dir-stat__num">{{ store_count }}+</span>
+        <span class="dir-stat__label">Shopify Stores</span>
+      </div>
+      <div class="dir-stat">
+        <span class="dir-stat__num">10</span>
+        <span class="dir-stat__label">Categories</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Two main sections -->
+<div class="dir-sections">
+  <a href="/directory/suppliers/" class="dir-section-card">
+    <div class="dir-section-card__icon">📦</div>
+    <div class="dir-section-card__body">
+      <h2 class="dir-section-card__title">Supplier Directory</h2>
+      <p class="dir-section-card__desc">Find overseas manufacturers and suppliers used by top Shopify brands. Filter by product category and country of origin. Data from US customs import records.</p>
+      <span class="dir-section-card__cta">Browse {{ supplier_count }}+ Suppliers →</span>
+    </div>
+  </a>
+  <a href="/directory/stores/" class="dir-section-card">
+    <div class="dir-section-card__icon">🛍️</div>
+    <div class="dir-section-card__body">
+      <h2 class="dir-section-card__title">Shopify Store Directory</h2>
+      <p class="dir-section-card__desc">Discover top-performing Shopify stores by niche. See founding year, revenue tier, traffic estimates, and what makes each brand stand out.</p>
+      <span class="dir-section-card__cta">Browse {{ store_count }}+ Stores →</span>
+    </div>
+  </a>
+</div>
+
+<!-- Category browse -->
+{% if categories %}
+<section class="dir-categories">
+  <div class="dir-section-header">
+    <h2>Browse Suppliers by Category</h2>
+  </div>
+  <div class="dir-cat-grid">
+    {% for cat in categories %}
+    <a href="/directory/suppliers/?category={{ cat.code }}" class="dir-cat-card">
+      <span class="dir-cat-card__name">{{ cat.label }}</span>
+      <span class="dir-cat-card__count">{{ cat.count }} suppliers</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Featured suppliers -->
+{% if featured_suppliers %}
+<section class="dir-featured">
+  <div class="dir-section-header">
+    <h2>Featured Suppliers</h2>
+    <a href="/directory/suppliers/" class="dir-section-header__link">View all →</a>
+  </div>
+  <div class="dir-card-grid">
+    {% for s in featured_suppliers %}
+    <a href="{{ s.get_absolute_url }}" class="dir-card">
+      <div class="dir-card__top">
+        <span class="dir-card__cat">{{ s.category_name }}</span>
+        <span class="dir-card__country">{{ s.country_name }}</span>
+      </div>
+      <h3 class="dir-card__name">{{ s.name }}</h3>
+      <p class="dir-card__desc">{{ s.description|truncatechars:100 }}</p>
+      <div class="dir-card__stats">
+        {% if s.us_importers %}<span>{{ s.us_importers }} US importers</span>{% endif %}
+        {% if s.total_shipments %}<span>{{ s.total_shipments|floatformat:0 }} shipments</span>{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Featured stores -->
+{% if featured_stores %}
+<section class="dir-featured">
+  <div class="dir-section-header">
+    <h2>Notable Shopify Stores</h2>
+    <a href="/directory/stores/" class="dir-section-header__link">View all →</a>
+  </div>
+  <div class="dir-card-grid">
+    {% for store in featured_stores %}
+    <a href="{{ store.get_absolute_url }}" class="dir-card">
+      <div class="dir-card__top">
+        <span class="dir-card__cat">{{ store.category_name }}</span>
+        {% if store.shopify_plus %}<span class="dir-card__badge dir-card__badge--plus">Shopify Plus</span>{% endif %}
+      </div>
+      <h3 class="dir-card__name">{{ store.name }}</h3>
+      <p class="dir-card__desc">{{ store.description|truncatechars:100 }}</p>
+      <div class="dir-card__stats">
+        {% if store.founded_year %}<span>Est. {{ store.founded_year }}</span>{% endif %}
+        {% if store.location %}<span>{{ store.location }}</span>{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- CTA -->
+<section class="dir-cta">
+  <div class="dir-cta__inner">
+    <h2>Found your supplier? Automate the PO.</h2>
+    <p>Once you have a supplier, the next step is setting up automated purchase orders. Reorderly monitors your Shopify inventory and emails POs to your suppliers automatically.</p>
+    <a href="/" class="btn btn-primary">Try Reorderly Free →</a>
+  </div>
+</section>
+{% endblock %}

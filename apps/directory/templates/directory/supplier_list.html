@@ -1,0 +1,117 @@
+{% extends 'directory/base_directory.html' %}
+{% load static %}
+
+{% block dir_content %}
+<div class="dir-browse">
+
+  <!-- Sidebar -->
+  <aside class="dir-sidebar">
+    <form method="get" class="dir-filter-form">
+      <div class="dir-filter-section">
+        <h3 class="dir-filter-title">Search</h3>
+        <input type="text" name="q" value="{{ query }}" placeholder="Supplier name, product..." class="dir-filter-input">
+      </div>
+
+      <div class="dir-filter-section">
+        <h3 class="dir-filter-title">Category</h3>
+        <div class="dir-filter-list">
+          <label class="dir-filter-opt {% if not category_filter %}dir-filter-opt--active{% endif %}">
+            <input type="radio" name="category" value="" {% if not category_filter %}checked{% endif %}>
+            All Categories
+          </label>
+          {% for cat in cat_counts %}
+          <label class="dir-filter-opt {% if category_filter == cat.code %}dir-filter-opt--active{% endif %}">
+            <input type="radio" name="category" value="{{ cat.code }}" {% if category_filter == cat.code %}checked{% endif %}>
+            {{ cat.label }} <span class="dir-filter-count">{{ cat.count }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="dir-filter-section">
+        <h3 class="dir-filter-title">Country</h3>
+        <div class="dir-filter-list">
+          <label class="dir-filter-opt {% if not country_filter %}dir-filter-opt--active{% endif %}">
+            <input type="radio" name="country" value="" {% if not country_filter %}checked{% endif %}>
+            All Countries
+          </label>
+          {% for code, name in country_options %}
+          <label class="dir-filter-opt {% if country_filter == code %}dir-filter-opt--active{% endif %}">
+            <input type="radio" name="country" value="{{ code }}" {% if country_filter == code %}checked{% endif %}>
+            {{ name }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <button type="submit" class="dir-filter-submit">Apply Filters</button>
+      {% if category_filter or country_filter or query %}
+      <a href="/directory/suppliers/" class="dir-filter-clear">Clear filters</a>
+      {% endif %}
+    </form>
+  </aside>
+
+  <!-- Main content -->
+  <main class="dir-main">
+    <div class="dir-main-header">
+      <div>
+        <h1 class="dir-main-title">Shopify Supplier Directory</h1>
+        <p class="dir-main-count">{{ total }} supplier{{ total|pluralize }} found</p>
+      </div>
+    </div>
+
+    {% if suppliers %}
+    <div class="dir-grid">
+      {% for s in suppliers %}
+      <a href="{{ s.get_absolute_url }}" class="dir-card">
+        <div class="dir-card__top">
+          <span class="dir-card__cat">{{ s.category_name }}</span>
+          <span class="dir-card__country">{{ s.country_name }}</span>
+        </div>
+        <h2 class="dir-card__name">{{ s.name }}</h2>
+        <p class="dir-card__desc">{{ s.description|truncatechars:120 }}</p>
+        {% if s.products %}
+        <p class="dir-card__products">{{ s.products|truncatechars:80 }}</p>
+        {% endif %}
+        <div class="dir-card__stats">
+          {% if s.us_importers %}<span title="US companies that import from this supplier"><strong>{{ s.us_importers }}</strong> US importers</span>{% endif %}
+          {% if s.annual_shipments %}<span title="Estimated annual shipments to the US"><strong>{{ s.annual_shipments }}</strong>/yr shipments</span>{% endif %}
+        </div>
+        {% if s.notable_brands %}
+        <div class="dir-card__brands">
+          Used by:
+          {% for brand in s.notable_brands|slice:":3" %}
+          <span class="dir-card__brand-tag">{{ brand }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </a>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    <div class="dir-pagination">
+      {% if page > 1 %}
+      <a href="?page={{ page|add:'-1' }}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if country_filter %}&country={{ country_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}" class="dir-page-btn">← Previous</a>
+      {% endif %}
+      <span class="dir-page-info">Page {{ page }}</span>
+      {% if has_next %}
+      <a href="?page={{ page|add:'1' }}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if country_filter %}&country={{ country_filter }}{% endif %}{% if query %}&q={{ query }}{% endif %}" class="dir-page-btn">Next →</a>
+      {% endif %}
+    </div>
+
+    {% else %}
+    <div class="dir-empty">
+      <p>No suppliers found matching your filters. <a href="/directory/suppliers/">Clear all filters</a></p>
+    </div>
+    {% endif %}
+
+    <!-- CTA -->
+    <div class="dir-inline-cta">
+      <strong>Have a supplier? Automate your POs.</strong>
+      Reorderly monitors your Shopify inventory and emails purchase orders to your suppliers automatically.
+      <a href="/" class="dir-inline-cta__link">Try free →</a>
+    </div>
+  </main>
+</div>
+{% endblock %}
