@@ -1,0 +1,146 @@
+{% extends 'directory/base_directory.html' %}
+{% load static %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "{{ store.name }}",
+  "description": "{{ store.description }}",
+  "url": "{{ store.url }}",
+  "sameAs": "{{ store.url }}"
+}
+</script>
+{% endblock %}
+
+{% block dir_content %}
+<div class="dir-detail">
+
+  <nav class="dir-breadcrumb">
+    <a href="/directory/">Directory</a> /
+    <a href="/directory/stores/">Stores</a> /
+    <a href="/directory/stores/?category={{ store.category }}">{{ store.category_name }}</a> /
+    <span>{{ store.name }}</span>
+  </nav>
+
+  <div class="dir-detail__layout">
+    <main class="dir-detail__main">
+
+      <div class="dir-detail__header">
+        <div class="dir-detail__meta">
+          <span class="dir-card__cat">{{ store.category_name }}</span>
+          {% if store.shopify_plus %}<span class="dir-card__badge dir-card__badge--plus">Shopify Plus</span>{% endif %}
+          {% if store.location %}<span class="dir-card__country">{{ store.location }}</span>{% endif %}
+        </div>
+        <h1 class="dir-detail__title">{{ store.name }}</h1>
+        <p class="dir-detail__desc">{{ store.description }}</p>
+        <a href="{{ store.url }}" target="_blank" rel="noopener noreferrer" class="dir-external-link dir-external-link--primary">
+          Visit {{ store.url }} →
+        </a>
+      </div>
+
+      <!-- Stats row -->
+      <div class="dir-detail__stats">
+        {% if store.annual_revenue_est %}
+        <div class="dir-detail__stat">
+          <span class="dir-detail__stat-num">{{ store.annual_revenue_est }}</span>
+          <span class="dir-detail__stat-label">Est. Annual Revenue</span>
+        </div>
+        {% endif %}
+        {% if store.sku_count %}
+        <div class="dir-detail__stat">
+          <span class="dir-detail__stat-num">{{ store.sku_count }}</span>
+          <span class="dir-detail__stat-label">Active SKUs</span>
+        </div>
+        {% endif %}
+        {% if store.supplier_count %}
+        <div class="dir-detail__stat">
+          <span class="dir-detail__stat-num">{{ store.supplier_count }}</span>
+          <span class="dir-detail__stat-label">Suppliers</span>
+        </div>
+        {% endif %}
+        {% if store.founded_year %}
+        <div class="dir-detail__stat">
+          <span class="dir-detail__stat-num">{{ store.founded_year }}</span>
+          <span class="dir-detail__stat-label">Founded</span>
+        </div>
+        {% endif %}
+        {% if store.employee_count %}
+        <div class="dir-detail__stat">
+          <span class="dir-detail__stat-num">{{ store.employee_count }}</span>
+          <span class="dir-detail__stat-label">Employees</span>
+        </div>
+        {% endif %}
+        {% if store.traffic_tier %}
+        <div class="dir-detail__stat">
+          <span class="dir-detail__stat-num">
+            {% if store.traffic_tier == 'small' %}Under 10K
+            {% elif store.traffic_tier == 'medium' %}10K–100K
+            {% elif store.traffic_tier == 'large' %}100K–1M
+            {% else %}1M+{% endif %}
+          </span>
+          <span class="dir-detail__stat-label">Monthly Visits</span>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if store.notable_for %}
+      <div class="dir-detail__section">
+        <h2>Why This Store Is Notable</h2>
+        <p>{{ store.notable_for }}</p>
+      </div>
+      {% endif %}
+
+    </main>
+
+    <aside class="dir-detail__sidebar">
+
+      <div class="dir-detail__cta-card">
+        <h3>Manage your inventory like the pros</h3>
+        <p>Top Shopify stores automate their supplier purchase orders so they never run out of stock. Reorderly handles the full PO workflow — monitor, create, send, and receive.</p>
+        <a href="/" class="btn btn-primary btn--full">Try Reorderly Free</a>
+        <span class="dir-detail__cta-note">No credit card required</span>
+      </div>
+
+      <div class="dir-detail__info-card">
+        <h3>Store Details</h3>
+        <dl class="dir-detail__dl">
+          {% if store.annual_revenue_est %}<dt>Est. Revenue</dt><dd>{{ store.annual_revenue_est }}/yr</dd>{% endif %}
+          {% if store.sku_count %}<dt>SKUs</dt><dd>{{ store.sku_count }}</dd>{% endif %}
+          {% if store.supplier_count %}<dt>Suppliers</dt><dd>{{ store.supplier_count }}</dd>{% endif %}
+          {% if store.founded_year %}<dt>Founded</dt><dd>{{ store.founded_year }}</dd>{% endif %}
+          {% if store.location %}<dt>Location</dt><dd>{{ store.location }}</dd>{% endif %}
+          {% if store.employee_count %}<dt>Team Size</dt><dd>{{ store.employee_count }}</dd>{% endif %}
+          <dt>Platform</dt><dd>Shopify{% if store.shopify_plus %} Plus{% endif %}</dd>
+          <dt>Category</dt><dd>{{ store.category_name }}</dd>
+        </dl>
+      </div>
+
+    </aside>
+  </div>
+
+  {% if related %}
+  <section class="dir-related">
+    <h2>More {{ store.category_name }} Stores</h2>
+    <div class="dir-card-grid">
+      {% for s in related %}
+      <a href="{{ s.get_absolute_url }}" class="dir-card">
+        <div class="dir-card__top">
+          <span class="dir-card__cat">{{ s.category_name }}</span>
+          {% if s.shopify_plus %}<span class="dir-card__badge dir-card__badge--plus">Plus</span>{% endif %}
+        </div>
+        <h3 class="dir-card__name">{{ s.name }}</h3>
+        <p class="dir-card__desc">{{ s.description|truncatechars:100 }}</p>
+        <div class="dir-card__stats">
+          {% if s.founded_year %}<span>Est. {{ s.founded_year }}</span>{% endif %}
+          {% if s.location %}<span>{{ s.location }}</span>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}

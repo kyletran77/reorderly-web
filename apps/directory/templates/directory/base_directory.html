@@ -1,0 +1,28 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/directory.css' %}">
+{% endblock %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "{{ title }}",
+  "description": "{{ description }}",
+  "url": "{{ canonical }}"
+}
+</script>
+{% endblock %}
+
+{% block content %}
+{% include 'core/components/nav.html' %}
+
+<div class="dir-layout">
+  {% block dir_content %}{% endblock %}
+</div>
+
+{% include 'core/components/footer.html' %}
+{% endblock %}

@@ -35,7 +35,30 @@ INSTALLED_APPS = [
     'apps.api',
     'apps.tools',
     'apps.content',
+    'apps.dashboard',
+    'apps.directory',
 ]
+
+# Shopify App credentials
+SHOPIFY_API_KEY = os.environ.get('SHOPIFY_API_KEY', '')
+SHOPIFY_API_SECRET = os.environ.get('SHOPIFY_API_SECRET', '')
+
+# QuickBooks OAuth
+QB_CLIENT_ID = os.environ.get('QB_CLIENT_ID', '')
+QB_CLIENT_SECRET = os.environ.get('QB_CLIENT_SECRET', '')
+
+# Anthropic — AI PO generation
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
+
+# App base URL (for OAuth redirects)
+APP_URL = os.environ.get('APP_URL', 'https://reorderly.me')
+
+# SMTP — outbound PO emails
+SMTP_HOST = os.environ.get('SMTP_HOST', '')
+SMTP_PORT = os.environ.get('SMTP_PORT', '587')
+SMTP_USER = os.environ.get('SMTP_USER', '')
+SMTP_PASS = os.environ.get('SMTP_PASS', '')
+FROM_EMAIL_ADDR = os.environ.get('FROM_EMAIL', '')
 
 # Analytics
 GA4_MEASUREMENT_ID = os.environ.get('GA4_MEASUREMENT_ID', '')

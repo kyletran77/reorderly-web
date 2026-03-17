@@ -1,0 +1,159 @@
+{% extends 'directory/base_directory.html' %}
+{% load static %}
+
+{% block structured_data %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "{{ supplier.name }}",
+  "description": "{{ supplier.description }}",
+  "url": "{{ canonical }}",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "{{ supplier.country }}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block dir_content %}
+<div class="dir-detail">
+
+  <nav class="dir-breadcrumb">
+    <a href="/directory/">Directory</a> /
+    <a href="/directory/suppliers/">Suppliers</a> /
+    <a href="/directory/suppliers/?category={{ supplier.category }}">{{ supplier.category_name }}</a> /
+    <span>{{ supplier.name }}</span>
+  </nav>
+
+  <div class="dir-detail__layout">
+    <main class="dir-detail__main">
+
+      <div class="dir-detail__header">
+        <div class="dir-detail__meta">
+          <span class="dir-card__cat">{{ supplier.category_name }}</span>
+          <span class="dir-card__country">{{ supplier.country_name }}{% if supplier.city %}, {{ supplier.city }}{% endif %}</span>
+        </div>
+        <h1 class="dir-detail__title">{{ supplier.name }}</h1>
+        <p class="dir-detail__desc">{{ supplier.description }}</p>
+      </div>
+
+      <!-- Stats row -->
+      <div class="dir-detail__stats">
+        {% if supplier.us_importers %}
+        <div class="dir-detail__stat">
+          <span class="dir-detail__stat-num">{{ supplier.us_importers }}</span>
+          <span class="dir-detail__stat-label">US Importers</span>
+        </div>
+        {% endif %}
+        {% if supplier.total_shipments %}
+        <div class="dir-detail__stat">
+          <span class="dir-detail__stat-num">{{ supplier.total_shipments|floatformat:0 }}</span>
+          <span class="dir-detail__stat-label">Total Shipments</span>
+        </div>
+        {% endif %}
+        {% if supplier.annual_shipments %}
+        <div class="dir-detail__stat">
+          <span class="dir-detail__stat-num">~{{ supplier.annual_shipments }}</span>
+          <span class="dir-detail__stat-label">Annual Shipments</span>
+        </div>
+        {% endif %}
+        {% if supplier.lead_time_days %}
+        <div class="dir-detail__stat">
+          <span class="dir-detail__stat-num">{{ supplier.lead_time_days }}</span>
+          <span class="dir-detail__stat-label">Lead Time (days)</span>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if supplier.products %}
+      <div class="dir-detail__section">
+        <h2>Products Made</h2>
+        <p>{{ supplier.products }}</p>
+      </div>
+      {% endif %}
+
+      {% if supplier.notable_brands %}
+      <div class="dir-detail__section">
+        <h2>Notable US Brands / Importers</h2>
+        <div class="dir-brand-tags">
+          {% for brand in supplier.notable_brands %}
+          <span class="dir-brand-tag">{{ brand }}</span>
+          {% endfor %}
+        </div>
+        <p class="dir-detail__note">Source: US customs import records via Import Yeti. Data reflects verified shipment activity.</p>
+      </div>
+      {% endif %}
+
+      {% if supplier.min_order_qty %}
+      <div class="dir-detail__section">
+        <h2>Minimum Order Quantity</h2>
+        <p>{{ supplier.min_order_qty }}</p>
+      </div>
+      {% endif %}
+
+      {% if supplier.import_yeti_url %}
+      <div class="dir-detail__section">
+        <h2>Import Data Source</h2>
+        <a href="{{ supplier.import_yeti_url }}" target="_blank" rel="noopener noreferrer" class="dir-external-link">
+          View full import history on Import Yeti →
+        </a>
+      </div>
+      {% endif %}
+
+    </main>
+
+    <aside class="dir-detail__sidebar">
+
+      <div class="dir-detail__cta-card">
+        <h3>Automate POs with this supplier</h3>
+        <p>Once you're working with {{ supplier.name }}, Reorderly can monitor your Shopify inventory and send purchase orders automatically when you run low.</p>
+        <ul class="dir-detail__cta-list">
+          <li>✓ Set reorder points per SKU</li>
+          <li>✓ Auto-email POs to your supplier</li>
+          <li>✓ Track shipments and receiving</li>
+          <li>✓ QuickBooks + Slack integration</li>
+        </ul>
+        <a href="/" class="btn btn-primary btn--full">Try Reorderly Free</a>
+        <span class="dir-detail__cta-note">No credit card required · Connects in minutes</span>
+      </div>
+
+      <div class="dir-detail__info-card">
+        <h3>Supplier Details</h3>
+        <dl class="dir-detail__dl">
+          <dt>Country</dt><dd>{{ supplier.country_name }}</dd>
+          {% if supplier.city %}<dt>City</dt><dd>{{ supplier.city }}</dd>{% endif %}
+          <dt>Category</dt><dd>{{ supplier.category_name }}</dd>
+          {% if supplier.us_importers %}<dt>US Importers</dt><dd>{{ supplier.us_importers }}</dd>{% endif %}
+          {% if supplier.total_shipments %}<dt>Total Shipments</dt><dd>{{ supplier.total_shipments|floatformat:0 }}</dd>{% endif %}
+        </dl>
+      </div>
+
+    </aside>
+  </div>
+
+  <!-- Related -->
+  {% if related %}
+  <section class="dir-related">
+    <h2>More {{ supplier.category_name }} Suppliers</h2>
+    <div class="dir-card-grid">
+      {% for s in related %}
+      <a href="{{ s.get_absolute_url }}" class="dir-card">
+        <div class="dir-card__top">
+          <span class="dir-card__cat">{{ s.category_name }}</span>
+          <span class="dir-card__country">{{ s.country_name }}</span>
+        </div>
+        <h3 class="dir-card__name">{{ s.name }}</h3>
+        <p class="dir-card__desc">{{ s.description|truncatechars:100 }}</p>
+        <div class="dir-card__stats">
+          {% if s.us_importers %}<span>{{ s.us_importers }} US importers</span>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}
