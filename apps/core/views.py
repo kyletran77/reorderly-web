@@ -69,9 +69,31 @@ def sitemap(request):
         {'loc': f'{BASE_DOMAIN}/', 'changefreq': 'weekly', 'priority': '1.0'},
         {'loc': f'{BASE_DOMAIN}/stocky-alternative/', 'changefreq': 'monthly', 'priority': '0.9'},
         {'loc': f'{BASE_DOMAIN}/pricing/', 'changefreq': 'monthly', 'priority': '0.8'},
+        {'loc': f'{BASE_DOMAIN}/directory/', 'changefreq': 'weekly', 'priority': '0.9'},
+        {'loc': f'{BASE_DOMAIN}/directory/suppliers/', 'changefreq': 'weekly', 'priority': '0.8'},
+        {'loc': f'{BASE_DOMAIN}/directory/stores/', 'changefreq': 'weekly', 'priority': '0.8'},
         {'loc': f'{BASE_DOMAIN}/privacy/', 'changefreq': 'yearly', 'priority': '0.3'},
         {'loc': f'{BASE_DOMAIN}/terms/', 'changefreq': 'yearly', 'priority': '0.3'},
     ]
+
+    # Dynamically add all supplier and store detail pages
+    try:
+        from apps.directory.models import Supplier, ShopifyStore
+        for supplier in Supplier.objects.only('slug').iterator():
+            urls.append({
+                'loc': f'{BASE_DOMAIN}/directory/suppliers/{supplier.slug}/',
+                'changefreq': 'monthly',
+                'priority': '0.7',
+            })
+        for store in ShopifyStore.objects.only('slug').iterator():
+            urls.append({
+                'loc': f'{BASE_DOMAIN}/directory/stores/{store.slug}/',
+                'changefreq': 'monthly',
+                'priority': '0.7',
+            })
+    except Exception:
+        pass
+
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for url in urls:
