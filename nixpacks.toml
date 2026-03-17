@@ -9,10 +9,8 @@ cmds = [
 
 [phases.build]
 cmds = [
-  "python manage.py collectstatic --noinput",
-  "python manage.py migrate --noinput",
-  "python manage.py seed_directory"
+  "python manage.py collectstatic --noinput"
 ]
 
 [start]
-cmd = "gunicorn reorderly.wsgi --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 --log-file -"
+cmd = "python manage.py migrate --noinput && python manage.py seed_directory && gunicorn reorderly.wsgi --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 --log-file -"
