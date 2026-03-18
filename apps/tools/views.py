@@ -1,6 +1,8 @@
 import json
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import quote_plus
 
 import anthropic
 import requests
@@ -194,6 +196,154 @@ def ad_intel(request):
     ))
 
 
+_SCRAPE_HEADERS = {
+    'User-Agent': (
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+        'AppleWebKit/537.36 (KHTML, like Gecko) '
+        'Chrome/120.0.0.0 Safari/537.36'
+    ),
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+}
+
+
+def _scrape_product_page(url):
+    """Fetch and parse competitor product page."""
+    resp = requests.get(url, headers=_SCRAPE_HEADERS, timeout=15)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, 'html.parser')
+
+    title_tag = soup.find('title')
+    page_title = title_tag.get_text(strip=True) if title_tag else ''
+
+    meta_desc = ''
+    m = soup.find('meta', attrs={'name': 'description'})
+    if m:
+        meta_desc = m.get('content', '')
+
+    og_title = ''
+    og = soup.find('meta', attrs={'property': 'og:title'})
+    if og:
+        og_title = og.get('content', '')
+
+    og_desc = ''
+    ogd = soup.find('meta', attrs={'property': 'og:description'})
+    if ogd:
+        og_desc = ogd.get('content', '')
+
+    for tag in soup(['script', 'style', 'nav', 'footer', 'header', 'noscript', 'svg', 'iframe']):
+        tag.decompose()
+
+    body_text = soup.get_text(separator='\n', strip=True)
+    body_text = re.sub(r'\n{3,}', '\n\n', body_text)[:10000]
+
+    return {
+        'page_title': page_title,
+        'meta_desc': meta_desc,
+        'og_title': og_title,
+        'og_desc': og_desc,
+        'body_text': body_text,
+    }
+
+
+def _scrape_amazon_reviews(brand_name, product_name):
+    """Search Amazon for the product and pull real customer reviews."""
+    try:
+        query = f"{brand_name} {product_name}".strip()
+        search_url = f"https://www.amazon.com/s?k={quote_plus(query)}"
+        resp = requests.get(search_url, headers=_SCRAPE_HEADERS, timeout=12)
+        soup = BeautifulSoup(resp.text, 'html.parser')
+
+        # Find first product with an ASIN
+        asin = None
+        for el in soup.select('[data-asin]'):
+            candidate = el.get('data-asin', '').strip()
+            if candidate and len(candidate) == 10:
+                asin = candidate
+                break
+
+        if not asin:
+            return None
+
+        reviews_url = (
+            f"https://www.amazon.com/product-reviews/{asin}"
+            f"?sortBy=recent&reviewerType=all_reviews&pageNumber=1"
+        )
+        resp2 = requests.get(reviews_url, headers=_SCRAPE_HEADERS, timeout=12)
+        soup2 = BeautifulSoup(resp2.text, 'html.parser')
+
+        reviews = []
+        for rev in soup2.select('[data-hook="review"]')[:15]:
+            body_el = rev.select_one('[data-hook="review-body"] span')
+            rating_el = rev.select_one('[data-hook="review-star-rating"] span')
+            title_el = rev.select_one('[data-hook="review-title"] span:last-child')
+            if body_el and body_el.get_text(strip=True):
+                reviews.append({
+                    'body': body_el.get_text(strip=True)[:600],
+                    'rating': rating_el.get_text(strip=True)[:5] if rating_el else '',
+                    'title': title_el.get_text(strip=True) if title_el else '',
+                })
+
+        return {
+            'asin': asin,
+            'reviews': reviews,
+            'product_url': f"https://www.amazon.com/dp/{asin}",
+            'reviews_url': reviews_url,
+        }
+    except Exception:
+        return None
+
+
+def _scrape_reddit_voc(brand_name, product_category):
+    """Pull Reddit discussions about the brand and product category."""
+    try:
+        reddit_headers = {
+            'User-Agent': 'Mozilla/5.0 (compatible; research-bot/1.0)',
+            'Accept': 'application/json',
+        }
+        posts = []
+        seen = set()
+
+        for query in [brand_name, f"{product_category} review recommendation"]:
+            if not query.strip():
+                continue
+            url = (
+                f"https://www.reddit.com/search.json"
+                f"?q={quote_plus(query)}&sort=top&limit=8&t=year&type=link"
+            )
+            resp = requests.get(url, headers=reddit_headers, timeout=10)
+            if resp.status_code != 200:
+                continue
+
+            children = resp.json().get('data', {}).get('children', [])
+            for child in children:
+                d = child.get('data', {})
+                pid = d.get('id', '')
+                if pid in seen:
+                    continue
+                seen.add(pid)
+                text = d.get('selftext', '').strip()
+                title = d.get('title', '').strip()
+                if len(text) < 30 and len(title) < 20:
+                    continue
+                posts.append({
+                    'title': title,
+                    'text': text[:700] if text else '',
+                    'subreddit': d.get('subreddit', ''),
+                    'score': d.get('score', 0),
+                    'url': f"https://reddit.com{d.get('permalink', '')}",
+                    'num_comments': d.get('num_comments', 0),
+                })
+                if len(posts) >= 8:
+                    break
+            if len(posts) >= 8:
+                break
+
+        return posts
+    except Exception:
+        return []
+
+
 @csrf_exempt
 @require_POST
 def api_ad_intel_analyze(request):
@@ -205,94 +355,120 @@ def api_ad_intel_analyze(request):
     url = data.get('url', '').strip()
     if not url:
         return JsonResponse({'error': 'URL is required'}, status=400)
-
     if not url.startswith(('http://', 'https://')):
         url = 'https://' + url
 
-    # Scrape the competitor product page
-    try:
-        headers = {
-            'User-Agent': (
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
-                'AppleWebKit/537.36 (KHTML, like Gecko) '
-                'Chrome/120.0.0.0 Safari/537.36'
-            ),
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-        }
-        resp = requests.get(url, headers=headers, timeout=15)
-        resp.raise_for_status()
-        soup = BeautifulSoup(resp.text, 'html.parser')
-    except requests.RequestException as e:
-        return JsonResponse({'error': f'Could not fetch URL: {str(e)}'}, status=400)
-
-    # Extract structured content from the page
-    title_tag = soup.find('title')
-    page_title = title_tag.get_text(strip=True) if title_tag else ''
-
-    meta_desc_tag = soup.find('meta', attrs={'name': 'description'})
-    meta_desc = meta_desc_tag.get('content', '') if meta_desc_tag else ''
-
-    og_title_tag = soup.find('meta', attrs={'property': 'og:title'})
-    og_title = og_title_tag.get('content', '') if og_title_tag else ''
-
-    og_desc_tag = soup.find('meta', attrs={'property': 'og:description'})
-    og_desc = og_desc_tag.get('content', '') if og_desc_tag else ''
-
-    # Remove script, style, nav, footer noise
-    for tag in soup(['script', 'style', 'nav', 'footer', 'header', 'noscript', 'svg', 'iframe']):
-        tag.decompose()
-
-    body_text = soup.get_text(separator='\n', strip=True)
-    body_text = re.sub(r'\n{3,}', '\n\n', body_text)[:10000]
-
-    # Claude analysis
     api_key = os.environ.get('ANTHROPIC_API_KEY', '')
     if not api_key:
         return JsonResponse({'error': 'AI analysis not configured'}, status=500)
 
-    client = anthropic.Anthropic(api_key=api_key)
+    # Step 1: Scrape product page (needed to get brand/product names for other scrapers)
+    try:
+        page_data = _scrape_product_page(url)
+    except requests.RequestException as e:
+        return JsonResponse({'error': f'Could not fetch URL: {str(e)}'}, status=400)
 
-    prompt = f"""You are an expert DTC ecommerce ad creative analyst with deep experience in Facebook/Instagram advertising. Analyze this competitor product page and return a structured intelligence report.
+    # Quick first-pass to extract brand/product name for parallel scrapers
+    # Pull from og:title or page title
+    raw_title = page_data['og_title'] or page_data['page_title'] or ''
+    brand_guess = raw_title.split('|')[0].split('–')[0].split('-')[0].strip()[:60]
+    product_guess = raw_title[:80]
 
-URL: {url}
-Page Title: {page_title}
-OG Title: {og_title}
-Meta Description: {meta_desc}
-OG Description: {og_desc}
+    # Step 2: Parallel scrape Amazon + Reddit while we prep the prompt
+    amazon_data = None
+    reddit_data = []
 
-Page Content (first 10,000 chars):
-{body_text}
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        future_amazon = executor.submit(_scrape_amazon_reviews, brand_guess, product_guess)
+        future_reddit = executor.submit(_scrape_reddit_voc, brand_guess, brand_guess)
 
-Return ONLY a valid JSON object (no markdown, no explanation) with exactly these keys:
+        try:
+            amazon_data = future_amazon.result(timeout=20)
+        except Exception:
+            amazon_data = None
+
+        try:
+            reddit_data = future_reddit.result(timeout=15)
+        except Exception:
+            reddit_data = []
+
+    # Step 3: Build enriched prompt with all data sources
+    amazon_section = ''
+    if amazon_data and amazon_data.get('reviews'):
+        lines = [
+            f"[{r['rating']}★] {r['title']}: {r['body']}"
+            for r in amazon_data['reviews']
+        ]
+        amazon_section = '\n\nAMAZON CUSTOMER REVIEWS (real customer language — mine for exact phrases):\n'
+        amazon_section += '\n---\n'.join(lines)[:4500]
+
+    reddit_section = ''
+    if reddit_data:
+        lines = [
+            f"r/{p['subreddit']} ({p['score']} upvotes, {p['num_comments']} comments)\n"
+            f"Title: {p['title']}\n"
+            f"{p['text'][:500]}"
+            for p in reddit_data
+        ]
+        reddit_section = '\n\nREDDIT DISCUSSIONS (unfiltered community voice):\n'
+        reddit_section += '\n---\n'.join(lines)[:3500]
+
+    prompt = f"""You are a world-class DTC ad creative analyst. You have THREE data sources below — use ALL of them.
+
+TARGET URL: {url}
+Page Title: {page_data['page_title']}
+OG Title: {page_data['og_title']}
+Meta Description: {page_data['meta_desc']}
+
+PRODUCT PAGE CONTENT:
+{page_data['body_text']}
+{amazon_section}
+{reddit_section}
+
+Synthesize ALL sources above into a structured intelligence report. The Amazon reviews and Reddit data contain REAL customer language — extract the exact phrases people use, their specific pain points, and transformation language. This is gold for ad copy.
+
+Return ONLY a valid JSON object (no markdown, no extra text) with exactly these keys:
 
 {{
-  "brand_name": "string — the brand name",
-  "product_name": "string — the specific product name",
-  "product_category": "string — e.g. skincare, supplements, fitness equipment",
-  "positioning_summary": "string — 2-3 sentences on how they position this product and who it's for",
+  "brand_name": "string",
+  "product_name": "string",
+  "product_category": "string",
+  "positioning_summary": "string — 2-3 sentences on their positioning and target customer",
   "price_point": "string — price if found, or 'Not listed'",
-  "core_claims": ["array of strings — top 5-7 specific claims they make about the product"],
+  "data_sources": {{
+    "product_page": true,
+    "amazon_reviews": {json.dumps(bool(amazon_data and amazon_data.get('reviews')))},
+    "reddit_posts": {json.dumps(len(reddit_data))}
+  }},
+  "core_claims": ["top 5-7 claims they make about the product"],
   "target_avatars": [
     {{"avatar": "string", "pain_point": "string"}}
   ],
+  "customer_voice": {{
+    "top_complaints": ["3-5 most common complaints or frustrations from real reviews/reddit"],
+    "top_praises": ["3-5 things customers love most — in their exact language"],
+    "transformation_phrases": ["5-8 exact phrases customers use to describe before/after — word-for-word from the data"],
+    "pain_language": ["5-8 specific pain point phrases customers actually use — not marketing language, real words"]
+  }},
   "proven_angles": [
     {{
-      "angle": "string — the ad angle name",
-      "hook_example": "string — a specific example hook that would work for this angle",
-      "why_it_works": "string — why this angle converts for this product"
+      "angle": "string",
+      "hook_example": "string — a specific scroll-stopping hook using REAL customer language from the data above",
+      "why_it_works": "string"
     }}
   ],
-  "hook_ideas": ["array of 5 specific scroll-stopping hook lines you could run against this product/niche"],
-  "content_gaps": ["array of strings — angles they are NOT hitting that represent opportunities"],
-  "positioning_vulnerabilities": ["array of strings — weak points in their positioning you can attack"],
-  "meta_ad_library_url": "string — Facebook Ads Library search URL: https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=US&q=BRAND_NAME_HERE"
+  "hook_ideas": ["5 specific scroll-stopping hook lines built from real customer language — not generic, pull actual phrases"],
+  "ad_copy_language_bank": ["10-15 exact phrases, sentence fragments, or expressions from real customers to use directly in ad copy"],
+  "content_gaps": ["angles they are NOT hitting that represent opportunities"],
+  "positioning_vulnerabilities": ["weak points in their positioning you can attack"],
+  "meta_ad_library_url": "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=US&q=BRAND_NAME_HERE"
 }}"""
 
     try:
+        client = anthropic.Anthropic(api_key=api_key)
         response = client.messages.create(
             model='claude-opus-4-6',
-            max_tokens=2500,
+            max_tokens=3500,
             messages=[{'role': 'user', 'content': prompt}],
         )
         result_text = response.content[0].text.strip()
@@ -303,5 +479,16 @@ Return ONLY a valid JSON object (no markdown, no explanation) with exactly these
         return JsonResponse({'error': f'Failed to parse AI response: {str(e)}'}, status=500)
     except anthropic.APIError as e:
         return JsonResponse({'error': f'AI service error: {str(e)}'}, status=500)
+
+    # Attach raw source URLs for the frontend
+    if amazon_data:
+        result['amazon_product_url'] = amazon_data.get('product_url', '')
+        result['amazon_reviews_url'] = amazon_data.get('reviews_url', '')
+        result['amazon_review_count'] = len(amazon_data.get('reviews', []))
+    if reddit_data:
+        result['reddit_posts'] = [
+            {'title': p['title'], 'url': p['url'], 'subreddit': p['subreddit'], 'score': p['score']}
+            for p in reddit_data[:6]
+        ]
 
     return JsonResponse(result)

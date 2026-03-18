@@ -11,16 +11,8 @@
   "url": "{{ canonical }}",
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "creator": {
-    "@type": "Organization",
-    "name": "Reorderly",
-    "url": "https://reorderly.com"
-  }
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "creator": { "@type": "Organization", "name": "Reorderly", "url": "https://reorderly.me" }
 }
 </script>
 {% endblock %}
@@ -28,54 +20,52 @@
 {% block content %}
 <div class="tool-page ad-intel-page">
 
-  <!-- Tool Header -->
   <div class="tool-header">
     <div class="container">
       <a href="/tools/" class="tool-breadcrumb">← All free tools</a>
       <h1>Ad Intelligence Tool</h1>
-      <p class="tool-subtitle">Paste a competitor's product URL. Get their positioning breakdown, proven ad angles, hook ideas, and content gaps — in seconds.</p>
+      <p class="tool-subtitle">Paste a competitor URL. Get real customer language from Amazon reviews + Reddit, proven ad angles, and hooks you can run today.</p>
       <div class="tool-badges">
         <span class="badge badge-free">Free</span>
         <span class="badge badge-no-signup">No signup required</span>
         <span class="badge" style="background:#f0f4ff;color:#4361ee;">AI-Powered</span>
+        <span class="badge" style="background:#f0fff4;color:#059669;">Live Data</span>
       </div>
     </div>
   </div>
 
-  <!-- Tool Body -->
   <div class="tool-body">
     <div class="container tool-container">
 
-      <!-- Main Tool Card -->
+      <!-- Input -->
       <div class="tool-card" id="input-card">
         <div class="tool-form-section">
           <h2>Enter a competitor product URL</h2>
-          <p style="color:#666;margin-bottom:1.5rem;">Works with any product page — Shopify stores, Amazon listings, DTC brand sites, etc.</p>
-
+          <p style="color:#666;margin-bottom:1.5rem;">Works with any product page — Shopify, Amazon, DTC sites. We'll also pull their Amazon reviews and Reddit discussions automatically.</p>
           <div class="form-group" style="margin-bottom:1rem;">
             <label for="competitorUrl">Product URL</label>
-            <input
-              type="url"
-              id="competitorUrl"
-              placeholder="https://example.com/products/their-product"
-              style="font-size:1rem;"
-            />
+            <input type="url" id="competitorUrl" placeholder="https://example.com/products/their-product" style="font-size:1rem;" />
           </div>
-
           <button class="btn btn-primary btn-lg" id="analyzeBtn" onclick="runAnalysis()">
             Analyze Competitor →
           </button>
         </div>
       </div>
 
-      <!-- Loading State -->
+      <!-- Loading -->
       <div id="loading-card" class="tool-card" style="display:none;text-align:center;padding:3rem 2rem;">
         <div class="intel-spinner"></div>
-        <p style="margin-top:1.5rem;font-size:1.1rem;font-weight:600;color:#1a1a2e;">Analyzing competitor...</p>
-        <p style="color:#666;margin-top:.5rem;">Scraping page, running AI analysis. Usually takes 10-20 seconds.</p>
+        <p style="margin-top:1.5rem;font-size:1.1rem;font-weight:600;color:#1a1a2e;" id="loading-status">Scraping product page...</p>
+        <p style="color:#666;margin-top:.5rem;">Also pulling Amazon reviews + Reddit discussions in parallel. Usually 20-35 seconds.</p>
+        <div class="loading-steps" style="margin-top:1.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+          <span class="load-step load-step-active" id="step-page">📄 Product page</span>
+          <span class="load-step" id="step-amazon">📦 Amazon reviews</span>
+          <span class="load-step" id="step-reddit">💬 Reddit</span>
+          <span class="load-step" id="step-ai">🤖 AI analysis</span>
+        </div>
       </div>
 
-      <!-- Error State -->
+      <!-- Error -->
       <div id="error-card" class="tool-card" style="display:none;border-left:4px solid #ef4444;padding:1.5rem 2rem;">
         <p style="color:#ef4444;font-weight:600;margin:0 0 .5rem;">⚠ Analysis failed</p>
         <p id="error-message" style="color:#666;margin:0;"></p>
@@ -83,6 +73,15 @@
 
       <!-- Results -->
       <div id="results-section" style="display:none;">
+
+        <!-- Data Sources Banner -->
+        <div id="card-sources" class="intel-card" style="background:#f0fff4;border-color:#6ee7b7;">
+          <div class="intel-card-header">
+            <span class="intel-card-icon">📡</span>
+            <h3>Data Sources Used</h3>
+          </div>
+          <div id="res-sources" style="display:flex;gap:.75rem;flex-wrap:wrap;"></div>
+        </div>
 
         <!-- Brand Overview -->
         <div class="intel-card" id="card-overview">
@@ -101,12 +100,47 @@
           </div>
         </div>
 
+        <!-- Customer Voice — NEW -->
+        <div class="intel-card intel-card-highlight intel-card-voc" id="card-voc">
+          <div class="intel-card-header">
+            <span class="intel-card-icon">🗣️</span>
+            <h3>What Customers Actually Say</h3>
+            <span class="intel-card-hint">Real language from Amazon reviews + Reddit — not marketing copy</span>
+          </div>
+          <div class="voc-grid">
+            <div class="voc-col">
+              <div class="voc-label voc-label-pain">😤 Pain language</div>
+              <ul class="intel-list intel-list-pain" id="res-pain-language"></ul>
+            </div>
+            <div class="voc-col">
+              <div class="voc-label voc-label-praise">✨ What they love</div>
+              <ul class="intel-list intel-list-praise" id="res-top-praises"></ul>
+            </div>
+          </div>
+          <div style="margin-top:1.25rem;">
+            <div class="voc-label" style="color:#7c3aed;background:#f5f3ff;border-color:#c4b5fd;">🔄 Transformation phrases (before → after)</div>
+            <ul class="intel-list intel-list-transform" id="res-transform-phrases"></ul>
+          </div>
+          <div id="amazon-link-row" style="margin-top:1rem;display:none;">
+            <a id="res-amazon-link" href="#" target="_blank" rel="noopener" style="font-size:.85rem;color:#4361ee;">View Amazon listing & reviews →</a>
+          </div>
+        </div>
+
+        <!-- Ad Copy Language Bank — NEW -->
+        <div class="intel-card intel-card-highlight" id="card-language-bank" style="border-color:#fcd34d;background:#fffbeb;">
+          <div class="intel-card-header">
+            <span class="intel-card-icon">💰</span>
+            <h3>Ad Copy Language Bank</h3>
+            <span class="intel-card-hint">Exact phrases from real customers — use these word-for-word in your ads</span>
+          </div>
+          <div class="language-bank" id="res-language-bank"></div>
+        </div>
+
         <!-- Core Claims -->
         <div class="intel-card" id="card-claims">
           <div class="intel-card-header">
             <span class="intel-card-icon">📣</span>
             <h3>Core Claims They're Making</h3>
-            <span class="intel-card-hint">What they're saying to sell the product</span>
           </div>
           <ul class="intel-list" id="res-claims"></ul>
         </div>
@@ -116,7 +150,6 @@
           <div class="intel-card-header">
             <span class="intel-card-icon">🎯</span>
             <h3>Who They're Targeting</h3>
-            <span class="intel-card-hint">Buyer avatars and their core pain points</span>
           </div>
           <div class="intel-avatar-grid" id="res-avatars"></div>
         </div>
@@ -126,7 +159,7 @@
           <div class="intel-card-header">
             <span class="intel-card-icon">⚡</span>
             <h3>Proven Ad Angles</h3>
-            <span class="intel-card-hint">Angles that work for this product/niche</span>
+            <span class="intel-card-hint">Built from real customer language</span>
           </div>
           <div id="res-angles"></div>
         </div>
@@ -136,9 +169,19 @@
           <div class="intel-card-header">
             <span class="intel-card-icon">🪝</span>
             <h3>Hook Ideas to Steal</h3>
-            <span class="intel-card-hint">Scroll-stopping hooks you can run today</span>
+            <span class="intel-card-hint">Written in real customer language</span>
           </div>
           <ol class="intel-hook-list" id="res-hooks"></ol>
+        </div>
+
+        <!-- Reddit Pulse — NEW -->
+        <div class="intel-card" id="card-reddit" style="display:none;">
+          <div class="intel-card-header">
+            <span class="intel-card-icon">💬</span>
+            <h3>Reddit Pulse</h3>
+            <span class="intel-card-hint">What the community says — unfiltered</span>
+          </div>
+          <div id="res-reddit-posts"></div>
         </div>
 
         <!-- Content Gaps -->
@@ -146,7 +189,7 @@
           <div class="intel-card-header">
             <span class="intel-card-icon">🕳️</span>
             <h3>Content Gaps</h3>
-            <span class="intel-card-hint">Angles they're NOT hitting — your opportunity</span>
+            <span class="intel-card-hint">Angles they're not hitting</span>
           </div>
           <ul class="intel-list intel-list-opportunity" id="res-gaps"></ul>
         </div>
@@ -154,56 +197,49 @@
         <!-- Vulnerabilities -->
         <div class="intel-card" id="card-vuln">
           <div class="intel-card-header">
-            <span class="intel-card-icon">🎯</span>
+            <span class="intel-card-icon">⚠️</span>
             <h3>Positioning Vulnerabilities</h3>
-            <span class="intel-card-hint">Weak points in their positioning you can attack</span>
+            <span class="intel-card-hint">Weak points to attack</span>
           </div>
           <ul class="intel-list intel-list-attack" id="res-vulns"></ul>
         </div>
 
         <!-- Meta Ad Library -->
-        <div class="intel-card" id="card-meta" style="background:#f0f4ff;border-color:#c7d2fe;">
+        <div class="intel-card" style="background:#f0f4ff;border-color:#c7d2fe;">
           <div class="intel-card-header">
             <span class="intel-card-icon">📱</span>
-            <h3>See Their Live Ads</h3>
-            <span class="intel-card-hint">What they're actually running right now on Facebook/Instagram</span>
+            <h3>See Their Live Ads on Meta</h3>
           </div>
-          <p style="color:#444;margin-bottom:1.25rem;">Check the Meta Ad Library to see every active ad this brand is running — creative, copy, how long it's been live.</p>
-          <a id="res-meta-link" href="#" target="_blank" rel="noopener" class="btn btn-primary">
-            View Their Ads on Meta Library →
-          </a>
+          <p style="color:#444;margin-bottom:1.25rem;">Every active ad they're running — creative, copy, how long it's been live. Long-running = proven.</p>
+          <a id="res-meta-link" href="#" target="_blank" rel="noopener" class="btn btn-primary">View Their Ads on Meta Library →</a>
         </div>
 
-        <!-- Analyze Another -->
         <div style="text-align:center;margin-top:1rem;">
           <button class="btn btn-ghost" onclick="resetTool()">← Analyze another URL</button>
         </div>
 
-      </div><!-- /results-section -->
+      </div><!-- /results -->
 
-      <!-- CTA -->
       <div class="tool-cta-box" style="margin-top:3rem;">
         <div class="tool-cta-inner">
           <div class="tool-cta-text">
             <strong>Ready to automate your inventory too?</strong>
-            <p>Reorderly connects to your Shopify store and handles reorders automatically — 24/7, without you touching it.</p>
+            <p>Reorderly connects to your Shopify store and handles reorders automatically — 24/7.</p>
           </div>
           <a href="/#waitlist" class="btn btn-primary">Get Reorderly Free →</a>
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- FAQ -->
   <div class="tool-faq">
     <div class="container">
       <h2>Frequently asked questions</h2>
       <div class="faq-list">
-        <details><summary>What does the Ad Intelligence Tool do?</summary><p>It scrapes a competitor's product page and uses AI to extract their positioning, core claims, target avatars, and proven ad angles. It also generates hook ideas and surfaces content gaps — angles they're NOT running that represent opportunities for you.</p></details>
-        <details><summary>How does it work?</summary><p>Paste any product URL. The tool fetches the page, extracts the text content, then runs it through Claude (Anthropic's AI) to analyze the positioning and generate a structured intelligence report. The whole process takes 10-20 seconds.</p></details>
-        <details><summary>Can I see their actual Facebook ads?</summary><p>Yes — the report includes a direct link to the Meta Ad Library for that brand, where you can see every active ad they're running, the creative, copy, and how long each ad has been live.</p></details>
-        <details><summary>What types of URLs work best?</summary><p>Product detail pages work best — Shopify product pages, Amazon listings, DTC brand product pages. The tool extracts claims, benefits, and positioning language from the page content. The more copy on the page, the richer the analysis.</p></details>
+        <details><summary>What data sources does this use?</summary><p>Three sources: (1) the competitor's product page, (2) Amazon customer reviews for that product, and (3) Reddit discussions about the brand and category. Claude synthesizes all three into a structured intelligence report.</p></details>
+        <details><summary>Why are real customer reviews so valuable for ad creative?</summary><p>The best ad copy sounds like it was written by the customer, not a marketer. When you use the exact words customers use to describe their pain ("my thighs look like cottage cheese"), their frustrations, and their transformation, ads feel personal and real — and they convert much better than polished marketing language.</p></details>
+        <details><summary>How is this different from ChatGPT?</summary><p>ChatGPT can't browse the web in real time. This tool actively scrapes the competitor's page, their Amazon listing, and Reddit — pulling live data. The AI then synthesizes actual customer language, not invented copy. A chatbot would hallucinate this; we pull the real thing.</p></details>
+        <details><summary>How long does it take?</summary><p>Usually 20-35 seconds. We scrape three data sources in parallel to keep it fast.</p></details>
         <details><summary>Is this free?</summary><p>Yes, completely free. No signup, no credit card.</p></details>
       </div>
     </div>
@@ -213,15 +249,25 @@
 
 <style>
 .ad-intel-page .intel-spinner {
-  width: 48px;
-  height: 48px;
+  width: 48px; height: 48px;
   border: 4px solid #e2e8f0;
   border-top-color: #4361ee;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin .8s linear infinite;
   margin: 0 auto;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.load-step {
+  padding: .35rem .85rem;
+  border-radius: 20px;
+  font-size: .8rem;
+  background: #f1f5f9;
+  color: #94a3b8;
+  transition: all .3s;
+}
+.load-step-active { background: #e0e7ff; color: #4361ee; font-weight: 600; }
+.load-step-done { background: #dcfce7; color: #16a34a; font-weight: 600; }
 
 .intel-card {
   background: #fff;
@@ -230,180 +276,139 @@
   padding: 1.75rem 2rem;
   margin-bottom: 1.25rem;
 }
-.intel-card-highlight {
-  border-color: #c7d2fe;
-  background: #f8f9ff;
-}
+.intel-card-highlight { border-color: #c7d2fe; background: #f8f9ff; }
+.intel-card-voc { border-color: #a7f3d0; background: #f0fdf4; }
 .intel-card-header {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  margin-bottom: 1.25rem;
-  flex-wrap: wrap;
+  display: flex; align-items: center; gap: .75rem;
+  margin-bottom: 1.25rem; flex-wrap: wrap;
 }
-.intel-card-icon {
-  font-size: 1.4rem;
-  line-height: 1;
-}
-.intel-card-header h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #1a1a2e;
-  margin: 0;
-}
-.intel-card-hint {
-  font-size: .8rem;
-  color: #888;
-  margin-left: auto;
-}
+.intel-card-icon { font-size: 1.4rem; line-height: 1; }
+.intel-card-header h3 { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; margin: 0; }
+.intel-card-hint { font-size: .8rem; color: #888; margin-left: auto; }
 
 .intel-overview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: .75rem;
-  margin-bottom: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: .75rem; margin-bottom: 1rem;
 }
-.intel-kv {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: .75rem 1rem;
-}
-.intel-k {
-  display: block;
-  font-size: .75rem;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  color: #888;
-  margin-bottom: .25rem;
-}
-.intel-v {
-  font-weight: 600;
-  color: #1a1a2e;
-}
+.intel-kv { background: #f8fafc; border-radius: 8px; padding: .75rem 1rem; }
+.intel-k { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: #888; margin-bottom: .2rem; }
+.intel-v { font-weight: 600; color: #1a1a2e; font-size: .95rem; }
 .intel-positioning-box {
-  background: #f8fafc;
-  border-left: 3px solid #4361ee;
-  border-radius: 0 8px 8px 0;
-  padding: 1rem 1.25rem;
+  background: #f8fafc; border-left: 3px solid #4361ee;
+  border-radius: 0 8px 8px 0; padding: 1rem 1.25rem;
 }
-.intel-positioning-box p {
-  margin: 0;
-  color: #333;
-  line-height: 1.6;
-}
+.intel-positioning-box p { margin: 0; color: #333; line-height: 1.6; }
 
-.intel-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
+/* VOC */
+.voc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 640px) { .voc-grid { grid-template-columns: 1fr; } }
+.voc-label {
+  font-size: .78rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em; padding: .35rem .75rem; border-radius: 6px;
+  margin-bottom: .6rem; display: inline-block;
 }
+.voc-label-pain { color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; }
+.voc-label-praise { color: #065f46; background: #ecfdf5; border: 1px solid #a7f3d0; }
+
+/* Language bank */
+.language-bank {
+  display: flex; flex-wrap: wrap; gap: .5rem;
+}
+.lang-chip {
+  background: #fff; border: 1.5px solid #fcd34d;
+  border-radius: 20px; padding: .4rem 1rem;
+  font-size: .9rem; color: #78350f; cursor: pointer;
+  transition: all .15s;
+}
+.lang-chip:hover { background: #fef3c7; border-color: #f59e0b; }
+.lang-chip.copied { border-color: #10b981; color: #065f46; background: #ecfdf5; }
+
+/* Lists */
+.intel-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .5rem; }
 .intel-list li {
-  padding: .6rem 1rem .6rem 2.5rem;
-  background: #f8fafc;
-  border-radius: 8px;
-  color: #333;
-  position: relative;
-}
-.intel-list li::before {
-  content: '✓';
-  position: absolute;
-  left: .85rem;
-  color: #4361ee;
-  font-weight: 700;
-}
-.intel-list-opportunity li::before {
-  content: '→';
-  color: #10b981;
-}
-.intel-list-attack li::before {
-  content: '⚠';
-  color: #f59e0b;
-}
-
-.intel-avatar-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: .75rem;
-}
-.intel-avatar-card {
-  background: #f8fafc;
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
-}
-.intel-avatar-name {
-  font-weight: 700;
-  color: #1a1a2e;
-  margin-bottom: .35rem;
-}
-.intel-avatar-pain {
-  font-size: .9rem;
-  color: #555;
+  padding: .6rem 1rem .6rem 2.5rem; background: #f8fafc;
+  border-radius: 8px; color: #333; position: relative;
   line-height: 1.5;
 }
+.intel-list li::before { position: absolute; left: .85rem; font-weight: 700; }
+.intel-list li::before { content: '✓'; color: #4361ee; }
+.intel-list-pain li::before { content: '😤'; }
+.intel-list-praise li::before { content: '✨'; }
+.intel-list-transform li::before { content: '→'; color: #7c3aed; }
+.intel-list-opportunity li::before { content: '→'; color: #10b981; }
+.intel-list-attack li::before { content: '⚠'; color: #f59e0b; }
 
-.intel-angle-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 1.25rem;
-  margin-bottom: .75rem;
-}
-.intel-angle-name {
-  font-weight: 700;
-  color: #4361ee;
-  font-size: .95rem;
-  margin-bottom: .5rem;
-}
+.intel-avatar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: .75rem; }
+.intel-avatar-card { background: #f8fafc; border-radius: 10px; padding: 1rem 1.25rem; }
+.intel-avatar-name { font-weight: 700; color: #1a1a2e; margin-bottom: .35rem; }
+.intel-avatar-pain { font-size: .9rem; color: #555; line-height: 1.5; }
+
+.intel-angle-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem; margin-bottom: .75rem; }
+.intel-angle-name { font-weight: 700; color: #4361ee; font-size: .95rem; margin-bottom: .5rem; }
 .intel-angle-hook {
-  font-style: italic;
-  color: #1a1a2e;
-  font-size: 1rem;
-  margin-bottom: .5rem;
-  padding: .5rem .75rem;
-  background: #f0f4ff;
-  border-radius: 6px;
+  font-style: italic; color: #1a1a2e; font-size: 1rem;
+  margin-bottom: .5rem; padding: .5rem .75rem;
+  background: #f0f4ff; border-radius: 6px;
 }
-.intel-angle-why {
-  font-size: .875rem;
-  color: #666;
-  line-height: 1.5;
-}
+.intel-angle-why { font-size: .875rem; color: #666; line-height: 1.5; }
 
 .intel-hook-list {
-  padding-left: 1.5rem;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: .75rem;
+  padding-left: 1.5rem; margin: 0;
+  display: flex; flex-direction: column; gap: .75rem;
 }
 .intel-hook-list li {
-  font-size: 1rem;
-  color: #1a1a2e;
-  line-height: 1.5;
-  padding: .5rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  font-size: 1rem; color: #1a1a2e; line-height: 1.5;
+  padding: .5rem 0; border-bottom: 1px solid #f0f0f0;
 }
-.intel-hook-list li:last-child {
-  border-bottom: none;
+.intel-hook-list li:last-child { border-bottom: none; }
+
+/* Reddit posts */
+.reddit-post {
+  border: 1px solid #e2e8f0; border-radius: 8px;
+  padding: 1rem; margin-bottom: .75rem; background: #fafafa;
 }
+.reddit-meta { font-size: .78rem; color: #888; margin-bottom: .4rem; }
+.reddit-title { font-weight: 600; color: #1a1a2e; margin-bottom: .5rem; font-size: .95rem; }
+.reddit-text { font-size: .875rem; color: #555; line-height: 1.5; }
+
+/* Source badges */
+.source-badge {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .4rem .9rem; border-radius: 20px;
+  font-size: .82rem; font-weight: 600;
+}
+.source-badge-ok { background: #dcfce7; color: #16a34a; }
+.source-badge-no { background: #f1f5f9; color: #94a3b8; }
 </style>
 
 <script>
+let _loadTimer;
+
+function _animateLoading() {
+  const steps = ['step-page','step-amazon','step-reddit','step-ai'];
+  const labels = ['Scraping product page...','Pulling Amazon reviews...','Checking Reddit...','Running AI analysis...'];
+  let i = 0;
+  document.getElementById(steps[0]).className = 'load-step load-step-active';
+  _loadTimer = setInterval(() => {
+    if (i < steps.length - 1) {
+      document.getElementById(steps[i]).className = 'load-step load-step-done';
+      i++;
+      document.getElementById(steps[i]).className = 'load-step load-step-active';
+      document.getElementById('loading-status').textContent = labels[i];
+    }
+  }, 7000);
+}
+
 async function runAnalysis() {
   const url = document.getElementById('competitorUrl').value.trim();
-  if (!url) {
-    document.getElementById('competitorUrl').focus();
-    return;
-  }
+  if (!url) { document.getElementById('competitorUrl').focus(); return; }
 
-  // Show loading
   document.getElementById('input-card').style.display = 'none';
   document.getElementById('loading-card').style.display = 'block';
   document.getElementById('error-card').style.display = 'none';
   document.getElementById('results-section').style.display = 'none';
+  _animateLoading();
 
   try {
     const resp = await fetch('/tools/ad-intel/analyze/', {
@@ -411,15 +416,12 @@ async function runAnalysis() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url }),
     });
-
     const data = await resp.json();
-
-    if (!resp.ok || data.error) {
-      throw new Error(data.error || 'Analysis failed');
-    }
-
+    if (!resp.ok || data.error) throw new Error(data.error || 'Analysis failed');
+    clearInterval(_loadTimer);
     renderResults(data);
   } catch (err) {
+    clearInterval(_loadTimer);
     document.getElementById('loading-card').style.display = 'none';
     document.getElementById('error-card').style.display = 'block';
     document.getElementById('error-message').textContent = err.message || 'Something went wrong. Try again.';
@@ -430,6 +432,16 @@ async function runAnalysis() {
 function renderResults(d) {
   document.getElementById('loading-card').style.display = 'none';
 
+  // Sources
+  const src = d.data_sources || {};
+  const amzCount = d.amazon_review_count || 0;
+  const redditCount = (d.reddit_posts || []).length;
+  document.getElementById('res-sources').innerHTML = `
+    <span class="source-badge source-badge-ok">✓ Product page</span>
+    <span class="source-badge ${amzCount > 0 ? 'source-badge-ok' : 'source-badge-no'}">${amzCount > 0 ? `✓ ${amzCount} Amazon reviews` : '✗ Amazon (not found)'}</span>
+    <span class="source-badge ${redditCount > 0 ? 'source-badge-ok' : 'source-badge-no'}">${redditCount > 0 ? `✓ ${redditCount} Reddit posts` : '✗ Reddit (not found)'}</span>
+  `;
+
   // Overview
   document.getElementById('res-brand').textContent = d.brand_name || '—';
   document.getElementById('res-product').textContent = d.product_name || '—';
@@ -437,13 +449,27 @@ function renderResults(d) {
   document.getElementById('res-price').textContent = d.price_point || 'Not listed';
   document.getElementById('res-positioning').textContent = d.positioning_summary || '';
 
+  // Customer Voice
+  const cv = d.customer_voice || {};
+  renderList('res-pain-language', cv.pain_language || []);
+  renderList('res-top-praises', cv.top_praises || []);
+  renderList('res-transform-phrases', cv.transformation_phrases || []);
+  if (d.amazon_product_url) {
+    document.getElementById('res-amazon-link').href = d.amazon_product_url;
+    document.getElementById('amazon-link-row').style.display = 'block';
+  }
+
+  // Language bank — clickable chips to copy
+  const bank = d.ad_copy_language_bank || [];
+  document.getElementById('res-language-bank').innerHTML = bank.map(phrase =>
+    `<span class="lang-chip" onclick="copyChip(this)">${escHtml(phrase)}</span>`
+  ).join('');
+
   // Core claims
-  const claimsList = document.getElementById('res-claims');
-  claimsList.innerHTML = (d.core_claims || []).map(c => `<li>${escHtml(c)}</li>`).join('');
+  renderList('res-claims', d.core_claims || []);
 
   // Avatars
-  const avatarGrid = document.getElementById('res-avatars');
-  avatarGrid.innerHTML = (d.target_avatars || []).map(a => `
+  document.getElementById('res-avatars').innerHTML = (d.target_avatars || []).map(a => `
     <div class="intel-avatar-card">
       <div class="intel-avatar-name">${escHtml(a.avatar || '')}</div>
       <div class="intel-avatar-pain">${escHtml(a.pain_point || '')}</div>
@@ -451,8 +477,7 @@ function renderResults(d) {
   `).join('');
 
   // Angles
-  const anglesDiv = document.getElementById('res-angles');
-  anglesDiv.innerHTML = (d.proven_angles || []).map(a => `
+  document.getElementById('res-angles').innerHTML = (d.proven_angles || []).map(a => `
     <div class="intel-angle-card">
       <div class="intel-angle-name">${escHtml(a.angle || '')}</div>
       <div class="intel-angle-hook">"${escHtml(a.hook_example || '')}"</div>
@@ -461,31 +486,48 @@ function renderResults(d) {
   `).join('');
 
   // Hooks
-  const hooksList = document.getElementById('res-hooks');
-  hooksList.innerHTML = (d.hook_ideas || []).map(h => `<li>${escHtml(h)}</li>`).join('');
+  document.getElementById('res-hooks').innerHTML = (d.hook_ideas || []).map(h =>
+    `<li>${escHtml(h)}</li>`
+  ).join('');
 
-  // Gaps
-  const gapsList = document.getElementById('res-gaps');
-  gapsList.innerHTML = (d.content_gaps || []).map(g => `<li>${escHtml(g)}</li>`).join('');
+  // Reddit posts
+  const redditPosts = d.reddit_posts || [];
+  if (redditPosts.length > 0) {
+    document.getElementById('card-reddit').style.display = 'block';
+    document.getElementById('res-reddit-posts').innerHTML = redditPosts.map(p => `
+      <div class="reddit-post">
+        <div class="reddit-meta">r/${escHtml(p.subreddit)} · ${p.score} upvotes</div>
+        <div class="reddit-title"><a href="${escHtml(p.url)}" target="_blank" rel="noopener">${escHtml(p.title)}</a></div>
+      </div>
+    `).join('');
+  }
 
-  // Vulnerabilities
-  const vulnsList = document.getElementById('res-vulns');
-  vulnsList.innerHTML = (d.positioning_vulnerabilities || []).map(v => `<li>${escHtml(v)}</li>`).join('');
+  // Gaps + Vulns
+  renderList('res-gaps', d.content_gaps || []);
+  renderList('res-vulns', d.positioning_vulnerabilities || []);
 
   // Meta link
   const metaLink = document.getElementById('res-meta-link');
   metaLink.href = d.meta_ad_library_url || `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=US&q=${encodeURIComponent(d.brand_name || '')}`;
-  if (d.brand_name) {
-    metaLink.textContent = `View ${d.brand_name}'s Ads on Meta Library →`;
-  }
+  if (d.brand_name) metaLink.textContent = `View ${d.brand_name}'s Ads on Meta Library →`;
 
   document.getElementById('results-section').style.display = 'block';
   document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  // Track
   if (window.reorderly && window.reorderly.track) {
-    window.reorderly.track('tool_used', { tool_name: 'Ad Intelligence', brand_analyzed: d.brand_name });
+    window.reorderly.track('tool_used', { tool_name: 'Ad Intelligence V2', brand_analyzed: d.brand_name });
   }
+}
+
+function renderList(id, items) {
+  document.getElementById(id).innerHTML = items.map(i => `<li>${escHtml(i)}</li>`).join('');
+}
+
+function copyChip(el) {
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    el.classList.add('copied');
+    setTimeout(() => el.classList.remove('copied'), 2000);
+  });
 }
 
 function resetTool() {
@@ -493,21 +535,20 @@ function resetTool() {
   document.getElementById('error-card').style.display = 'none';
   document.getElementById('input-card').style.display = 'block';
   document.getElementById('competitorUrl').value = '';
+  ['step-page','step-amazon','step-reddit','step-ai'].forEach(id => {
+    document.getElementById(id).className = 'load-step';
+  });
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function escHtml(str) {
   return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Allow Enter key on input
-document.getElementById('competitorUrl').addEventListener('keydown', function(e) {
+document.getElementById('competitorUrl').addEventListener('keydown', e => {
   if (e.key === 'Enter') runAnalysis();
 });
 </script>
-
 {% endblock %}
