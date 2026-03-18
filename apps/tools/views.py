@@ -1,6 +1,16 @@
-from django.shortcuts import render
+import json
+import os
+import re
 
-BASE = 'https://reorderly.com'
+import anthropic
+import requests
+from bs4 import BeautifulSoup
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+BASE = 'https://reorderly.me'
 
 TOOLS = [
     {
@@ -174,3 +184,124 @@ def inventory_health_score(request):
         description='Get your Shopify store\'s inventory health score out of 100. Answer 8 questions and get a personalized report with specific recommendations.',
         slug='inventory-health-score',
     ))
+
+
+def ad_intel(request):
+    return render(request, 'tools/ad_intel.html', _ctx(
+        title='Ad Intelligence Tool — Analyze Any Competitor\'s Ad Angles — Reorderly',
+        description='Paste a competitor\'s product URL and instantly get a breakdown of their positioning, proven ad angles, hooks to steal, and content gaps to exploit.',
+        slug='ad-intel',
+    ))
+
+
+@csrf_exempt
+@require_POST
+def api_ad_intel_analyze(request):
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    url = data.get('url', '').strip()
+    if not url:
+        return JsonResponse({'error': 'URL is required'}, status=400)
+
+    if not url.startswith(('http://', 'https://')):
+        url = 'https://' + url
+
+    # Scrape the competitor product page
+    try:
+        headers = {
+            'User-Agent': (
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/120.0.0.0 Safari/537.36'
+            ),
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+        }
+        resp = requests.get(url, headers=headers, timeout=15)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, 'html.parser')
+    except requests.RequestException as e:
+        return JsonResponse({'error': f'Could not fetch URL: {str(e)}'}, status=400)
+
+    # Extract structured content from the page
+    title_tag = soup.find('title')
+    page_title = title_tag.get_text(strip=True) if title_tag else ''
+
+    meta_desc_tag = soup.find('meta', attrs={'name': 'description'})
+    meta_desc = meta_desc_tag.get('content', '') if meta_desc_tag else ''
+
+    og_title_tag = soup.find('meta', attrs={'property': 'og:title'})
+    og_title = og_title_tag.get('content', '') if og_title_tag else ''
+
+    og_desc_tag = soup.find('meta', attrs={'property': 'og:description'})
+    og_desc = og_desc_tag.get('content', '') if og_desc_tag else ''
+
+    # Remove script, style, nav, footer noise
+    for tag in soup(['script', 'style', 'nav', 'footer', 'header', 'noscript', 'svg', 'iframe']):
+        tag.decompose()
+
+    body_text = soup.get_text(separator='\n', strip=True)
+    body_text = re.sub(r'\n{3,}', '\n\n', body_text)[:10000]
+
+    # Claude analysis
+    api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+    if not api_key:
+        return JsonResponse({'error': 'AI analysis not configured'}, status=500)
+
+    client = anthropic.Anthropic(api_key=api_key)
+
+    prompt = f"""You are an expert DTC ecommerce ad creative analyst with deep experience in Facebook/Instagram advertising. Analyze this competitor product page and return a structured intelligence report.
+
+URL: {url}
+Page Title: {page_title}
+OG Title: {og_title}
+Meta Description: {meta_desc}
+OG Description: {og_desc}
+
+Page Content (first 10,000 chars):
+{body_text}
+
+Return ONLY a valid JSON object (no markdown, no explanation) with exactly these keys:
+
+{{
+  "brand_name": "string — the brand name",
+  "product_name": "string — the specific product name",
+  "product_category": "string — e.g. skincare, supplements, fitness equipment",
+  "positioning_summary": "string — 2-3 sentences on how they position this product and who it's for",
+  "price_point": "string — price if found, or 'Not listed'",
+  "core_claims": ["array of strings — top 5-7 specific claims they make about the product"],
+  "target_avatars": [
+    {{"avatar": "string", "pain_point": "string"}}
+  ],
+  "proven_angles": [
+    {{
+      "angle": "string — the ad angle name",
+      "hook_example": "string — a specific example hook that would work for this angle",
+      "why_it_works": "string — why this angle converts for this product"
+    }}
+  ],
+  "hook_ideas": ["array of 5 specific scroll-stopping hook lines you could run against this product/niche"],
+  "content_gaps": ["array of strings — angles they are NOT hitting that represent opportunities"],
+  "positioning_vulnerabilities": ["array of strings — weak points in their positioning you can attack"],
+  "meta_ad_library_url": "string — Facebook Ads Library search URL: https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=US&q=BRAND_NAME_HERE"
+}}"""
+
+    try:
+        response = client.messages.create(
+            model='claude-opus-4-5',
+            max_tokens=2500,
+            messages=[{'role': 'user', 'content': prompt}],
+        )
+        result_text = response.content[0].text.strip()
+        result_text = re.sub(r'^```(?:json)?\s*', '', result_text)
+        result_text = re.sub(r'\s*```$', '', result_text)
+        result = json.loads(result_text)
+    except json.JSONDecodeError as e:
+        return JsonResponse({'error': f'Failed to parse AI response: {str(e)}'}, status=500)
+    except anthropic.APIError as e:
+        return JsonResponse({'error': f'AI service error: {str(e)}'}, status=500)
+
+    return JsonResponse(result)

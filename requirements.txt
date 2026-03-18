@@ -15,3 +15,4 @@ dj-database-url==2.1.0
 # AI + integrations
 anthropic>=0.32.0
 requests>=2.31.0
+beautifulsoup4>=4.12.0

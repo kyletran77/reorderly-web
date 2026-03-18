@@ -13,4 +13,6 @@ urlpatterns = [
     path('moq-negotiation-email/', views.moq_negotiation_email, name='moq_negotiation_email'),
     path('stocky-migration-checklist/', views.stocky_migration_checklist, name='stocky_migration_checklist'),
     path('inventory-health-score/', views.inventory_health_score, name='inventory_health_score'),
+    path('ad-intel/', views.ad_intel, name='ad_intel'),
+    path('ad-intel/analyze/', views.api_ad_intel_analyze, name='api_ad_intel_analyze'),
 ]
