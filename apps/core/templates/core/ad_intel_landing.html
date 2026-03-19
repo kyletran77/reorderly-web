@@ -67,6 +67,48 @@
 </section>
 
 <!-- ═══════════════════════════════════════
+     PAIN POINTS
+═══════════════════════════════════════ -->
+<section class="ai-pain-section">
+  <div class="container">
+    <div class="ai-pain-label">Sound familiar?</div>
+    <h2 class="ai-pain-h2">Running ads is expensive.<br>Running the wrong ad is brutal.</h2>
+    <div class="ai-pain-grid">
+
+      <div class="ai-pain-card">
+        <div class="ai-pain-icon">🕳️</div>
+        <h3>The research rabbit hole</h3>
+        <p>You opened 14 tabs. You pulled competitor ads. You read three Reddit threads. You watched two UGC examples. Two hours later you still haven't written the brief — and you're not sure any of that research was actually useful.</p>
+      </div>
+
+      <div class="ai-pain-card">
+        <div class="ai-pain-icon">🤷</div>
+        <h3>Comparison paralysis</h3>
+        <p>You've got three hooks. You think hook B is stronger but hook A performed last month. You ask the copywriter. She likes hook C. You schedule a call to align. The ad doesn't ship this week.</p>
+      </div>
+
+      <div class="ai-pain-card">
+        <div class="ai-pain-icon">😬</div>
+        <h3>The launch anxiety</h3>
+        <p>You wrote the ad. It sounds good. But is it grounded? Is the angle actually what customers care about, or is it what you think they care about? You've got $3k of budget riding on a gut feeling.</p>
+      </div>
+
+      <div class="ai-pain-card">
+        <div class="ai-pain-icon">🔥</div>
+        <h3>The post-mortem spiral</h3>
+        <p>The ad flopped. Now you're back to square one — except you don't know why it failed. Was it the hook? The angle? The audience? You run another round of research. The cycle starts over.</p>
+      </div>
+
+    </div>
+    <div class="ai-pain-bridge">
+      There's a version of this job where you don't research. You don't compare. You don't guess.<br>
+      You wake up, read a drafted ad built from real customer data, and approve it or skip it.<br>
+      <strong>That's what we're building.</strong>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
      ACTION OVER MOTION
 ═══════════════════════════════════════ -->
 <section class="ai-aom-section">
@@ -506,6 +548,47 @@
 }
 .ai-mockup-btn-approve { background: #0d9488; color: #fff; }
 .ai-mockup-btn-pass { background: #f1f5f9; color: #64748b; }
+
+/* Pain points section */
+.ai-pain-section {
+  background: #fff;
+  padding: 80px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.ai-pain-label {
+  font-size: .75rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: #ef4444; margin-bottom: .75rem;
+}
+.ai-pain-h2 {
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 800; color: #0f172a;
+  line-height: 1.2; margin-bottom: 2.5rem;
+  letter-spacing: -.02em;
+}
+.ai-pain-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 3rem;
+}
+@media (max-width: 700px) { .ai-pain-grid { grid-template-columns: 1fr; } }
+.ai-pain-card {
+  border: 1px solid #fee2e2;
+  background: #fffafa;
+  border-radius: 14px;
+  padding: 1.5rem;
+}
+.ai-pain-icon { font-size: 1.75rem; margin-bottom: .75rem; }
+.ai-pain-card h3 { font-size: 1rem; font-weight: 700; color: #0f172a; margin-bottom: .5rem; }
+.ai-pain-card p { font-size: .9rem; color: #64748b; line-height: 1.7; margin: 0; }
+.ai-pain-bridge {
+  background: #f8fafc;
+  border-left: 4px solid #0d9488;
+  border-radius: 0 12px 12px 0;
+  padding: 1.5rem 2rem;
+  font-size: 1rem; color: #475569; line-height: 1.8;
+}
+.ai-pain-bridge strong { color: #0f172a; }
 
 /* Action over Motion section */
 .ai-aom-section {
