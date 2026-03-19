@@ -37,8 +37,8 @@ def stocky_alternative(request):
 
 def pricing(request):
     context = {
-        'title': 'Pricing — Reorderly AI Supplier PO Agent for Shopify',
-        'description': 'Reorderly is free during early access. Paid plans starting at $149/month. No credit card required to get started.',
+        'title': 'Pricing — Ad Intel by Reorderly',
+        'description': 'Unlimited competitor analysis free forever. Pro plan ($49/mo) adds daily drafted ads, overnight monitoring, and ad generation. No credit card required.',
         'canonical': f'{BASE_DOMAIN}/pricing/',
         'og_image': f'{BASE_DOMAIN}/static/images/og-image.png',
         'waitlist_count': _waitlist_count(),
