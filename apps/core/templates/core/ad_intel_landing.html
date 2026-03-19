@@ -32,26 +32,34 @@
 </section>
 
 <!-- ═══════════════════════════════════════
-     PROBLEM BAR
+     ACTION OVER MOTION
 ═══════════════════════════════════════ -->
-<section class="ai-problem-bar">
+<section class="ai-aom-section">
   <div class="container">
-    <div class="ai-problem-grid">
-      <div class="ai-problem-item">
-        <span class="ai-problem-x">✗</span>
-        <span>Burning money on untested creative</span>
+    <div class="ai-aom-inner">
+      <div class="ai-aom-left">
+        <div class="ai-aom-label">The problem with most ad workflows</div>
+        <h2 class="ai-aom-h2">You're doing a lot.<br>But are you shipping?</h2>
+        <p class="ai-aom-p">Most media buyers are in motion — researching, planning, meeting, reviewing. But motion isn't action. The ad that ships and gets data beats the strategy deck that doesn't.</p>
+        <div class="ai-aom-philosophy">Action over motion.</div>
       </div>
-      <div class="ai-problem-item">
-        <span class="ai-problem-x">✗</span>
-        <span>Guessing what angles work in your niche</span>
-      </div>
-      <div class="ai-problem-item">
-        <span class="ai-problem-x">✗</span>
-        <span>Writing copy that sounds like an AI wrote it</span>
-      </div>
-      <div class="ai-problem-item">
-        <span class="ai-problem-x">✗</span>
-        <span>No idea what competitors are actually running</span>
+      <div class="ai-aom-right">
+        <div class="ai-motion-list">
+          <div class="ai-motion-item ai-motion-bad">
+            <span class="ai-motion-icon">🔄</span>
+            <div>
+              <strong>Motion</strong>
+              <p>The weekly "what should we test next" meeting. The Slack thread asking the copywriter what hook to try. The spreadsheet tracking what's been tested. The mood board. The brainstorm. The brief that never gets written.</p>
+            </div>
+          </div>
+          <div class="ai-motion-item ai-motion-good">
+            <span class="ai-motion-icon">⚡</span>
+            <div>
+              <strong>Action</strong>
+              <p>Wake up. An ad is already drafted — built overnight from competitor data and real customer language. You read it in 60 seconds. You approve it. It runs. You get data. That's it.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -403,20 +411,56 @@
 }
 .ai-hero-proof span::before { content: ''; }
 
-.ai-problem-bar {
-  background: #f8fafc;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 1.5rem 0;
+/* Action over Motion section */
+.ai-aom-section {
+  background: #0f172a;
+  padding: 80px 0;
 }
-.ai-problem-grid {
-  display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;
+.ai-aom-inner {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;
 }
-.ai-problem-item {
-  display: flex; align-items: center; gap: .5rem;
-  font-size: .9rem; color: #475569;
+@media (max-width: 800px) { .ai-aom-inner { grid-template-columns: 1fr; gap: 2.5rem; } }
+.ai-aom-label {
+  font-size: .72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: #475569; margin-bottom: .75rem;
 }
-.ai-problem-x { color: #ef4444; font-weight: 700; font-size: 1.1rem; }
+.ai-aom-h2 {
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 800; color: #f8fafc;
+  line-height: 1.2; margin-bottom: 1rem;
+  letter-spacing: -.02em;
+}
+.ai-aom-p { font-size: 1rem; color: #94a3b8; line-height: 1.7; margin-bottom: 1.5rem; }
+.ai-aom-philosophy {
+  display: inline-block;
+  font-size: 1.1rem; font-weight: 800;
+  color: #0d9488;
+  border-left: 3px solid #0d9488;
+  padding-left: .85rem;
+  letter-spacing: -.01em;
+}
+.ai-motion-list { display: flex; flex-direction: column; gap: 1rem; }
+.ai-motion-item {
+  display: flex; gap: 1rem; align-items: flex-start;
+  border-radius: 12px; padding: 1.25rem 1.5rem;
+}
+.ai-motion-bad {
+  background: rgba(239,68,68,.08);
+  border: 1px solid rgba(239,68,68,.2);
+}
+.ai-motion-good {
+  background: rgba(13,148,136,.08);
+  border: 1px solid rgba(13,148,136,.25);
+}
+.ai-motion-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: .1rem; }
+.ai-motion-item strong {
+  display: block; font-size: .85rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em;
+  margin-bottom: .35rem;
+}
+.ai-motion-bad strong { color: #fca5a5; }
+.ai-motion-good strong { color: #2dd4bf; }
+.ai-motion-item p { font-size: .875rem; color: #94a3b8; line-height: 1.65; margin: 0; }
 
 .ai-section { padding: 80px 0; }
 .ai-section-alt { background: #f8fafc; }
