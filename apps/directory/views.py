@@ -19,8 +19,8 @@ def directory_index(request):
             categories.append({'code': code, 'label': label, 'count': count})
 
     return render(request, 'directory/index.html', {
-        'title': 'Shopify Supplier & Store Directory — Reorderly',
-        'description': 'Browse thousands of Shopify suppliers and top DTC stores. Filter by category, country, and size. Powered by US import data from Import Yeti.',
+        'title': 'DTC Store & Supplier Directory — Find Competitors to Analyze — Reorderly',
+        'description': 'Browse top DTC Shopify stores by niche and verified overseas suppliers. Find your competitors, then run Ad Intel to mine their customer language and ship better ads.',
         'canonical': f'{BASE}/directory/',
         'supplier_count': supplier_count,
         'store_count': store_count,

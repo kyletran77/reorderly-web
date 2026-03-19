@@ -102,8 +102,8 @@ def _ctx(title, description, slug, extra=None):
 
 def tools_index(request):
     return render(request, 'tools/index.html', _ctx(
-        title='Free Shopify Inventory Tools — Reorderly',
-        description='10 free tools for Shopify merchants: PO email generator, reorder point calculator, stockout cost calculator, safety stock calculator, and more.',
+        title='Free DTC Ad & Inventory Tools — Reorderly',
+        description='Ad Intel competitor analysis, inventory calculators, PO generators — all free, no signup. Built for DTC operators who want to ship more ads and waste less time researching.',
         slug=None,
     ))
 
