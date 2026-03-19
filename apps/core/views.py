@@ -58,9 +58,9 @@ def ad_intel_landing(request):
         {'feature': 'Free to start', 'chatgpt': '~ Limited', 'us': '✓ Unlimited analysis', 'atria': '✗ $129/mo minimum'},
     ]
     context = {
-        'title': 'Ad Intel — Competitor Intelligence for DTC Media Buyers — Reorderly',
-        'description': 'Scrape competitor product pages, mine Amazon reviews and Reddit VOC, and get proven ad angles with hooks built from real customer language. Free to start.',
-        'canonical': f'{BASE_DOMAIN}/ad-intel/',
+        'title': 'Ad Intel — Stop Researching. Start Shipping Ads.',
+        'description': 'Your AI media buyer. Analyzes competitors, mines real customer language from Amazon & Reddit, drafts human-sounding ads daily. Free to start — no fluff, just ads that ship.',
+        'canonical': f'{BASE_DOMAIN}/',
         'og_image': f'{BASE_DOMAIN}/static/images/og-image.png',
         'compare_rows': compare_rows,
     }
@@ -88,7 +88,9 @@ def terms(request):
 def sitemap(request):
     urls = [
         {'loc': f'{BASE_DOMAIN}/', 'changefreq': 'weekly', 'priority': '1.0'},
-        {'loc': f'{BASE_DOMAIN}/stocky-alternative/', 'changefreq': 'monthly', 'priority': '0.9'},
+        {'loc': f'{BASE_DOMAIN}/ad-intel/', 'changefreq': 'weekly', 'priority': '0.95'},
+        {'loc': f'{BASE_DOMAIN}/tools/ad-intel/', 'changefreq': 'weekly', 'priority': '0.9'},
+        {'loc': f'{BASE_DOMAIN}/stocky-alternative/', 'changefreq': 'monthly', 'priority': '0.7'},
         {'loc': f'{BASE_DOMAIN}/pricing/', 'changefreq': 'monthly', 'priority': '0.8'},
         {'loc': f'{BASE_DOMAIN}/directory/', 'changefreq': 'weekly', 'priority': '0.9'},
         {'loc': f'{BASE_DOMAIN}/directory/suppliers/', 'changefreq': 'weekly', 'priority': '0.8'},
