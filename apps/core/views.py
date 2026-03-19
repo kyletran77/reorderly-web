@@ -46,6 +46,27 @@ def pricing(request):
     return render(request, 'core/pricing.html', context)
 
 
+def ad_intel_landing(request):
+    compare_rows = [
+        {'feature': 'Real-time competitor product page scrape', 'chatgpt': '✗ Can\'t browse', 'us': '✓ Always live', 'atria': '✗ Ad library only'},
+        {'feature': 'Amazon review VOC mining', 'chatgpt': '✗ No access', 'us': '✓ Auto-pulled', 'atria': '~ Surface level'},
+        {'feature': 'Reddit community language', 'chatgpt': '✗ No access', 'us': '✓ Auto-pulled', 'atria': '✗ Not available'},
+        {'feature': 'Ad angles from real customer data', 'chatgpt': '✗ Invented', 'us': '✓ Data-grounded', 'atria': '~ Ad library only'},
+        {'feature': 'Native ad generation', 'chatgpt': '~ Generic voice', 'us': '✓ Human voice', 'atria': '~ AI voice'},
+        {'feature': 'Daily drafted ad', 'chatgpt': '✗ Manual', 'us': '✓ Automated', 'atria': '✗ Not available'},
+        {'feature': 'Reasoning behind every ad', 'chatgpt': '✗ No data', 'us': '✓ Full citations', 'atria': '✗ No reasoning'},
+        {'feature': 'Free to start', 'chatgpt': '~ Limited', 'us': '✓ Unlimited analysis', 'atria': '✗ $129/mo minimum'},
+    ]
+    context = {
+        'title': 'Ad Intel — Competitor Intelligence for DTC Media Buyers — Reorderly',
+        'description': 'Scrape competitor product pages, mine Amazon reviews and Reddit VOC, and get proven ad angles with hooks built from real customer language. Free to start.',
+        'canonical': f'{BASE_DOMAIN}/ad-intel/',
+        'og_image': f'{BASE_DOMAIN}/static/images/og-image.png',
+        'compare_rows': compare_rows,
+    }
+    return render(request, 'core/ad_intel_landing.html', context)
+
+
 def privacy(request):
     context = {
         'title': 'Privacy Policy — Reorderly',
