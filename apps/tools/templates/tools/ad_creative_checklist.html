@@ -1,0 +1,103 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+<style>{% include 'tools/ad_tool_styles.html' %}</style>
+<div class="ad-tool-page">
+  <div class="container">
+    <div class="ad-tool-header">
+      <a href="/tools/" class="ad-tool-back">← All Tools</a>
+      <div class="ad-tool-badge">✅ Free · Interactive</div>
+      <h1>Ad Creative Checklist</h1>
+      <p>Run your creative through 20 proven checks before you publish. Catch the mistakes that tank performance before they cost you money.</p>
+    </div>
+
+    <div class="checklist-card">
+      <div class="checklist-progress-bar"><div id="progress-fill" class="checklist-progress-fill" style="width:0%"></div></div>
+      <div class="checklist-score-row">
+        <span id="score-text" class="checklist-score-text">0 / 20 checked</span>
+        <span id="score-badge" class="checklist-score-badge">Not started</span>
+      </div>
+
+      <div class="checklist-section">
+        <h3 class="checklist-section-title">Hook (first 3 seconds)</h3>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">Hook stops the scroll in under 3 seconds</span><span class="checklist-item-tip">If you wouldn't stop scrolling, neither will your audience.</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">Hook does NOT start with your brand name or logo</span><span class="checklist-item-tip">Lead with the problem or curiosity, not your brand.</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">Visual hook matches the text hook (no mismatch)</span><span class="checklist-item-tip">Dissonance between visual and text kills retention.</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">No text in the first frame for video ads</span><span class="checklist-item-tip">Let the visual do the stopping, then add text.</span></div></label>
+      </div>
+
+      <div class="checklist-section">
+        <h3 class="checklist-section-title">Copy & Voice</h3>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">No em dashes (—) in the copy</span><span class="checklist-item-tip">Em dashes are the #1 AI tell. Use commas or periods instead.</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">No exclamation marks</span><span class="checklist-item-tip">Exclamation marks signal desperation. Let the benefit sell.</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">Copy sounds like a real person, not a press release</span><span class="checklist-item-tip">Read it out loud. If it sounds weird said aloud, rewrite it.</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">Claims are specific, not vague ("lost 12 lbs" not "lost weight")</span><span class="checklist-item-tip">Specific = credible. Vague = ignored.</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">No banned words: "revolutionary", "game-changer", "unlock", "elevate"</span></div></label>
+      </div>
+
+      <div class="checklist-section">
+        <h3 class="checklist-section-title">Offer & CTA</h3>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">The offer is clear in the first 5 seconds</span><span class="checklist-item-tip">Don't make people guess what you're selling.</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">CTA is specific (not "Shop Now" or "Click Here")</span><span class="checklist-item-tip">Specific CTAs outperform generic ones consistently.</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">There is only ONE call-to-action</span><span class="checklist-item-tip">Multiple CTAs = confusion = no clicks.</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">The landing page matches what the ad promises</span><span class="checklist-item-tip">Ad-to-page mismatch kills conversion rates.</span></div></label>
+      </div>
+
+      <div class="checklist-section">
+        <h3 class="checklist-section-title">Visual & Format</h3>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">Creative is formatted for the right placement (9:16, 1:1, etc.)</span><span class="checklist-item-tip">Wrong aspect ratio = cropped creative = wasted impression.</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">Text is readable on mobile (min 14px equivalent)</span><span class="checklist-item-tip">75% of Meta impressions are on mobile.</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">Product is visible in the first frame</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">Captions/subtitles included for video (85% watch without sound)</span></div></label>
+      </div>
+
+      <div class="checklist-section">
+        <h3 class="checklist-section-title">Strategy</h3>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">This ad is based on a real customer pain point (not what you think they want)</span><span class="checklist-item-tip">Mine Amazon reviews and Reddit before writing.</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">You know what angle you're testing (curiosity, pain, transformation, social proof)</span></div></label>
+        <label class="checklist-item"><input type="checkbox" onchange="updateScore()"><span class="checklist-checkbox"></span><div class="checklist-item-content"><span class="checklist-item-text">You have a hypothesis for why this should work</span><span class="checklist-item-tip">If you can't explain why it should work, don't publish it yet.</span></div></label>
+      </div>
+    </div>
+
+    <div class="ad-tool-next-cta"><p>Creative passes the checklist. Now base your angles on real competitor data.</p><a href="/tools/ad-intel/" class="ad-tool-btn-ghost">Run Ad Intel on a competitor →</a></div>
+  </div>
+</div>
+<style>
+.checklist-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; max-width: 720px; }
+.checklist-progress-bar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; margin-bottom: 0.75rem; overflow: hidden; }
+.checklist-progress-fill { height: 100%; background: linear-gradient(90deg, #14b8a6, #6366f1); border-radius: 99px; transition: width 0.3s ease; }
+.checklist-score-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.checklist-score-text { font-size: 0.82rem; color: rgba(255,255,255,0.4); }
+.checklist-score-badge { font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: 99px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); transition: all 0.3s; }
+.checklist-score-badge.good { background: rgba(245,158,11,0.12); color: #fbbf24; }
+.checklist-score-badge.great { background: rgba(20,184,166,0.12); color: #14b8a6; }
+.checklist-score-badge.perfect { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+.checklist-section { margin-bottom: 1.5rem; }
+.checklist-section:last-child { margin-bottom: 0; }
+.checklist-section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); margin: 0 0 0.75rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.5rem; }
+.checklist-section:first-of-type .checklist-section-title { border-top: none; padding-top: 0; }
+.checklist-item { display: flex; gap: 0.85rem; align-items: flex-start; padding: 0.6rem 0; cursor: pointer; }
+.checklist-item input[type=checkbox] { display: none; }
+.checklist-checkbox { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.2); border-radius: 5px; flex-shrink: 0; margin-top: 2px; transition: all 0.15s; position: relative; }
+.checklist-item input:checked ~ .checklist-checkbox { background: #14b8a6; border-color: #14b8a6; }
+.checklist-item input:checked ~ .checklist-checkbox::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-52%); font-size: 11px; color: #fff; font-weight: 700; }
+.checklist-item input:checked ~ .checklist-item-content .checklist-item-text { color: rgba(255,255,255,0.3); text-decoration: line-through; }
+.checklist-item-content { flex: 1; }
+.checklist-item-text { font-size: 0.88rem; color: rgba(255,255,255,0.7); line-height: 1.45; display: block; transition: color 0.15s; }
+.checklist-item-tip { font-size: 0.75rem; color: rgba(255,255,255,0.28); display: block; margin-top: 0.2rem; }
+</style>
+<script>
+function updateScore() {
+  const total = document.querySelectorAll('.checklist-item input').length;
+  const checked = document.querySelectorAll('.checklist-item input:checked').length;
+  const pct = Math.round(checked / total * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('score-text').textContent = `${checked} / ${total} checked`;
+  const badge = document.getElementById('score-badge');
+  if (pct === 100) { badge.textContent = '🏆 Ready to publish'; badge.className = 'checklist-score-badge perfect'; }
+  else if (pct >= 80) { badge.textContent = '✓ Looking good'; badge.className = 'checklist-score-badge great'; }
+  else if (pct >= 50) { badge.textContent = 'Keep going'; badge.className = 'checklist-score-badge good'; }
+  else { badge.textContent = 'Not ready yet'; badge.className = 'checklist-score-badge'; }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+<style>{% include 'tools/ad_tool_styles.html' %}</style>
+<div class="ad-tool-page">
+  <div class="container">
+    <div class="ad-tool-header">
+      <a href="/tools/" class="ad-tool-back">← All Tools</a>
+      <div class="ad-tool-badge">🧪 Free · No Signup</div>
+      <h1>Ad Headline Scorer</h1>
+      <p>Enter two headlines. Get a score and clear reasoning on which will convert better — before you spend a dollar testing it.</p>
+    </div>
+    <div class="ad-tool-form-card">
+      <div class="ad-tool-form-group">
+        <label>Headline A</label>
+        <input type="text" id="headline_a" class="ad-tool-input" placeholder="e.g. I couldn't sleep for 3 years. Then I tried this." />
+      </div>
+      <div class="ad-tool-form-group">
+        <label>Headline B</label>
+        <input type="text" id="headline_b" class="ad-tool-input" placeholder="e.g. The magnesium supplement that actually works for sleep" />
+      </div>
+      <button id="btn" class="ad-tool-btn" onclick="score()">Score These Headlines →</button>
+    </div>
+    <div id="loading" class="ad-tool-loading" style="display:none"><div class="ad-tool-spinner"></div><p>Scoring...</p></div>
+    <div id="results" style="display:none">
+      <div id="winner-banner" class="winner-banner"></div>
+      <div class="score-grid">
+        <div id="card-a" class="score-card"></div>
+        <div id="card-b" class="score-card"></div>
+      </div>
+      <div id="recommendation" class="recommendation-card"></div>
+      <div class="ad-tool-next-cta"><p>Need better headline options to test?</p><a href="/tools/hook-generator/" class="ad-tool-btn-ghost">Generate hooks →</a></div>
+    </div>
+    <div id="error" class="ad-tool-error" style="display:none"></div>
+  </div>
+</div>
+<style>
+.winner-banner { background: linear-gradient(90deg, rgba(20,184,166,0.12), rgba(20,184,166,0.04)); border: 1px solid rgba(20,184,166,0.3); border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; font-size: 1rem; font-weight: 700; color: #14b8a6; }
+.score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+@media(max-width:640px) { .score-grid { grid-template-columns: 1fr; } }
+.score-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; }
+.score-card.winner { border-color: rgba(20,184,166,0.4); }
+.score-card-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); margin-bottom: 0.5rem; }
+.score-card-headline { font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 1rem; line-height: 1.4; }
+.big-score { font-size: 2.5rem; font-weight: 800; color: #14b8a6; line-height: 1; margin-bottom: 1rem; }
+.score-bars { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+.score-bar-row { display: flex; align-items: center; gap: 0.75rem; }
+.score-bar-label { font-size: 0.72rem; color: rgba(255,255,255,0.4); width: 90px; flex-shrink: 0; }
+.score-bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+.score-bar-fill { height: 100%; background: #14b8a6; border-radius: 99px; transition: width 0.8s ease; }
+.score-bar-val { font-size: 0.72rem; color: rgba(255,255,255,0.4); width: 28px; text-align: right; }
+.score-verdict { font-size: 0.82rem; color: rgba(255,255,255,0.55); margin-bottom: 0.5rem; }
+.score-works { font-size: 0.78rem; color: rgba(255,255,255,0.35); margin-bottom: 0.35rem; }
+.score-fix { font-size: 0.78rem; color: rgba(239,68,68,0.6); }
+.recommendation-card { background: rgba(20,184,166,0.06); border: 1px solid rgba(20,184,166,0.2); border-radius: 14px; padding: 1.5rem; }
+.recommendation-card h3 { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #14b8a6; margin: 0 0 0.75rem; }
+.recommendation-card p { font-size: 0.9rem; color: rgba(255,255,255,0.65); margin: 0; line-height: 1.6; }
+</style>
+<script>
+function buildCard(label, headline, d, isWinner) {
+  const dims = ['scroll_stop','specificity','emotion','clarity','human_voice'];
+  const dimLabels = {'scroll_stop':'Scroll-stop','specificity':'Specificity','emotion':'Emotion','clarity':'Clarity','human_voice':'Human voice'};
+  return `
+    <div class="${isWinner ? 'winner' : ''}">
+      <div class="score-card-label">${label}${isWinner ? ' 🏆 Winner' : ''}</div>
+      <div class="score-card-headline">"${headline}"</div>
+      <div class="big-score">${d.score}</div>
+      <div class="score-bars">${dims.map(k => `
+        <div class="score-bar-row">
+          <span class="score-bar-label">${dimLabels[k]}</span>
+          <div class="score-bar-track"><div class="score-bar-fill" style="width:${d[k]}%"></div></div>
+          <span class="score-bar-val">${d[k]}</span>
+        </div>`).join('')}</div>
+      <div class="score-verdict">${d.verdict}</div>
+      <div class="score-works">✓ ${d.what_works}</div>
+      <div class="score-fix">✗ ${d.what_to_fix}</div>
+    </div>`;
+}
+async function score() {
+  const a = document.getElementById('headline_a').value.trim();
+  const b = document.getElementById('headline_b').value.trim();
+  if (!a || !b) { alert('Enter both headlines'); return; }
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('error').style.display = 'none';
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('btn').disabled = true;
+  try {
+    const res = await fetch('/tools/headline-scorer/score/', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({headline_a: a, headline_b: b}) });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    document.getElementById('winner-banner').textContent = `Winner: Headline ${data.winner}`;
+    document.getElementById('card-a').innerHTML = buildCard('Headline A', a, data.headline_a, data.winner === 'A');
+    document.getElementById('card-b').innerHTML = buildCard('Headline B', b, data.headline_b, data.winner === 'B');
+    document.getElementById('recommendation').innerHTML = `<h3>How to improve further</h3><p>${data.recommendation}</p>`;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').textContent = e.message;
+    document.getElementById('error').style.display = 'block';
+  }
+  document.getElementById('btn').disabled = false;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+<style>{% include 'tools/ad_tool_styles.html' %}</style>
+<div class="ad-tool-page">
+  <div class="container">
+    <div class="ad-tool-header">
+      <a href="/tools/" class="ad-tool-back">← All Tools</a>
+      <div class="ad-tool-badge">🎯 Free · No Signup</div>
+      <h1>Pain Point Miner</h1>
+      <p>Enter any product niche. Get the exact customer frustrations, desires, and language that converts in DTC ads — no scraping required.</p>
+    </div>
+    <div class="ad-tool-form-card">
+      <div class="ad-tool-form-group">
+        <label>Product niche or category</label>
+        <input type="text" id="niche" class="ad-tool-input" placeholder="e.g. posture correctors, collagen supplements, baby sleep products" />
+      </div>
+      <button id="btn" class="ad-tool-btn" onclick="mine()">Mine Pain Points →</button>
+    </div>
+    <div id="loading" class="ad-tool-loading" style="display:none"><div class="ad-tool-spinner"></div><p>Mining customer language...</p></div>
+    <div id="results" style="display:none">
+      <div class="ppm-grid">
+        <div class="ppm-section">
+          <h3 class="ppm-section-title">🔴 Pain Points</h3>
+          <div id="pains"></div>
+        </div>
+        <div class="ppm-section">
+          <h3 class="ppm-section-title">✨ Desires</h3>
+          <div id="desires"></div>
+        </div>
+      </div>
+      <div class="ppm-phrases-card">
+        <h3 class="ppm-section-title">💬 Exact Customer Phrases</h3>
+        <p class="ppm-phrases-sub">Use these verbatim in your ad copy.</p>
+        <div id="phrases" class="phrases-chips"></div>
+      </div>
+      <div class="ppm-angles-card">
+        <h3 class="ppm-section-title">🎯 Top Ad Angles</h3>
+        <div id="angles"></div>
+      </div>
+      <div class="ad-tool-next-cta"><p>Want this data pulled live from Amazon reviews and Reddit?</p><a href="/tools/ad-intel/" class="ad-tool-btn-ghost">Run Ad Intel on a competitor →</a></div>
+    </div>
+    <div id="error" class="ad-tool-error" style="display:none"></div>
+  </div>
+</div>
+<style>
+.ppm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+@media(max-width:640px) { .ppm-grid { grid-template-columns: 1fr; } }
+.ppm-section-title { font-size: 0.85rem; font-weight: 700; color: rgba(255,255,255,0.7); margin: 0 0 1rem; }
+.ppm-section { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; }
+.pain-item, .desire-item { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.pain-item:last-child, .desire-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.pain-text { font-size: 0.88rem; font-weight: 600; color: rgba(255,255,255,0.85); margin-bottom: 0.3rem; }
+.pain-intensity { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.15rem 0.5rem; border-radius: 99px; margin-bottom: 0.4rem; }
+.high { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+.medium { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+.pain-angle { font-size: 0.78rem; color: rgba(255,255,255,0.4); }
+.desire-text { font-size: 0.88rem; font-weight: 600; color: rgba(255,255,255,0.85); margin-bottom: 0.4rem; }
+.desire-hook { font-size: 0.8rem; color: #14b8a6; }
+.ppm-phrases-card, .ppm-angles-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
+.ppm-phrases-sub { font-size: 0.78rem; color: rgba(255,255,255,0.3); margin: -0.5rem 0 1rem; }
+.phrases-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.phrase-chip { background: rgba(20,184,166,0.08); border: 1px solid rgba(20,184,166,0.2); color: rgba(255,255,255,0.75); font-size: 0.82rem; padding: 0.35rem 0.85rem; border-radius: 99px; cursor: pointer; }
+.phrase-chip:hover { background: rgba(20,184,166,0.15); }
+.angle-item { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.angle-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.angle-name { font-size: 0.88rem; font-weight: 600; color: #fff; margin-bottom: 0.35rem; }
+.angle-hook { font-size: 0.82rem; color: rgba(255,255,255,0.5); font-style: italic; }
+</style>
+<script>
+async function mine() {
+  const niche = document.getElementById('niche').value.trim();
+  if (!niche) { alert('Enter a niche first'); return; }
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('error').style.display = 'none';
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('btn').disabled = true;
+  try {
+    const res = await fetch('/tools/pain-point-miner/mine/', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({niche}) });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    document.getElementById('pains').innerHTML = data.pain_points.map(p => `
+      <div class="pain-item">
+        <div><span class="pain-intensity ${p.intensity}">${p.intensity}</span></div>
+        <div class="pain-text">${p.pain}</div>
+        <div class="pain-angle">Ad angle: ${p.ad_angle}</div>
+      </div>`).join('');
+    document.getElementById('desires').innerHTML = data.desires.map(d => `
+      <div class="desire-item">
+        <div class="desire-text">${d.desire}</div>
+        <div class="desire-hook">"${d.ad_hook}"</div>
+      </div>`).join('');
+    document.getElementById('phrases').innerHTML = data.customer_phrases.map(p => `<span class="phrase-chip" onclick="navigator.clipboard.writeText('${p.replace(/'/g,"\\'")}')">&#8220;${p}&#8221;</span>`).join('');
+    document.getElementById('angles').innerHTML = data.top_angles.map(a => `
+      <div class="angle-item">
+        <div class="angle-name">${a.angle}</div>
+        <div class="angle-hook">"${a.example_hook}"</div>
+      </div>`).join('');
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').textContent = e.message;
+    document.getElementById('error').style.display = 'block';
+  }
+  document.getElementById('btn').disabled = false;
+}
+document.getElementById('niche').addEventListener('keydown', e => { if (e.key === 'Enter') mine(); });
+</script>
+{% endblock %}

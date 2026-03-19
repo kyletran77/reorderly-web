@@ -1,0 +1,92 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+<style>{% include 'tools/ad_tool_styles.html' %}</style>
+<div class="ad-tool-page">
+  <div class="container">
+    <div class="ad-tool-header">
+      <a href="/tools/" class="ad-tool-back">← All Tools</a>
+      <div class="ad-tool-badge">🎬 Free · No Signup</div>
+      <h1>UGC Script Generator</h1>
+      <p>Get a TikTok or Reels-ready UGC script for your product. Hook, story, proof, CTA — 30 seconds, human voice, ready to film.</p>
+    </div>
+    <div class="ad-tool-form-card">
+      <div class="ad-tool-form-group">
+        <label>Product or offer</label>
+        <input type="text" id="product" class="ad-tool-input" placeholder="e.g. anti-chafe thigh bands for women" />
+      </div>
+      <div class="ad-tool-form-group">
+        <label>Target audience <span class="optional">optional</span></label>
+        <input type="text" id="audience" class="ad-tool-input" placeholder="e.g. active women who deal with chafing in summer" />
+      </div>
+      <div class="ad-tool-form-group">
+        <label>Script angle</label>
+        <select id="angle" class="ad-tool-select">
+          <option value="transformation">Transformation (before/after)</option>
+          <option value="pain">Pain (problem-led)</option>
+          <option value="confession">Confession ("I didn't believe it until...")</option>
+          <option value="social_proof">Social proof ("Everyone's been asking me...")</option>
+          <option value="contrarian">Contrarian ("Stop doing X, do this instead")</option>
+        </select>
+      </div>
+      <button id="btn" class="ad-tool-btn" onclick="generate()">Generate Script →</button>
+    </div>
+    <div id="loading" class="ad-tool-loading" style="display:none"><div class="ad-tool-spinner"></div><p>Writing your script...</p></div>
+    <div id="results" style="display:none">
+      <div class="script-sections" id="script-sections"></div>
+      <div class="script-full-card">
+        <div class="script-full-label">Full Script <button onclick="copyScript()" class="copy-btn">Copy all</button></div>
+        <div id="full-script" class="full-script-text"></div>
+      </div>
+      <div class="ad-tool-next-cta"><p>Want to base your next script on real competitor data?</p><a href="/tools/ad-intel/" class="ad-tool-btn-ghost">Run Ad Intel →</a></div>
+    </div>
+    <div id="error" class="ad-tool-error" style="display:none"></div>
+  </div>
+</div>
+<style>
+.script-sections { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.script-section { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; }
+.script-section-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #14b8a6; margin-bottom: 0.5rem; }
+.script-section-time { font-size: 0.68rem; color: rgba(255,255,255,0.25); margin-bottom: 0.5rem; }
+.script-section-text { font-size: 0.88rem; color: rgba(255,255,255,0.8); line-height: 1.55; }
+.script-full-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
+.script-full-label { font-size: 0.82rem; font-weight: 700; color: rgba(255,255,255,0.6); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+.copy-btn { background: rgba(20,184,166,0.15); border: 1px solid rgba(20,184,166,0.3); color: #14b8a6; border-radius: 6px; padding: 0.25rem 0.75rem; font-size: 0.78rem; cursor: pointer; }
+.full-script-text { font-size: 0.9rem; color: rgba(255,255,255,0.8); line-height: 1.7; white-space: pre-wrap; }
+</style>
+<script>
+let fullScriptText = '';
+const times = {hook:'0–3s', problem:'3–8s', solution:'8–20s', proof:'20–25s', cta:'25–30s'};
+async function generate() {
+  const product = document.getElementById('product').value.trim();
+  if (!product) { alert('Enter a product first'); return; }
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('error').style.display = 'none';
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('btn').disabled = true;
+  try {
+    const res = await fetch('/tools/ugc-script-generator/generate/', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ product, audience: document.getElementById('audience').value.trim(), angle: document.getElementById('angle').value }) });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const sections = ['hook','problem','solution','proof','cta'];
+    document.getElementById('script-sections').innerHTML = sections.map(s => `
+      <div class="script-section">
+        <div class="script-section-label">${s}</div>
+        <div class="script-section-time">${times[s]}</div>
+        <div class="script-section-text">${data[s]}</div>
+      </div>`).join('');
+    fullScriptText = data.full_script;
+    document.getElementById('full-script').textContent = data.full_script;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').textContent = e.message;
+    document.getElementById('error').style.display = 'block';
+  }
+  document.getElementById('btn').disabled = false;
+}
+function copyScript() { navigator.clipboard.writeText(fullScriptText); }
+document.getElementById('product').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+</script>
+{% endblock %}

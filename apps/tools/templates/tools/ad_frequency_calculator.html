@@ -1,0 +1,113 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+<style>{% include 'tools/ad_tool_styles.html' %}</style>
+<div class="ad-tool-page">
+  <div class="container">
+    <div class="ad-tool-header">
+      <a href="/tools/" class="ad-tool-back">← All Tools</a>
+      <div class="ad-tool-badge">📊 Free · Instant</div>
+      <h1>Ad Frequency Calculator</h1>
+      <p>Know when your audience has seen your ad too many times before performance tanks. Calculate frequency and get a fatigue warning.</p>
+    </div>
+    <div class="roas-grid">
+      <div class="ad-tool-form-card" style="margin-bottom:0">
+        <div class="ad-tool-form-group">
+          <label>Total impressions</label>
+          <input type="number" id="impressions" class="ad-tool-input" value="500000" oninput="calc()" />
+        </div>
+        <div class="ad-tool-form-group">
+          <label>Unique reach (people)</label>
+          <input type="number" id="reach" class="ad-tool-input" value="150000" oninput="calc()" />
+        </div>
+        <div class="ad-tool-form-group">
+          <label>Campaign duration (days)</label>
+          <input type="number" id="days" class="ad-tool-input" value="14" oninput="calc()" />
+        </div>
+        <div class="ad-tool-form-group">
+          <label>Ad objective</label>
+          <select id="objective" class="ad-tool-select" onchange="calc()">
+            <option value="awareness">Awareness / Top of funnel</option>
+            <option value="consideration">Consideration / Traffic</option>
+            <option value="conversion" selected>Conversion / Purchase</option>
+            <option value="retargeting">Retargeting</option>
+          </select>
+        </div>
+      </div>
+      <div id="freq-results" class="roas-results"></div>
+    </div>
+    <div class="ad-tool-next-cta"><p>Burned through your audience? Time to test new creative angles.</p><a href="/tools/hook-generator/" class="ad-tool-btn-ghost">Generate fresh hooks →</a></div>
+  </div>
+</div>
+<style>
+.roas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+@media(max-width:640px) { .roas-grid { grid-template-columns: 1fr; } }
+.roas-results { display: flex; flex-direction: column; gap: 1rem; }
+.roas-metric { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; }
+.roas-metric-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.35); margin-bottom: 0.4rem; }
+.roas-metric-val { font-size: 2rem; font-weight: 800; color: #fff; line-height: 1; }
+.roas-metric-sub { font-size: 0.78rem; color: rgba(255,255,255,0.3); margin-top: 0.3rem; }
+.status-ok { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.3); }
+.status-ok .roas-metric-val { color: #86efac; }
+.status-warn { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.25); }
+.status-warn .roas-metric-val { color: #fbbf24; }
+.status-danger { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25); }
+.status-danger .roas-metric-val { color: #f87171; }
+</style>
+<script>
+const thresholds = {
+  awareness: { warn: 4, danger: 7 },
+  consideration: { warn: 3, danger: 6 },
+  conversion: { warn: 2.5, danger: 5 },
+  retargeting: { warn: 5, danger: 9 }
+};
+const labels = { awareness: 'Awareness', consideration: 'Consideration', conversion: 'Conversion', retargeting: 'Retargeting' };
+
+function calc() {
+  const imp = parseFloat(document.getElementById('impressions').value) || 0;
+  const reach = parseFloat(document.getElementById('reach').value) || 0;
+  const days = parseFloat(document.getElementById('days').value) || 0;
+  const obj = document.getElementById('objective').value;
+
+  if (!imp || !reach) {
+    document.getElementById('freq-results').innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:0.9rem">Fill in impressions and reach.</div>';
+    return;
+  }
+
+  const freq = imp / reach;
+  const dailyFreq = days > 0 ? freq / days : 0;
+  const t = thresholds[obj];
+  let statusClass = 'status-ok';
+  let statusMsg = 'Looking healthy. Frequency is within safe range.';
+  let emoji = '✅';
+  if (freq >= t.danger) { statusClass = 'status-danger'; statusMsg = 'Fatigue risk. Your audience has seen this ad too many times. Refresh creative now.'; emoji = '🔴'; }
+  else if (freq >= t.warn) { statusClass = 'status-warn'; statusMsg = 'Watch closely. You\'re approaching fatigue. Plan a creative refresh soon.'; emoji = '⚠️'; }
+
+  const daysToWarn = dailyFreq > 0 ? Math.max(0, (t.warn - freq) / dailyFreq) : null;
+  const daysToDanger = dailyFreq > 0 ? Math.max(0, (t.danger - freq) / dailyFreq) : null;
+
+  document.getElementById('freq-results').innerHTML = `
+    <div class="roas-metric ${statusClass}">
+      <div class="roas-metric-label">${emoji} Frequency Status</div>
+      <div class="roas-metric-val">${freq.toFixed(2)}x</div>
+      <div class="roas-metric-sub">${statusMsg}</div>
+    </div>
+    <div class="roas-metric">
+      <div class="roas-metric-label">Daily frequency</div>
+      <div class="roas-metric-val">${dailyFreq > 0 ? dailyFreq.toFixed(2) + 'x/day' : '—'}</div>
+      <div class="roas-metric-sub">Average times shown per person per day</div>
+    </div>
+    <div class="roas-metric">
+      <div class="roas-metric-label">Warn threshold (${labels[obj]})</div>
+      <div class="roas-metric-val">${t.warn}x</div>
+      <div class="roas-metric-sub">${daysToWarn !== null && daysToWarn > 0 ? 'Reached in ~' + Math.ceil(daysToWarn) + ' days at current pace' : freq >= t.warn ? 'Already reached' : '—'}</div>
+    </div>
+    <div class="roas-metric">
+      <div class="roas-metric-label">Danger threshold</div>
+      <div class="roas-metric-val">${t.danger}x</div>
+      <div class="roas-metric-sub">${daysToDanger !== null && daysToDanger > 0 ? 'Reached in ~' + Math.ceil(daysToDanger) + ' days' : freq >= t.danger ? 'Already reached — refresh now' : '—'}</div>
+    </div>`;
+}
+calc();
+</script>
+{% endblock %}

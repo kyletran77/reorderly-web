@@ -16,6 +16,76 @@ BASE = 'https://reorderly.me'
 
 TOOLS = [
     {
+        'slug': 'hook-generator',
+        'name': 'Ad Hook Generator',
+        'description': 'Get 10 scroll-stopping hooks for your product. Curiosity, pain, transformation — all written in human voice.',
+        'icon': '🪝',
+        'url': '/tools/hook-generator/',
+    },
+    {
+        'slug': 'human-voice-rewriter',
+        'name': 'Human Voice Rewriter',
+        'description': 'Paste your AI-sounding ad copy. Get a version that reads like a real person wrote it.',
+        'icon': '✍️',
+        'url': '/tools/human-voice-rewriter/',
+    },
+    {
+        'slug': 'ugc-script-generator',
+        'name': 'UGC Script Generator',
+        'description': 'Generate a TikTok or Reels UGC-style script for your product. Hook, story, CTA — ready to film.',
+        'icon': '🎬',
+        'url': '/tools/ugc-script-generator/',
+    },
+    {
+        'slug': 'pain-point-miner',
+        'name': 'Pain Point Miner',
+        'description': 'Enter any product niche. Get the exact customer frustrations and language that convert in ads.',
+        'icon': '🎯',
+        'url': '/tools/pain-point-miner/',
+    },
+    {
+        'slug': 'cta-generator',
+        'name': 'CTA Generator',
+        'description': 'Generate 10 high-converting calls-to-action for your ad. No more generic "Shop Now."',
+        'icon': '🔤',
+        'url': '/tools/cta-generator/',
+    },
+    {
+        'slug': 'headline-scorer',
+        'name': 'Ad Headline Scorer',
+        'description': 'Enter two ad headlines. Get a score and reasoning on which will convert better and why.',
+        'icon': '🧪',
+        'url': '/tools/headline-scorer/',
+    },
+    {
+        'slug': 'roas-calculator',
+        'name': 'ROAS Breakeven Calculator',
+        'description': 'Enter your product price, COGS, and ad spend. Instantly see your breakeven ROAS and target CPA.',
+        'icon': '💰',
+        'url': '/tools/roas-calculator/',
+    },
+    {
+        'slug': 'ad-budget-planner',
+        'name': 'Ad Budget Planner',
+        'description': 'Set your revenue goal. See exactly how much to spend on ads based on your conversion rate and AOV.',
+        'icon': '💸',
+        'url': '/tools/ad-budget-planner/',
+    },
+    {
+        'slug': 'ad-frequency-calculator',
+        'name': 'Ad Frequency Calculator',
+        'description': 'Calculate your ad frequency and know when your audience is fatigued before you burn budget.',
+        'icon': '📊',
+        'url': '/tools/ad-frequency-calculator/',
+    },
+    {
+        'slug': 'ad-creative-checklist',
+        'name': 'Ad Creative Checklist',
+        'description': 'Run your creative through 20 proven checks before you publish. Catch what tanks performance.',
+        'icon': '✅',
+        'url': '/tools/ad-creative-checklist/',
+    },
+    {
         'slug': 'po-email-generator',
         'name': 'PO Email Generator',
         'description': 'Generate a professional purchase order email to your supplier in 10 seconds. Free, no signup.',
@@ -492,3 +562,388 @@ Return ONLY a valid JSON object (no markdown, no extra text) with exactly these 
         ]
 
     return JsonResponse(result)
+
+
+# ─────────────────────────────────────────────────────────
+# AD TOOLS — new suite
+# ─────────────────────────────────────────────────────────
+
+def _get_claude_client():
+    api_key = os.environ.get('ANTHROPIC_API_KEY', '')
+    if not api_key:
+        return None
+    return anthropic.Anthropic(api_key=api_key)
+
+
+def hook_generator(request):
+    return render(request, 'tools/hook_generator.html', _ctx(
+        title='Free Ad Hook Generator — 10 Scroll-Stopping Hooks — Reorderly',
+        description='Enter your product and target audience. Get 10 proven ad hooks — curiosity, pain, transformation — written in human voice. Free, no signup.',
+        slug='hook-generator',
+    ))
+
+
+@csrf_exempt
+@require_POST
+def api_hook_generator(request):
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    product = data.get('product', '').strip()
+    audience = data.get('audience', '').strip()
+    if not product:
+        return JsonResponse({'error': 'Product is required'}, status=400)
+
+    client = _get_claude_client()
+    if not client:
+        return JsonResponse({'error': 'AI not configured'}, status=500)
+
+    prompt = f"""You are a world-class DTC copywriter. Generate 10 scroll-stopping ad hooks for this product.
+
+Product: {product}
+Target audience: {audience or 'DTC consumers'}
+
+Rules:
+- No em dashes (—), no corporate speak, no exclamation marks
+- Write like a real human texting a friend
+- Mix hook types: curiosity, pain, transformation, social proof, contrarian, confession
+- Each hook is 1-2 sentences max, under 20 words
+- Make them feel native to TikTok / Meta feed
+
+Return JSON: {{"hooks": [{{"type": "curiosity|pain|transformation|social_proof|contrarian|confession", "hook": "..."}}]}}"""
+
+    try:
+        resp = client.messages.create(
+            model='claude-opus-4-6',
+            max_tokens=1000,
+            messages=[{'role': 'user', 'content': prompt}],
+        )
+        result_text = resp.content[0].text.strip()
+        result_text = re.sub(r'^```(?:json)?\s*', '', result_text)
+        result_text = re.sub(r'\s*```$', '', result_text)
+        result = json.loads(result_text)
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def human_voice_rewriter(request):
+    return render(request, 'tools/human_voice_rewriter.html', _ctx(
+        title='Human Voice Ad Rewriter — Remove AI-Sounding Copy — Reorderly',
+        description='Paste AI-generated ad copy. Get a human-sounding rewrite with no em dashes, no corporate speak, and no obvious AI tells. Free.',
+        slug='human-voice-rewriter',
+    ))
+
+
+@csrf_exempt
+@require_POST
+def api_human_voice_rewriter(request):
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    copy_text = data.get('copy', '').strip()
+    if not copy_text:
+        return JsonResponse({'error': 'Ad copy is required'}, status=400)
+
+    client = _get_claude_client()
+    if not client:
+        return JsonResponse({'error': 'AI not configured'}, status=500)
+
+    prompt = f"""You are an expert DTC copywriter who rewrites AI-sounding ad copy into human-sounding copy.
+
+Original copy:
+{copy_text}
+
+Rewrite rules:
+- No em dashes (—). Replace with period, comma, or restructure.
+- No exclamation marks
+- No words: "game-changer", "revolutionary", "unlock", "leverage", "dive into", "delve", "seamless", "elevate", "craft", "transform your"
+- Short sentences. Vary length. Some fragments are fine.
+- Sound like a real person who tried this product and loved it
+- Keep the core message and any specific claims
+
+Return JSON: {{"rewritten": "...", "changes": ["list of main changes made"]}}"""
+
+    try:
+        resp = client.messages.create(
+            model='claude-opus-4-6',
+            max_tokens=800,
+            messages=[{'role': 'user', 'content': prompt}],
+        )
+        result_text = resp.content[0].text.strip()
+        result_text = re.sub(r'^```(?:json)?\s*', '', result_text)
+        result_text = re.sub(r'\s*```$', '', result_text)
+        result = json.loads(result_text)
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def ugc_script_generator(request):
+    return render(request, 'tools/ugc_script_generator.html', _ctx(
+        title='Free UGC Script Generator — TikTok & Reels Ad Scripts — Reorderly',
+        description='Generate a UGC-style video script for your product. Hook, story, CTA — ready to film. Free, no signup required.',
+        slug='ugc-script-generator',
+    ))
+
+
+@csrf_exempt
+@require_POST
+def api_ugc_script_generator(request):
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    product = data.get('product', '').strip()
+    audience = data.get('audience', '').strip()
+    angle = data.get('angle', 'transformation').strip()
+    if not product:
+        return JsonResponse({'error': 'Product is required'}, status=400)
+
+    client = _get_claude_client()
+    if not client:
+        return JsonResponse({'error': 'AI not configured'}, status=500)
+
+    prompt = f"""Write a UGC-style video ad script for TikTok/Reels.
+
+Product: {product}
+Audience: {audience or 'general consumers'}
+Angle: {angle}
+
+Script structure:
+- Hook (0-3s): One sentence that stops the scroll. Start mid-story or with a strong claim.
+- Problem (3-8s): Relate to their pain. Sound real, not scripted.
+- Solution (8-20s): Show/tell how the product solves it. Specific details.
+- Proof (20-25s): One specific result or social proof moment.
+- CTA (25-30s): Simple, low-friction ask.
+
+Rules:
+- No em dashes, no exclamation marks, no corporate words
+- Sound like a real person. Short sentences. Casual language.
+- Include [ACTION] notes like [hold up product] [point to screen] for the creator
+- 30 seconds total when read at natural pace
+
+Return JSON: {{"hook": "...", "problem": "...", "solution": "...", "proof": "...", "cta": "...", "full_script": "complete script with action notes"}}"""
+
+    try:
+        resp = client.messages.create(
+            model='claude-opus-4-6',
+            max_tokens=1000,
+            messages=[{'role': 'user', 'content': prompt}],
+        )
+        result_text = resp.content[0].text.strip()
+        result_text = re.sub(r'^```(?:json)?\s*', '', result_text)
+        result_text = re.sub(r'\s*```$', '', result_text)
+        result = json.loads(result_text)
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def pain_point_miner(request):
+    return render(request, 'tools/pain_point_miner.html', _ctx(
+        title='Free Pain Point Miner — Ad Angles from Customer Language — Reorderly',
+        description='Enter any product niche. Get the exact customer frustrations, complaints, and language that converts in DTC ads. Free.',
+        slug='pain-point-miner',
+    ))
+
+
+@csrf_exempt
+@require_POST
+def api_pain_point_miner(request):
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    niche = data.get('niche', '').strip()
+    if not niche:
+        return JsonResponse({'error': 'Niche is required'}, status=400)
+
+    client = _get_claude_client()
+    if not client:
+        return JsonResponse({'error': 'AI not configured'}, status=500)
+
+    prompt = f"""You are a DTC media buyer who specializes in mining customer language for ad copy.
+
+Niche/product category: {niche}
+
+Based on your knowledge of customer reviews, Reddit, and social media for this niche, identify:
+
+1. Top 5 pain points — the specific frustrations customers have BEFORE finding a solution
+2. Top 5 desire statements — what they desperately want
+3. 10 exact phrases customers actually say — direct quotes style (use "quotes")
+4. Top 3 ad angles that would resonate most with this audience
+
+Return JSON:
+{{
+  "pain_points": [{{"pain": "...", "intensity": "high|medium", "ad_angle": "how to use this in an ad"}}],
+  "desires": [{{"desire": "...", "ad_hook": "hook using this desire"}}],
+  "customer_phrases": ["exact phrase 1", ...],
+  "top_angles": [{{"angle": "...", "example_hook": "..."}}]
+}}"""
+
+    try:
+        resp = client.messages.create(
+            model='claude-opus-4-6',
+            max_tokens=1500,
+            messages=[{'role': 'user', 'content': prompt}],
+        )
+        result_text = resp.content[0].text.strip()
+        result_text = re.sub(r'^```(?:json)?\s*', '', result_text)
+        result_text = re.sub(r'\s*```$', '', result_text)
+        result = json.loads(result_text)
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def cta_generator(request):
+    return render(request, 'tools/cta_generator.html', _ctx(
+        title='Free CTA Generator — High-Converting Ad CTAs — Reorderly',
+        description='Generate 10 high-converting calls-to-action for your ad. No more generic "Shop Now." Free, no signup.',
+        slug='cta-generator',
+    ))
+
+
+@csrf_exempt
+@require_POST
+def api_cta_generator(request):
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    product = data.get('product', '').strip()
+    goal = data.get('goal', 'purchase').strip()
+    if not product:
+        return JsonResponse({'error': 'Product is required'}, status=400)
+
+    client = _get_claude_client()
+    if not client:
+        return JsonResponse({'error': 'AI not configured'}, status=500)
+
+    prompt = f"""Generate 10 high-converting CTAs for a DTC ad.
+
+Product: {product}
+Goal: {goal} (purchase, trial, learn more, quiz, etc.)
+
+Rules:
+- No generic CTAs like "Shop Now", "Buy Today", "Click Here"
+- Make them specific to the product benefit or outcome
+- Create urgency without being sleazy
+- Mix: benefit-driven, curiosity, risk-reversal, social proof
+- Keep each CTA under 6 words
+
+Return JSON: {{"ctas": [{{"cta": "...", "type": "benefit|curiosity|urgency|social_proof|risk_reversal", "why": "one sentence why this works"}}]}}"""
+
+    try:
+        resp = client.messages.create(
+            model='claude-opus-4-6',
+            max_tokens=800,
+            messages=[{'role': 'user', 'content': prompt}],
+        )
+        result_text = resp.content[0].text.strip()
+        result_text = re.sub(r'^```(?:json)?\s*', '', result_text)
+        result_text = re.sub(r'\s*```$', '', result_text)
+        result = json.loads(result_text)
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def headline_scorer(request):
+    return render(request, 'tools/headline_scorer.html', _ctx(
+        title='Free Ad Headline Scorer — A/B Test Your Headlines — Reorderly',
+        description='Enter two ad headlines. Get an AI score and reasoning on which will convert better and why. Free.',
+        slug='headline-scorer',
+    ))
+
+
+@csrf_exempt
+@require_POST
+def api_headline_scorer(request):
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    headline_a = data.get('headline_a', '').strip()
+    headline_b = data.get('headline_b', '').strip()
+    if not headline_a or not headline_b:
+        return JsonResponse({'error': 'Both headlines required'}, status=400)
+
+    client = _get_claude_client()
+    if not client:
+        return JsonResponse({'error': 'AI not configured'}, status=500)
+
+    prompt = f"""You are a DTC media buyer who has spent $10M+ on Meta and TikTok ads. Score these two ad headlines.
+
+Headline A: {headline_a}
+Headline B: {headline_b}
+
+Score each headline from 0-100 on:
+- Scroll-stop power (does it make someone pause?)
+- Specificity (concrete details vs vague claims)
+- Emotional resonance (does it hit a real pain or desire?)
+- Clarity (do you know what it's about in 2 seconds?)
+- Human voice (does it sound like a real person or marketing copy?)
+
+Return JSON:
+{{
+  "winner": "A" or "B",
+  "headline_a": {{"score": 0-100, "scroll_stop": 0-100, "specificity": 0-100, "emotion": 0-100, "clarity": 0-100, "human_voice": 0-100, "verdict": "one sentence", "what_works": "...", "what_to_fix": "..."}},
+  "headline_b": {{"score": 0-100, "scroll_stop": 0-100, "specificity": 0-100, "emotion": 0-100, "clarity": 0-100, "human_voice": 0-100, "verdict": "one sentence", "what_works": "...", "what_to_fix": "..."}},
+  "recommendation": "specific advice on how to improve the winner further"
+}}"""
+
+    try:
+        resp = client.messages.create(
+            model='claude-opus-4-6',
+            max_tokens=800,
+            messages=[{'role': 'user', 'content': prompt}],
+        )
+        result_text = resp.content[0].text.strip()
+        result_text = re.sub(r'^```(?:json)?\s*', '', result_text)
+        result_text = re.sub(r'\s*```$', '', result_text)
+        result = json.loads(result_text)
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def roas_calculator(request):
+    return render(request, 'tools/roas_calculator.html', _ctx(
+        title='ROAS Breakeven Calculator — Free DTC Ad Tool — Reorderly',
+        description='Enter your product price, COGS, and ad spend. Instantly see your breakeven ROAS, target CPA, and profit per conversion.',
+        slug='roas-calculator',
+    ))
+
+
+def ad_budget_planner(request):
+    return render(request, 'tools/ad_budget_planner.html', _ctx(
+        title='Ad Budget Planner — Free DTC Tool — Reorderly',
+        description='Set your revenue goal. See exactly how much to spend on ads based on your conversion rate, AOV, and ROAS target.',
+        slug='ad-budget-planner',
+    ))
+
+
+def ad_frequency_calculator(request):
+    return render(request, 'tools/ad_frequency_calculator.html', _ctx(
+        title='Ad Frequency Calculator — Avoid Creative Fatigue — Reorderly',
+        description='Calculate your Meta ad frequency and know when your audience is fatigued before you burn budget on creative that stopped working.',
+        slug='ad-frequency-calculator',
+    ))
+
+
+def ad_creative_checklist(request):
+    return render(request, 'tools/ad_creative_checklist.html', _ctx(
+        title='Ad Creative Checklist — 20 Checks Before You Publish — Reorderly',
+        description='Run your ad creative through 20 proven checks before you publish. Catch the mistakes that tank performance before they cost you money.',
+        slug='ad-creative-checklist',
+    ))

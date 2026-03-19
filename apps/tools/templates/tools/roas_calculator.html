@@ -1,0 +1,104 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+<style>{% include 'tools/ad_tool_styles.html' %}</style>
+<div class="ad-tool-page">
+  <div class="container">
+    <div class="ad-tool-header">
+      <a href="/tools/" class="ad-tool-back">← All Tools</a>
+      <div class="ad-tool-badge">💰 Free · Instant</div>
+      <h1>ROAS Breakeven Calculator</h1>
+      <p>Know your exact breakeven ROAS before you run a single dollar. Enter your numbers and see what you need to hit to be profitable.</p>
+    </div>
+    <div class="roas-grid">
+      <div class="ad-tool-form-card" style="margin-bottom:0">
+        <div class="ad-tool-form-group">
+          <label>Selling price ($)</label>
+          <input type="number" id="price" class="ad-tool-input" value="49" oninput="calc()" />
+        </div>
+        <div class="ad-tool-form-group">
+          <label>Cost of goods (COGS) ($)</label>
+          <input type="number" id="cogs" class="ad-tool-input" value="12" oninput="calc()" />
+        </div>
+        <div class="ad-tool-form-group">
+          <label>Shipping + fulfillment ($)</label>
+          <input type="number" id="ship" class="ad-tool-input" value="5" oninput="calc()" />
+        </div>
+        <div class="ad-tool-form-group">
+          <label>Payment processing (%) <span class="optional">default 3%</span></label>
+          <input type="number" id="fees" class="ad-tool-input" value="3" oninput="calc()" />
+        </div>
+        <div class="ad-tool-form-group">
+          <label>Target profit margin (%) <span class="optional">default 20%</span></label>
+          <input type="number" id="margin" class="ad-tool-input" value="20" oninput="calc()" />
+        </div>
+      </div>
+      <div class="roas-results" id="roas-results"></div>
+    </div>
+    <div class="ad-tool-next-cta"><p>Know your numbers. Now write ads that hit them.</p><a href="/tools/ad-intel/" class="ad-tool-btn-ghost">Run Ad Intel on a competitor →</a></div>
+  </div>
+</div>
+<style>
+.roas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+@media(max-width:640px) { .roas-grid { grid-template-columns: 1fr; } }
+.roas-results { display: flex; flex-direction: column; gap: 1rem; }
+.roas-metric { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; }
+.roas-metric.highlight { background: rgba(20,184,166,0.08); border-color: rgba(20,184,166,0.3); }
+.roas-metric-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.35); margin-bottom: 0.4rem; }
+.roas-metric-val { font-size: 2rem; font-weight: 800; color: #fff; line-height: 1; }
+.roas-metric.highlight .roas-metric-val { color: #14b8a6; }
+.roas-metric-sub { font-size: 0.78rem; color: rgba(255,255,255,0.3); margin-top: 0.3rem; }
+.roas-warning { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.82rem; color: #fca5a5; }
+</style>
+<script>
+function calc() {
+  const price = parseFloat(document.getElementById('price').value) || 0;
+  const cogs = parseFloat(document.getElementById('cogs').value) || 0;
+  const ship = parseFloat(document.getElementById('ship').value) || 0;
+  const fees = (parseFloat(document.getElementById('fees').value) || 3) / 100;
+  const targetMargin = (parseFloat(document.getElementById('margin').value) || 20) / 100;
+
+  const processingFee = price * fees;
+  const totalCost = cogs + ship + processingFee;
+  const grossProfit = price - totalCost;
+  const maxCPA = grossProfit; // breakeven CPA
+  const targetCPA = grossProfit * (1 - targetMargin);
+  const breakevenROAS = grossProfit > 0 ? price / maxCPA : null;
+  const targetROAS = targetCPA > 0 ? price / targetCPA : null;
+  const margin = grossProfit / price;
+
+  const el = document.getElementById('roas-results');
+  if (price <= 0 || grossProfit <= 0) {
+    el.innerHTML = '<div class="roas-warning">Gross profit is zero or negative — check your inputs.</div>';
+    return;
+  }
+  el.innerHTML = `
+    <div class="roas-metric highlight">
+      <div class="roas-metric-label">Breakeven ROAS</div>
+      <div class="roas-metric-val">${breakevenROAS ? breakevenROAS.toFixed(2) + 'x' : '—'}</div>
+      <div class="roas-metric-sub">Min ROAS before you lose money</div>
+    </div>
+    <div class="roas-metric highlight">
+      <div class="roas-metric-label">Target ROAS (${Math.round(targetMargin*100)}% margin)</div>
+      <div class="roas-metric-val">${targetROAS ? targetROAS.toFixed(2) + 'x' : '—'}</div>
+      <div class="roas-metric-sub">ROAS needed to hit your margin goal</div>
+    </div>
+    <div class="roas-metric">
+      <div class="roas-metric-label">Max CPA (breakeven)</div>
+      <div class="roas-metric-val">$${maxCPA.toFixed(2)}</div>
+      <div class="roas-metric-sub">Most you can spend per conversion to not lose</div>
+    </div>
+    <div class="roas-metric">
+      <div class="roas-metric-label">Target CPA (${Math.round(targetMargin*100)}% margin)</div>
+      <div class="roas-metric-val">$${targetCPA.toFixed(2)}</div>
+      <div class="roas-metric-sub">CPA to hit your margin target</div>
+    </div>
+    <div class="roas-metric">
+      <div class="roas-metric-label">Gross margin per order</div>
+      <div class="roas-metric-val">${(margin*100).toFixed(1)}%</div>
+      <div class="roas-metric-sub">$${grossProfit.toFixed(2)} gross profit before ad spend</div>
+    </div>`;
+}
+calc();
+</script>
+{% endblock %}

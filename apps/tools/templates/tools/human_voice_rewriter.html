@@ -1,0 +1,79 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+<style>{% include 'tools/ad_tool_styles.html' %}</style>
+<div class="ad-tool-page">
+  <div class="container">
+    <div class="ad-tool-header">
+      <a href="/tools/" class="ad-tool-back">← All Tools</a>
+      <div class="ad-tool-badge">✍️ Free · No Signup</div>
+      <h1>Human Voice Rewriter</h1>
+      <p>Paste AI-generated ad copy. Get a version that reads like a real person wrote it — no em dashes, no corporate speak, no AI tells.</p>
+    </div>
+    <div class="ad-tool-form-card">
+      <div class="ad-tool-form-group">
+        <label>Your AI-sounding ad copy</label>
+        <textarea id="copy" class="ad-tool-textarea" placeholder="Paste your ad copy here..."></textarea>
+      </div>
+      <button id="btn" class="ad-tool-btn" onclick="rewrite()">Rewrite in Human Voice →</button>
+    </div>
+    <div id="loading" class="ad-tool-loading" style="display:none"><div class="ad-tool-spinner"></div><p>Rewriting...</p></div>
+    <div id="results" style="display:none">
+      <div class="rewrite-grid">
+        <div class="rewrite-col">
+          <div class="rewrite-col-label">Original</div>
+          <div id="original-text" class="rewrite-text original-text"></div>
+        </div>
+        <div class="rewrite-col">
+          <div class="rewrite-col-label rewrite-col-label--new">Human Version</div>
+          <div id="rewritten-text" class="rewrite-text new-text"></div>
+          <button class="ad-tool-btn" style="margin-top:1rem" onclick="copyResult()">Copy Rewritten →</button>
+        </div>
+      </div>
+      <div id="changes-list" class="changes-list"></div>
+      <div class="ad-tool-next-cta"><p>Want hooks and angles based on real competitor data?</p><a href="/tools/ad-intel/" class="ad-tool-btn-ghost">Run Ad Intel →</a></div>
+    </div>
+    <div id="error" class="ad-tool-error" style="display:none"></div>
+  </div>
+</div>
+<style>
+.rewrite-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+@media(max-width:640px) { .rewrite-grid { grid-template-columns: 1fr; } }
+.rewrite-col-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.35); margin-bottom: 0.75rem; }
+.rewrite-col-label--new { color: #14b8a6; }
+.rewrite-text { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; font-size: 0.9rem; color: rgba(255,255,255,0.7); line-height: 1.6; white-space: pre-wrap; }
+.new-text { border-color: rgba(20,184,166,0.25); color: rgba(255,255,255,0.9); }
+.changes-list { background: rgba(20,184,166,0.05); border: 1px solid rgba(20,184,166,0.15); border-radius: 12px; padding: 1.25rem; }
+.changes-list h3 { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #14b8a6; margin: 0 0 0.75rem; }
+.changes-list ul { margin: 0; padding: 0 0 0 1.25rem; }
+.changes-list li { font-size: 0.85rem; color: rgba(255,255,255,0.55); margin-bottom: 0.3rem; }
+</style>
+<script>
+let rewrittenText = '';
+async function rewrite() {
+  const copy = document.getElementById('copy').value.trim();
+  if (!copy) { alert('Paste some copy first'); return; }
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('error').style.display = 'none';
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('btn').disabled = true;
+  try {
+    const res = await fetch('/tools/human-voice-rewriter/rewrite/', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({copy}) });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    document.getElementById('original-text').textContent = copy;
+    document.getElementById('rewritten-text').textContent = data.rewritten;
+    rewrittenText = data.rewritten;
+    document.getElementById('changes-list').innerHTML = `<h3>What changed</h3><ul>${data.changes.map(c=>`<li>${c}</li>`).join('')}</ul>`;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').textContent = e.message;
+    document.getElementById('error').style.display = 'block';
+  }
+  document.getElementById('btn').disabled = false;
+}
+function copyResult() { navigator.clipboard.writeText(rewrittenText); }
+</script>
+{% endblock %}

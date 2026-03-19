@@ -1,0 +1,125 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+{% include 'tools/ad_tool_styles.html' %}
+</style>
+<div class="ad-tool-page">
+  <div class="container">
+    <div class="ad-tool-header">
+      <a href="/tools/" class="ad-tool-back">← All Tools</a>
+      <div class="ad-tool-badge">🪝 Free · No Signup</div>
+      <h1>Ad Hook Generator</h1>
+      <p>Enter your product and target audience. Get 10 scroll-stopping hooks — written in human voice, ready to test.</p>
+    </div>
+
+    <div class="ad-tool-form-card">
+      <div class="ad-tool-form-group">
+        <label>Product or offer</label>
+        <input type="text" id="product" placeholder="e.g. magnesium glycinate supplement for sleep" class="ad-tool-input" />
+      </div>
+      <div class="ad-tool-form-group">
+        <label>Target audience <span class="optional">optional</span></label>
+        <input type="text" id="audience" placeholder="e.g. women 30-45 who struggle with sleep" class="ad-tool-input" />
+      </div>
+      <button id="generate-btn" class="ad-tool-btn" onclick="generate()">Generate 10 Hooks →</button>
+    </div>
+
+    <div id="loading" class="ad-tool-loading" style="display:none">
+      <div class="ad-tool-spinner"></div>
+      <p>Writing hooks...</p>
+    </div>
+
+    <div id="results" style="display:none">
+      <div class="ad-tool-results-header">
+        <h2>Your Hooks</h2>
+        <p class="ad-tool-results-sub">Click any hook to copy it.</p>
+      </div>
+      <div id="hooks-grid" class="hooks-grid"></div>
+      <div class="ad-tool-next-cta">
+        <p>Ready to analyze what your competitors are actually running?</p>
+        <a href="/tools/ad-intel/" class="ad-tool-btn-ghost">Run Ad Intel on a competitor →</a>
+      </div>
+    </div>
+
+    <div id="error" class="ad-tool-error" style="display:none"></div>
+  </div>
+</div>
+
+<style>
+.hooks-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+.hook-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
+}
+.hook-card:hover { border-color: rgba(20,184,166,0.4); background: rgba(20,184,166,0.04); }
+.hook-card.copied { border-color: #14b8a6; }
+.hook-type {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #14b8a6;
+  margin-bottom: 0.5rem;
+}
+.hook-text { font-size: 0.95rem; color: rgba(255,255,255,0.85); line-height: 1.5; }
+.hook-copy-hint { font-size: 0.72rem; color: rgba(255,255,255,0.25); margin-top: 0.75rem; }
+</style>
+
+<script>
+async function generate() {
+  const product = document.getElementById('product').value.trim();
+  if (!product) { alert('Enter a product first'); return; }
+
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('error').style.display = 'none';
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('generate-btn').disabled = true;
+
+  try {
+    const res = await fetch('/tools/hook-generator/generate/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product,
+        audience: document.getElementById('audience').value.trim()
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const grid = document.getElementById('hooks-grid');
+    grid.innerHTML = data.hooks.map((h, i) => `
+      <div class="hook-card" onclick="copyHook(this, '${h.hook.replace(/'/g, "\\'")}')">
+        <div class="hook-type">${h.type.replace(/_/g,' ')}</div>
+        <div class="hook-text">${h.hook}</div>
+        <div class="hook-copy-hint">tap to copy</div>
+      </div>
+    `).join('');
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+  } catch (e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').textContent = e.message;
+    document.getElementById('error').style.display = 'block';
+  }
+  document.getElementById('generate-btn').disabled = false;
+}
+
+function copyHook(el, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    el.classList.add('copied');
+    el.querySelector('.hook-copy-hint').textContent = '✓ copied';
+    setTimeout(() => { el.classList.remove('copied'); el.querySelector('.hook-copy-hint').textContent = 'tap to copy'; }, 2000);
+  });
+}
+
+document.getElementById('product').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+</script>
+{% endblock %}
