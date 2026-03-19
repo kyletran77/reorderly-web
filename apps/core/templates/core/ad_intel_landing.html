@@ -66,6 +66,67 @@
 </section>
 
 <!-- ═══════════════════════════════════════
+     INTEGRATIONS
+═══════════════════════════════════════ -->
+<section class="ai-integrations-section">
+  <div class="container">
+    <p class="ai-integrations-label">Plugs into the tools your workflow already runs on</p>
+    <div class="ai-integrations-row">
+
+      <a href="#" class="ai-integration-chip">
+        <img src="https://logo.clearbit.com/meta.com" alt="Meta Ads" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <span class="ai-logo-fallback" style="display:none;background:#0081FB;color:#fff;">M</span>
+        <span>Meta Ads</span>
+      </a>
+
+      <a href="#" class="ai-integration-chip">
+        <img src="https://logo.clearbit.com/tiktok.com" alt="TikTok Ads" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <span class="ai-logo-fallback" style="display:none;background:#000;color:#fff;">T</span>
+        <span>TikTok Ads</span>
+      </a>
+
+      <a href="#" class="ai-integration-chip">
+        <img src="https://logo.clearbit.com/slack.com" alt="Slack" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <span class="ai-logo-fallback" style="display:none;background:#4A154B;color:#fff;">S</span>
+        <span>Slack</span>
+      </a>
+
+      <a href="#" class="ai-integration-chip">
+        <img src="https://logo.clearbit.com/notion.so" alt="Notion" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <span class="ai-logo-fallback" style="display:none;background:#000;color:#fff;">N</span>
+        <span>Notion</span>
+      </a>
+
+      <a href="#" class="ai-integration-chip">
+        <img src="https://logo.clearbit.com/klaviyo.com" alt="Klaviyo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <span class="ai-logo-fallback" style="display:none;background:#006732;color:#fff;">K</span>
+        <span>Klaviyo</span>
+      </a>
+
+      <a href="#" class="ai-integration-chip">
+        <img src="https://logo.clearbit.com/shopify.com" alt="Shopify" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <span class="ai-logo-fallback" style="display:none;background:#96BF48;color:#fff;">S</span>
+        <span>Shopify</span>
+      </a>
+
+      <a href="#" class="ai-integration-chip">
+        <img src="https://logo.clearbit.com/google.com" alt="Google Sheets" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <span class="ai-logo-fallback" style="display:none;background:#34A853;color:#fff;">G</span>
+        <span>Google Sheets</span>
+      </a>
+
+      <a href="#" class="ai-integration-chip">
+        <img src="https://logo.clearbit.com/linkedin.com" alt="LinkedIn" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+        <span class="ai-logo-fallback" style="display:none;background:#0A66C2;color:#fff;">in</span>
+        <span>LinkedIn Ads</span>
+      </a>
+
+    </div>
+    <p class="ai-integrations-sub">Approve in Slack. Push to Meta in one click. Sync to Notion. Your whole ad workflow, automated.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
      HOW IT WORKS
 ═══════════════════════════════════════ -->
 <section class="ai-section" id="how-it-works">
@@ -410,6 +471,49 @@
   font-size: .85rem; color: #64748b;
 }
 .ai-hero-proof span::before { content: ''; }
+
+/* Integrations bar */
+.ai-integrations-section {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 2.5rem 0;
+  text-align: center;
+}
+.ai-integrations-label {
+  font-size: .75rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: #94a3b8; margin-bottom: 1.5rem;
+}
+.ai-integrations-row {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: .75rem; margin-bottom: 1.5rem;
+}
+.ai-integration-chip {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .5rem 1rem; border-radius: 30px;
+  background: #fff; border: 1px solid #e2e8f0;
+  font-size: .85rem; font-weight: 600; color: #334155;
+  text-decoration: none; transition: all .15s;
+  white-space: nowrap;
+}
+.ai-integration-chip:hover {
+  border-color: #0d9488; color: #0d9488;
+  box-shadow: 0 2px 8px rgba(13,148,136,.12);
+  text-decoration: none;
+}
+.ai-integration-chip img {
+  width: 20px; height: 20px;
+  object-fit: contain; border-radius: 4px;
+}
+.ai-logo-fallback {
+  width: 20px; height: 20px; border-radius: 4px;
+  font-size: .7rem; font-weight: 800;
+  align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.ai-integrations-sub {
+  font-size: .875rem; color: #64748b;
+}
 
 /* Action over Motion section */
 .ai-aom-section {
