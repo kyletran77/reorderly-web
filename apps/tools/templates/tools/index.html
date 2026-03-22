@@ -2,271 +2,43 @@
 {% load static %}
 
 {% block content %}
-<style>
-  .tools-page { background: #0d1117; min-height: 100vh; }
-
-  /* ── Hero ─────────────────────────────────────────── */
-  .tools-hero {
-    padding: 5rem 0 3rem;
-    text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
-  .tools-hero-badge {
-    display: inline-block;
-    background: rgba(20,184,166,0.12);
-    border: 1px solid rgba(20,184,166,0.3);
-    color: #14b8a6;
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.35rem 1rem;
-    border-radius: 99px;
-    margin-bottom: 1.5rem;
-  }
-  .tools-hero h1 {
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 800;
-    color: #fff;
-    margin: 0 0 1rem;
-  }
-  .tools-hero p {
-    font-size: 1.15rem;
-    color: rgba(255,255,255,0.55);
-    max-width: 560px;
-    margin: 0 auto;
-  }
-
-  /* ── Featured Ad Intel card ──────────────────────── */
-  .tools-featured { padding: 3rem 0 2rem; }
-  .tools-featured-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.3);
-    margin-bottom: 1rem;
-  }
-  .ad-intel-feature-card {
-    background: linear-gradient(135deg, rgba(20,184,166,0.08) 0%, rgba(99,102,241,0.08) 100%);
-    border: 1px solid rgba(20,184,166,0.25);
-    border-radius: 20px;
-    padding: 2.5rem;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 2rem;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .ad-intel-feature-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #14b8a6, #6366f1);
-  }
-  .ad-intel-feature-card h2 {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: #fff;
-    margin: 0 0 0.5rem;
-  }
-  .ad-intel-feature-card .flagship-badge {
-    display: inline-block;
-    background: rgba(20,184,166,0.15);
-    border: 1px solid rgba(20,184,166,0.4);
-    color: #14b8a6;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.25rem 0.75rem;
-    border-radius: 99px;
-    margin-bottom: 0.75rem;
-  }
-  .ad-intel-feature-card p {
-    color: rgba(255,255,255,0.6);
-    font-size: 1rem;
-    line-height: 1.6;
-    margin: 0 0 1.5rem;
-    max-width: 520px;
-  }
-  .ad-intel-feature-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1.75rem;
-  }
-  .ad-intel-feature-pill {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: rgba(255,255,255,0.6);
-    font-size: 0.78rem;
-    padding: 0.3rem 0.75rem;
-    border-radius: 99px;
-  }
-  .ad-intel-feature-pill.teal { background: rgba(20,184,166,0.1); border-color: rgba(20,184,166,0.3); color: #14b8a6; }
-  .ad-intel-feature-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
-  .btn-feature-primary {
-    background: #14b8a6;
-    color: #fff;
-    font-weight: 700;
-    font-size: 0.95rem;
-    padding: 0.8rem 1.75rem;
-    border-radius: 10px;
-    text-decoration: none;
-    transition: background 0.2s;
-  }
-  .btn-feature-primary:hover { background: #0d9488; }
-  .btn-feature-ghost {
-    background: transparent;
-    color: rgba(255,255,255,0.5);
-    font-weight: 500;
-    font-size: 0.9rem;
-    padding: 0.8rem 1.5rem;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.12);
-    text-decoration: none;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  .btn-feature-ghost:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
-  .ad-intel-feature-stat {
-    text-align: center;
-    padding: 1.5rem 2rem;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    min-width: 160px;
-  }
-  .ad-intel-feature-stat .stat-val {
-    font-size: 2.25rem;
-    font-weight: 800;
-    color: #14b8a6;
-    line-height: 1;
-    margin-bottom: 0.4rem;
-  }
-  .ad-intel-feature-stat .stat-label {
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.4);
-    font-weight: 500;
-  }
-
-  /* ── More tools section ──────────────────────────── */
-  .tools-secondary { padding: 3rem 0 4rem; }
-  .tools-secondary-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-  }
-  .tools-secondary-header h2 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: rgba(255,255,255,0.5);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1rem;
-  }
-  .tool-index-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 12px;
-    padding: 1.4rem;
-    transition: border-color 0.2s, background 0.2s;
-    text-decoration: none;
-    display: block;
-  }
-  .tool-index-card:hover { border-color: rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); }
-  .tool-index-icon { font-size: 1.5rem; margin-bottom: 0.6rem; }
-  .tool-index-card h3 { font-size: 0.95rem; font-weight: 700; color: #fff; margin: 0 0 0.4rem; }
-  .tool-index-card p { font-size: 0.82rem; color: rgba(255,255,255,0.45); margin: 0 0 0.75rem; line-height: 1.5; }
-  .tool-link-label { font-size: 0.8rem; color: #14b8a6; font-weight: 600; }
-
-  /* ── Bottom CTA ──────────────────────────────────── */
-  .tools-bottom-cta {
-    background: linear-gradient(135deg, rgba(20,184,166,0.07), rgba(99,102,241,0.07));
-    border: 1px solid rgba(20,184,166,0.2);
-    border-radius: 20px;
-    padding: 2.5rem;
-    text-align: center;
-    margin-top: 2rem;
-  }
-  .tools-bottom-cta h3 { font-size: 1.5rem; font-weight: 800; color: #fff; margin: 0 0 0.75rem; }
-  .tools-bottom-cta p { color: rgba(255,255,255,0.5); font-size: 0.95rem; margin: 0 0 1.5rem; }
-
-  @media (max-width: 700px) {
-    .ad-intel-feature-card { grid-template-columns: 1fr; }
-    .ad-intel-feature-stat { display: none; }
-  }
-</style>
-
-<div class="tools-page">
-  <!-- Hero -->
-  <section class="tools-hero">
+<div class="tool-page">
+  <div class="tool-header">
     <div class="container">
-      <div class="tools-hero-badge">Free DTC Tools — No Signup Required</div>
-      <h1>Tools that ship ads.<br>Not more busywork.</h1>
-      <p>Ad intel, competitor analysis, and ad calculators — all free, all built for DTC operators.</p>
-    </div>
-  </section>
-
-  <!-- Featured: Ad Intel -->
-  <section class="tools-featured">
-    <div class="container">
-      <div class="tools-featured-label">Flagship Tool</div>
-      <div class="ad-intel-feature-card">
-        <div>
-          <div class="flagship-badge">AI-Powered · Free Forever</div>
-          <h2>Ad Intel — Competitor Analysis</h2>
-          <p>Enter any competitor URL. In 60 seconds you get their customer pain language mined from Amazon reviews and Reddit, proven ad angles, hook ideas, and a language bank you can steal legally.</p>
-          <div class="ad-intel-feature-pills">
-            <span class="ad-intel-feature-pill teal">✓ Amazon VOC mining</span>
-            <span class="ad-intel-feature-pill teal">✓ Reddit community language</span>
-            <span class="ad-intel-feature-pill teal">✓ Hook + angle generator</span>
-            <span class="ad-intel-feature-pill">No signup</span>
-            <span class="ad-intel-feature-pill">Unlimited</span>
-          </div>
-          <div class="ad-intel-feature-btns">
-            <a href="/tools/ad-intel/" class="btn-feature-primary">Run a Free Analysis →</a>
-            <a href="/" class="btn-feature-ghost">See how it works</a>
-          </div>
-        </div>
-        <div class="ad-intel-feature-stat">
-          <div class="stat-val">60s</div>
-          <div class="stat-label">to full<br>competitor intel</div>
-        </div>
+      <h1>Free Shopify Inventory Tools</h1>
+      <p class="tool-subtitle">10 free tools for Shopify merchants — no signup, no credit card, instant results.</p>
+      <div class="tool-badges">
+        <span class="badge badge-free">All free</span>
+        <span class="badge badge-no-signup">No signup required</span>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- More Tools -->
-  <section class="tools-secondary">
+  <div class="tool-body">
     <div class="container">
-      <div class="tools-secondary-header">
-        <h2>More Free Tools</h2>
-      </div>
       <div class="tools-grid">
         {% for tool in tools %}
-        <a href="{{ tool.url }}" class="tool-index-card">
-          <div class="tool-index-icon">{{ tool.icon }}</div>
-          <h3>{{ tool.name }}</h3>
-          <p>{{ tool.description }}</p>
-          <span class="tool-link-label">Use free tool →</span>
+        <a href="{{ tool.url }}" class="tool-card-link">
+          <div class="tool-index-card">
+            <div class="tool-index-icon">{{ tool.icon }}</div>
+            <h3>{{ tool.name }}</h3>
+            <p>{{ tool.description }}</p>
+            <span class="tool-link-label">Use free tool →</span>
+          </div>
         </a>
         {% endfor %}
       </div>
 
-      <div class="tools-bottom-cta">
-        <h3>Ready to stop researching and start shipping?</h3>
-        <p>Ad Intel turns competitor research into drafted ads — automatically. Free to start, no credit card.</p>
-        <a href="/tools/ad-intel/" class="btn-feature-primary">Try Ad Intel Free →</a>
+      <div class="tool-cta-box" style="margin-top:3rem;">
+        <div class="tool-cta-inner">
+          <div class="tool-cta-text">
+            <strong>Want all of this automated?</strong>
+            <p>Reorderly replaces every one of these manual tasks — monitoring inventory, calculating reorder points, and sending POs to suppliers automatically.</p>
+          </div>
+          <a href="/#waitlist" class="btn btn-primary">Get Reorderly Free →</a>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 </div>
 {% endblock %}

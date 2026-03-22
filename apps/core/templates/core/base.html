@@ -4,28 +4,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}{{ title|default:"Karen — Your AI Short-Form Video Team" }}{% endblock %}</title>
-  <meta name="description" content="{% block meta_description %}{{ description|default:"Karen automatically creates and posts daily TikTok, Instagram Reels, and YouTube Shorts for your business. No camera, no editing, no burnout." }}{% endblock %}">
+  <title>{{ title }}</title>
+  <meta name="description" content="{{ description }}">
   <link rel="canonical" href="{{ canonical }}">
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
-  <link rel="alternate icon" type="image/png" href="{% static 'images/favicon.svg' %}">
-  <meta name="theme-color" content="#0d9488">
-
 
   <!-- Open Graph -->
-  <meta property="og:title" content="{{ title|default:'Karen — Your AI Short-Form Video Team' }}">
-  <meta property="og:description" content="{{ description|default:'Karen automatically creates and posts daily TikTok, Instagram Reels, and YouTube Shorts for your business. No camera, no editing, no burnout.' }}">
-  <meta property="og:image" content="{{ og_image|default:'https://reorderly.me/static/images/og-image.png' }}">
+  <meta property="og:title" content="{{ title }}">
+  <meta property="og:description" content="{{ description }}">
+  <meta property="og:image" content="{{ og_image|default:'https://reorderly.com/static/images/og-image.png' }}">
   <meta property="og:url" content="{{ canonical }}">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Karen">
+  <meta property="og:site_name" content="Reorderly">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="{{ title|default:'Karen — Your AI Short-Form Video Team' }}">
-  <meta name="twitter:description" content="{{ description|default:'Karen automatically creates and posts daily TikTok, Instagram Reels, and YouTube Shorts for your business. No camera, no editing, no burnout.' }}">
-  <meta name="twitter:image" content="{{ og_image|default:'https://reorderly.me/static/images/og-image.png' }}">
+  <meta name="twitter:title" content="{{ title }}">
+  <meta name="twitter:description" content="{{ description }}">
+  <meta name="twitter:image" content="{{ og_image|default:'https://reorderly.com/static/images/og-image.png' }}">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +29,6 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="{% static 'css/landing.css' %}">
-  {% block extra_css %}{% endblock %}
 
   <!-- Google Search Console -->
   {% if gsc_verification %}
@@ -187,18 +181,54 @@
         }
       });
 
-      // Submit handler — analytics only, form submission handled by page-level script
-      waitlistForm.addEventListener('submit', function() {
+      // Submit handler
+      waitlistForm.addEventListener('submit', function(e) {
+        e.preventDefault();
         var email = waitlistForm.querySelector('input[name="email"]');
-        if (!email || !email.value.trim()) return;
-        window.reorderly.track('waitlist_submit', {
-          source: sourceInput.value,
-          has_store: false,
-          sku_count: 'not_provided'
+        var shopifyStore = waitlistForm.querySelector('input[name="shopify_store"]');
+        var skuCount = waitlistForm.querySelector('input[name="sku_count"]');
+        var msgEl = document.getElementById('waitlist-msg');
+
+        var payload = {
+          email: email ? email.value.trim() : '',
+          shopify_store: shopifyStore ? shopifyStore.value.trim() : '',
+          sku_count: skuCount ? skuCount.value.trim() : '',
+          source: sourceInput.value
+        };
+
+        if (!payload.email) return;
+
+        fetch('/api/waitlist/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+          body: JSON.stringify(payload)
+        })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, status: r.status, data: d }; }); })
+        .then(function(res) {
+          if (msgEl) {
+            msgEl.textContent = res.data.message || (res.ok ? 'You\'re on the list!' : 'Something went wrong.');
+            msgEl.className = 'waitlist-msg ' + (res.ok ? 'waitlist-msg-success' : 'waitlist-msg-error');
+          }
+          if (res.ok || res.status === 200) {
+            // Fire conversion event
+            window.reorderly.track('waitlist_submit', {
+              source: payload.source,
+              has_store: !!payload.shopify_store,
+              sku_count: payload.sku_count || 'not_provided'
+            });
+            // GA4 conversion
+            if (typeof gtag !== 'undefined') {
+              gtag('event', 'conversion', { send_to: '{{ ga4_id }}' });
+            }
+            if (email) email.value = '';
+          }
+        })
+        .catch(function() {
+          if (msgEl) {
+            msgEl.textContent = 'Network error. Please try again.';
+            msgEl.className = 'waitlist-msg waitlist-msg-error';
+          }
         });
-        if (typeof gtag !== 'undefined') {
-          gtag('event', 'conversion', { send_to: '{{ ga4_id }}' });
-        }
       });
     }
 
