@@ -17,10 +17,24 @@ BASE = 'https://reorderly.me'
 TOOLS = [
     {
         'slug': 'hook-generator',
-        'name': 'Ad Hook Generator',
-        'description': 'Get 10 scroll-stopping hooks for your product. Curiosity, pain, transformation — all written in human voice.',
+        'name': 'Short-Form Hook Generator',
+        'description': 'Enter any topic. Get 5 scroll-stopping hooks for TikTok, Reels, or Shorts — with the psychological trigger behind each one.',
         'icon': '🪝',
         'url': '/tools/hook-generator/',
+    },
+    {
+        'slug': 'content-calendar',
+        'name': '30-Day Content Calendar',
+        'description': 'Enter your niche and posting frequency. Get a full 30-day content calendar with topic ideas and hook starters.',
+        'icon': '📅',
+        'url': '/tools/content-calendar/',
+    },
+    {
+        'slug': 'hook-scorer',
+        'name': 'Hook Strength Scorer',
+        'description': 'Paste your hook. Get a score out of 10 across curiosity gap, specificity, emotional trigger, and scroll-stop power — plus an improved version.',
+        'icon': '📊',
+        'url': '/tools/hook-scorer/',
     },
     {
         'slug': 'human-voice-rewriter',
@@ -577,8 +591,8 @@ def _get_claude_client():
 
 def hook_generator(request):
     return render(request, 'tools/hook_generator.html', _ctx(
-        title='Free Ad Hook Generator — 10 Scroll-Stopping Hooks — Reorderly',
-        description='Enter your product and target audience. Get 10 proven ad hooks — curiosity, pain, transformation — written in human voice. Free, no signup.',
+        title='Free Short-Form Hook Generator — 5 Viral Hooks for TikTok, Reels & Shorts — Karen',
+        description='Enter your topic and platform. Get 5 scroll-stopping hooks with psychological trigger explanations. Free, no signup required.',
         slug='hook-generator',
     ))
 
@@ -591,28 +605,21 @@ def api_hook_generator(request):
     except (json.JSONDecodeError, ValueError):
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
-    product = data.get('product', '').strip()
-    audience = data.get('audience', '').strip()
-    if not product:
-        return JsonResponse({'error': 'Product is required'}, status=400)
+    topic = data.get('topic', '').strip() or data.get('product', '').strip()
+    platform = data.get('platform', 'TikTok').strip()
+    niche = data.get('niche', '').strip()
+    if not topic:
+        return JsonResponse({'error': 'Topic is required'}, status=400)
 
     client = _get_claude_client()
     if not client:
         return JsonResponse({'error': 'AI not configured'}, status=500)
 
-    prompt = f"""You are a world-class DTC copywriter. Generate 10 scroll-stopping ad hooks for this product.
+    prompt = f"""Generate 5 viral hooks for a short-form video about: {topic}. Platform: {platform}.{f" Niche: {niche}." if niche else ""}
 
-Product: {product}
-Target audience: {audience or 'DTC consumers'}
+Each hook should be under 15 words and create immediate curiosity or shock. Return exactly 5 hooks.
 
-Rules:
-- No em dashes (—), no corporate speak, no exclamation marks
-- Write like a real human texting a friend
-- Mix hook types: curiosity, pain, transformation, social proof, contrarian, confession
-- Each hook is 1-2 sentences max, under 20 words
-- Make them feel native to TikTok / Meta feed
-
-Return JSON: {{"hooks": [{{"type": "curiosity|pain|transformation|social_proof|contrarian|confession", "hook": "..."}}]}}"""
+Return JSON: {{"hooks": [{{"type": "curiosity|shock|pain|contrarian|social_proof", "hook": "...", "trigger": "one sentence explaining the psychological trigger used"}}]}}"""
 
     try:
         resp = client.messages.create(
@@ -947,3 +954,123 @@ def ad_creative_checklist(request):
         description='Run your ad creative through 20 proven checks before you publish. Catch the mistakes that tank performance before they cost you money.',
         slug='ad-creative-checklist',
     ))
+
+
+# ─────────────────────────────────────────────────────────
+# KAREN TOOLS
+# ─────────────────────────────────────────────────────────
+
+def content_calendar(request):
+    return render(request, 'tools/content_calendar.html', _ctx(
+        title='Free 30-Day Short-Form Content Calendar Generator — Karen',
+        description='Enter your niche and posting frequency. Get a full 30-day content calendar with topic ideas for TikTok, Reels, and YouTube Shorts. Free.',
+        slug='content-calendar',
+    ))
+
+
+@csrf_exempt
+@require_POST
+def api_content_calendar(request):
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    niche = data.get('niche', '').strip()
+    frequency = data.get('frequency', 'daily').strip()
+    if not niche:
+        return JsonResponse({'error': 'Niche is required'}, status=400)
+
+    client = _get_claude_client()
+    if not client:
+        return JsonResponse({'error': 'AI not configured'}, status=500)
+
+    freq_map = {'daily': 30, '3x': 12, 'weekly': 4}
+    num_posts = freq_map.get(frequency, 30)
+
+    prompt = f"""Generate a {num_posts}-topic short-form content calendar for a creator in the {niche} niche posting {frequency} on TikTok, Instagram Reels, and YouTube Shorts.
+
+Each topic should be specific and actionable — not vague like "tips" but concrete like "3 things your dentist never tells you about whitening toothpaste."
+
+Mix content types: educational, myth-busting, behind-the-scenes, trending commentary, social proof.
+
+Return JSON: {{"posts": [{{"day": 1, "topic": "...", "format": "educational|myth-busting|behind-scenes|trending|social-proof", "hook_idea": "first line to hook viewers"}}]}}
+
+Return exactly {num_posts} posts."""
+
+    try:
+        resp = client.messages.create(
+            model='claude-3-5-haiku-20241022',
+            max_tokens=3000,
+            messages=[{'role': 'user', 'content': prompt}],
+        )
+        result_text = resp.content[0].text.strip()
+        result_text = re.sub(r'^```(?:json)?\s*', '', result_text)
+        result_text = re.sub(r'\s*```$', '', result_text)
+        result = json.loads(result_text)
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def hook_scorer(request):
+    return render(request, 'tools/hook_scorer.html', _ctx(
+        title='Free Hook Strength Scorer — Rate Your TikTok & Reels Hook — Karen',
+        description='Paste your short-form video hook. Get a score out of 10 with breakdown across curiosity gap, specificity, emotional trigger, and scroll-stop power — plus an improved version.',
+        slug='hook-scorer',
+    ))
+
+
+@csrf_exempt
+@require_POST
+def api_hook_scorer(request):
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    hook = data.get('hook', '').strip()
+    if not hook:
+        return JsonResponse({'error': 'Hook is required'}, status=400)
+
+    client = _get_claude_client()
+    if not client:
+        return JsonResponse({'error': 'AI not configured'}, status=500)
+
+    prompt = f"""You are a short-form video strategist who has studied thousands of viral TikTok, Reels, and YouTube Shorts hooks.
+
+Score this hook: "{hook}"
+
+Rate it 1-10 on four dimensions:
+- curiosity_gap: Does it create an information gap that makes people need to keep watching?
+- specificity: Is it specific and concrete, or vague and generic?
+- emotional_trigger: Does it tap into a strong emotion (fear, envy, surprise, relief)?
+- scroll_stop_power: Would it stop a fast-scrolling thumb in the first 1-2 seconds?
+
+Then provide an improved version of the hook.
+
+Return JSON: {{
+  "overall_score": 7,
+  "dimensions": {{
+    "curiosity_gap": {{"score": 8, "explanation": "..."}},
+    "specificity": {{"score": 6, "explanation": "..."}},
+    "emotional_trigger": {{"score": 7, "explanation": "..."}},
+    "scroll_stop_power": {{"score": 7, "explanation": "..."}}
+  }},
+  "improved_hook": "...",
+  "improvement_explanation": "what changed and why it works better"
+}}"""
+
+    try:
+        resp = client.messages.create(
+            model='claude-3-5-haiku-20241022',
+            max_tokens=800,
+            messages=[{'role': 'user', 'content': prompt}],
+        )
+        result_text = resp.content[0].text.strip()
+        result_text = re.sub(r'^```(?:json)?\s*', '', result_text)
+        result_text = re.sub(r'\s*```$', '', result_text)
+        result = json.loads(result_text)
+        return JsonResponse(result)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

@@ -32,6 +32,13 @@ urlpatterns = [
     path('ad-intel/', views.ad_intel, name='ad_intel'),
     path('ad-intel/analyze/', views.api_ad_intel_analyze, name='api_ad_intel_analyze'),
 
+    # ── Karen Tools ───────────────────────────────────────
+    path('content-calendar/', views.content_calendar, name='content_calendar'),
+    path('content-calendar/generate/', views.api_content_calendar, name='api_content_calendar'),
+
+    path('hook-scorer/', views.hook_scorer, name='hook_scorer'),
+    path('hook-scorer/score/', views.api_hook_scorer, name='api_hook_scorer'),
+
     # ── Legacy Inventory Tools ────────────────────────────
     path('po-email-generator/', views.po_email_generator, name='po_email_generator'),
     path('reorder-point-calculator/', views.reorder_point_calculator, name='reorder_point_calculator'),

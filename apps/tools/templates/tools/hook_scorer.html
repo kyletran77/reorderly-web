@@ -1,0 +1,178 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+{% include 'tools/ad_tool_styles.html' %}
+</style>
+<div class="ad-tool-page">
+  <div class="container">
+    <div class="ad-tool-header">
+      <a href="/tools/" class="ad-tool-back">← All Tools</a>
+      <div class="ad-tool-badge">Free · No Signup</div>
+      <h1>Hook Strength Scorer</h1>
+      <p>Paste your TikTok, Reels, or Shorts hook. Get a score out of 10 across four dimensions — plus an improved version.</p>
+    </div>
+
+    <div class="ad-tool-form-card">
+      <div class="ad-tool-form-group">
+        <label>Your hook</label>
+        <textarea id="hook" class="ad-tool-input" rows="3" placeholder="e.g. I stopped using sunscreen for 30 days and here's what happened to my skin"></textarea>
+      </div>
+      <button id="score-btn" class="ad-tool-btn" onclick="scoreHook()">Score My Hook →</button>
+    </div>
+
+    <div id="loading" class="ad-tool-loading" style="display:none">
+      <div class="ad-tool-spinner"></div>
+      <p>Analyzing your hook...</p>
+    </div>
+
+    <div id="results" style="display:none">
+      <div class="score-overview">
+        <div class="score-circle">
+          <span id="overall-score">0</span>
+          <small>/10</small>
+        </div>
+        <div class="score-label">Overall Hook Strength</div>
+      </div>
+
+      <div class="dimensions-grid" id="dimensions-grid"></div>
+
+      <div class="improved-hook-card" id="improved-section" style="display:none">
+        <div class="improved-label">Improved version</div>
+        <div class="improved-text" id="improved-hook"></div>
+        <div class="improved-explanation" id="improved-explanation"></div>
+        <button class="ad-tool-btn-ghost" onclick="copyImproved()">Copy improved hook</button>
+      </div>
+
+      <div class="ad-tool-next-cta">
+        <p>Want Karen to create and post hooks like this automatically every day?</p>
+        <a href="/#waitlist" class="ad-tool-btn-ghost">Join the waitlist →</a>
+      </div>
+    </div>
+
+    <div id="error" class="ad-tool-error" style="display:none"></div>
+  </div>
+</div>
+
+<style>
+.score-overview {
+  text-align: center;
+  margin: 2rem 0;
+}
+.score-circle {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 4rem;
+  font-weight: 800;
+  color: #14b8a6;
+  line-height: 1;
+}
+.score-circle small { font-size: 1.5rem; color: rgba(255,255,255,0.4); font-weight: 400; }
+.score-label { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+.dimensions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.dimension-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+.dim-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+.dim-name { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: rgba(255,255,255,0.6); }
+.dim-score { font-size: 1.4rem; font-weight: 800; color: #14b8a6; }
+.dim-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; margin-bottom: 0.75rem; }
+.dim-bar-fill { height: 100%; background: linear-gradient(90deg, #0d9488, #14b8a6); border-radius: 2px; transition: width 0.6s ease; }
+.dim-explanation { font-size: 0.82rem; color: rgba(255,255,255,0.5); line-height: 1.5; }
+
+.improved-hook-card {
+  background: rgba(20,184,166,0.06);
+  border: 1px solid rgba(20,184,166,0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+.improved-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #14b8a6; margin-bottom: 0.75rem; }
+.improved-text { font-size: 1.05rem; color: rgba(255,255,255,0.9); line-height: 1.5; margin-bottom: 0.75rem; font-style: italic; }
+.improved-explanation { font-size: 0.82rem; color: rgba(255,255,255,0.5); line-height: 1.5; margin-bottom: 1rem; }
+</style>
+
+<script>
+let improvedHookText = '';
+
+const dimLabels = {
+  'curiosity_gap': 'Curiosity Gap',
+  'specificity': 'Specificity',
+  'emotional_trigger': 'Emotional Trigger',
+  'scroll_stop_power': 'Scroll-Stop Power',
+};
+
+async function scoreHook() {
+  const hook = document.getElementById('hook').value.trim();
+  if (!hook) { alert('Enter a hook to score'); return; }
+
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('error').style.display = 'none';
+  document.getElementById('loading').style.display = 'flex';
+  const btn = document.getElementById('score-btn');
+  btn.disabled = true;
+  btn.textContent = 'Scoring...';
+
+  try {
+    const res = await fetch('/tools/hook-scorer/score/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hook })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    document.getElementById('overall-score').textContent = data.overall_score || 0;
+
+    const dimsEl = document.getElementById('dimensions-grid');
+    const dims = data.dimensions || {};
+    dimsEl.innerHTML = Object.entries(dimLabels).map(([key, label]) => {
+      const d = dims[key] || {};
+      const score = d.score || 0;
+      const pct = (score / 10) * 100;
+      return `
+        <div class="dimension-card">
+          <div class="dim-header">
+            <span class="dim-name">${label}</span>
+            <span class="dim-score">${score}/10</span>
+          </div>
+          <div class="dim-bar"><div class="dim-bar-fill" style="width:${pct}%"></div></div>
+          <div class="dim-explanation">${d.explanation || ''}</div>
+        </div>
+      `;
+    }).join('');
+
+    if (data.improved_hook) {
+      improvedHookText = data.improved_hook;
+      document.getElementById('improved-hook').textContent = data.improved_hook;
+      document.getElementById('improved-explanation').textContent = data.improvement_explanation || '';
+      document.getElementById('improved-section').style.display = 'block';
+    }
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+  } catch (e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').textContent = e.message;
+    document.getElementById('error').style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Score My Hook →';
+}
+
+function copyImproved() {
+  if (!improvedHookText) return;
+  navigator.clipboard.writeText(improvedHookText).then(() => {
+    const btn = document.querySelector('#improved-section .ad-tool-btn-ghost');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied';
+    setTimeout(() => { btn.textContent = orig; }, 2000);
+  });
+}
+</script>
+{% endblock %}

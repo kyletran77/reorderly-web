@@ -1,0 +1,152 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+{% include 'tools/ad_tool_styles.html' %}
+</style>
+<div class="ad-tool-page">
+  <div class="container">
+    <div class="ad-tool-header">
+      <a href="/tools/" class="ad-tool-back">← All Tools</a>
+      <div class="ad-tool-badge">Free · No Signup</div>
+      <h1>30-Day Short-Form Content Calendar</h1>
+      <p>Enter your niche and posting frequency. Get a full content calendar with specific topics and hook ideas for TikTok, Reels, and YouTube Shorts.</p>
+    </div>
+
+    <div class="ad-tool-form-card">
+      <div class="ad-tool-form-group">
+        <label>Niche or industry</label>
+        <input type="text" id="niche" placeholder="e.g. personal finance, skincare, coffee, real estate" class="ad-tool-input" />
+      </div>
+      <div class="ad-tool-form-group">
+        <label>Posting frequency</label>
+        <select id="frequency" class="ad-tool-input">
+          <option value="daily">Daily (30 topics)</option>
+          <option value="3x">3x per week (12 topics)</option>
+          <option value="weekly">Weekly (4 topics)</option>
+        </select>
+      </div>
+      <button id="generate-btn" class="ad-tool-btn" onclick="generate()">Generate Calendar →</button>
+    </div>
+
+    <div id="loading" class="ad-tool-loading" style="display:none">
+      <div class="ad-tool-spinner"></div>
+      <p>Building your calendar...</p>
+    </div>
+
+    <div id="results" style="display:none">
+      <div class="ad-tool-results-header">
+        <h2>Your Content Calendar</h2>
+        <p class="ad-tool-results-sub">30 days of topics with hook ideas ready to go.</p>
+      </div>
+      <div id="calendar-grid" class="calendar-grid"></div>
+      <div class="ad-tool-next-cta">
+        <p>Want Karen to actually create and post all of this automatically?</p>
+        <a href="/#waitlist" class="ad-tool-btn-ghost">Join the waitlist →</a>
+      </div>
+    </div>
+
+    <div id="error" class="ad-tool-error" style="display:none"></div>
+  </div>
+</div>
+
+<style>
+.calendar-grid { display: flex; flex-direction: column; gap: 0.75rem; }
+.calendar-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 120px;
+  gap: 1rem;
+  align-items: start;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+.cal-day {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #14b8a6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-top: 2px;
+}
+.cal-topic { font-size: 0.9rem; color: rgba(255,255,255,0.85); line-height: 1.4; }
+.cal-hook { font-size: 0.78rem; color: rgba(255,255,255,0.45); margin-top: 0.35rem; font-style: italic; }
+.cal-format {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  text-align: right;
+  padding-top: 2px;
+}
+.format-educational { color: #60a5fa; }
+.format-myth-busting { color: #f59e0b; }
+.format-behind-scenes { color: #a78bfa; }
+.format-trending { color: #f87171; }
+.format-social-proof { color: #34d399; }
+</style>
+
+<script>
+const formatColors = {
+  'educational': 'format-educational',
+  'myth-busting': 'format-myth-busting',
+  'behind-scenes': 'format-behind-scenes',
+  'trending': 'format-trending',
+  'social-proof': 'format-social-proof',
+};
+
+async function generate() {
+  const niche = document.getElementById('niche').value.trim();
+  if (!niche) { alert('Enter your niche first'); return; }
+
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('error').style.display = 'none';
+  document.getElementById('loading').style.display = 'flex';
+  const btn = document.getElementById('generate-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+
+  try {
+    const res = await fetch('/tools/content-calendar/generate/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        niche,
+        frequency: document.getElementById('frequency').value
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const grid = document.getElementById('calendar-grid');
+    grid.innerHTML = data.posts.map(p => {
+      const fmt = (p.format || '').toLowerCase().replace(/_/g, '-');
+      const colorClass = formatColors[fmt] || '';
+      return `
+        <div class="calendar-row">
+          <div class="cal-day">Day ${p.day}</div>
+          <div>
+            <div class="cal-topic">${p.topic || ''}</div>
+            ${p.hook_idea ? `<div class="cal-hook">"${p.hook_idea}"</div>` : ''}
+          </div>
+          <div class="cal-format ${colorClass}">${fmt.replace(/-/g, ' ')}</div>
+        </div>
+      `;
+    }).join('');
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+  } catch (e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').textContent = e.message;
+    document.getElementById('error').style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Generate Calendar →';
+}
+
+document.getElementById('niche').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+</script>
+{% endblock %}

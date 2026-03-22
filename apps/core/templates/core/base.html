@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ title }}</title>
-  <meta name="description" content="{{ description }}">
+  <title>{% block title %}{{ title|default:"Karen — Your AI Short-Form Video Team" }}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ description|default:"Karen automatically creates and posts daily TikTok, Instagram Reels, and YouTube Shorts for your business. No camera, no editing, no burnout." }}{% endblock %}">
   <link rel="canonical" href="{{ canonical }}">
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
@@ -14,17 +14,17 @@
 
 
   <!-- Open Graph -->
-  <meta property="og:title" content="{{ title }}">
-  <meta property="og:description" content="{{ description }}">
+  <meta property="og:title" content="{{ title|default:'Karen — Your AI Short-Form Video Team' }}">
+  <meta property="og:description" content="{{ description|default:'Karen automatically creates and posts daily TikTok, Instagram Reels, and YouTube Shorts for your business. No camera, no editing, no burnout.' }}">
   <meta property="og:image" content="{{ og_image|default:'https://reorderly.me/static/images/og-image.png' }}">
   <meta property="og:url" content="{{ canonical }}">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Reorderly">
+  <meta property="og:site_name" content="Karen">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="{{ title }}">
-  <meta name="twitter:description" content="{{ description }}">
+  <meta name="twitter:title" content="{{ title|default:'Karen — Your AI Short-Form Video Team' }}">
+  <meta name="twitter:description" content="{{ description|default:'Karen automatically creates and posts daily TikTok, Instagram Reels, and YouTube Shorts for your business. No camera, no editing, no burnout.' }}">
   <meta name="twitter:image" content="{{ og_image|default:'https://reorderly.me/static/images/og-image.png' }}">
 
   <!-- Fonts -->

@@ -3,10 +3,9 @@ from . import views
 
 urlpatterns = [
     path('', views.content_index, name='content_index'),
-    path('shopify-stocky-shutdown/', views.stocky_shutdown, name='stocky_shutdown'),
-    path('best-shopify-inventory-apps/', views.best_inventory_apps, name='best_inventory_apps'),
-    path('shopify-purchase-order-supplier/', views.shopify_po_supplier, name='shopify_po_supplier'),
-    path('replacing-shopify-stocky/', views.replacing_stocky, name='replacing_stocky'),
-    path('automate-purchase-orders-shopify/', views.automate_pos, name='automate_pos'),
-    path('how-to-calculate-reorder-point/', views.reorder_point_guide, name='reorder_point_guide'),
+    path('how-to-post-on-tiktok-every-day-without-burning-out/', views.post_tiktok_daily, name='post_tiktok_daily'),
+    path('ai-tools-to-automate-youtube-shorts-2026/', views.ai_tools_youtube_shorts, name='ai_tools_youtube_shorts'),
+    path('how-long-does-it-take-to-make-a-youtube-short/', views.how_long_youtube_short, name='how_long_youtube_short'),
+    path('opus-clip-alternatives-2026/', views.opus_clip_alternatives, name='opus_clip_alternatives'),
+    path('how-to-grow-on-tiktok-as-a-small-business/', views.grow_tiktok_small_business, name='grow_tiktok_small_business'),
 ]

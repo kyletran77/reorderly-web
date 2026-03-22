@@ -8,21 +8,29 @@
   <div class="container">
     <div class="ad-tool-header">
       <a href="/tools/" class="ad-tool-back">← All Tools</a>
-      <div class="ad-tool-badge">🪝 Free · No Signup</div>
-      <h1>Ad Hook Generator</h1>
-      <p>Enter your product and target audience. Get 10 scroll-stopping hooks — written in human voice, ready to test.</p>
+      <div class="ad-tool-badge">Free · No Signup</div>
+      <h1>Short-Form Hook Generator</h1>
+      <p>Enter your topic and platform. Get 5 scroll-stopping hooks with the psychological trigger behind each one.</p>
     </div>
 
     <div class="ad-tool-form-card">
       <div class="ad-tool-form-group">
-        <label>Product or offer</label>
-        <input type="text" id="product" placeholder="e.g. magnesium glycinate supplement for sleep" class="ad-tool-input" />
+        <label>Topic</label>
+        <input type="text" id="topic" placeholder="e.g. why cheap coffee tastes different" class="ad-tool-input" />
       </div>
       <div class="ad-tool-form-group">
-        <label>Target audience <span class="optional">optional</span></label>
-        <input type="text" id="audience" placeholder="e.g. women 30-45 who struggle with sleep" class="ad-tool-input" />
+        <label>Platform</label>
+        <select id="platform" class="ad-tool-input">
+          <option value="TikTok">TikTok</option>
+          <option value="Instagram Reels">Instagram Reels</option>
+          <option value="YouTube Shorts">YouTube Shorts</option>
+        </select>
       </div>
-      <button id="generate-btn" class="ad-tool-btn" onclick="generate()">Generate 10 Hooks →</button>
+      <div class="ad-tool-form-group">
+        <label>Niche <span class="optional">optional</span></label>
+        <input type="text" id="niche" placeholder="e.g. coffee, fitness, personal finance" class="ad-tool-input" />
+      </div>
+      <button id="generate-btn" class="ad-tool-btn" onclick="generate()">Generate Hooks →</button>
     </div>
 
     <div id="loading" class="ad-tool-loading" style="display:none">
@@ -37,8 +45,8 @@
       </div>
       <div id="hooks-grid" class="hooks-grid"></div>
       <div class="ad-tool-next-cta">
-        <p>Ready to analyze what your competitors are actually running?</p>
-        <a href="/tools/ad-intel/" class="ad-tool-btn-ghost">Run Ad Intel on a competitor →</a>
+        <p>Want Karen to do this for all your content automatically?</p>
+        <a href="/#waitlist" class="ad-tool-btn-ghost">Join the waitlist →</a>
       </div>
     </div>
 
@@ -67,27 +75,31 @@
   color: #14b8a6;
   margin-bottom: 0.5rem;
 }
-.hook-text { font-size: 0.95rem; color: rgba(255,255,255,0.85); line-height: 1.5; }
+.hook-text { font-size: 0.95rem; color: rgba(255,255,255,0.85); line-height: 1.5; margin-bottom: 0.5rem; }
+.hook-trigger { font-size: 0.8rem; color: rgba(255,255,255,0.45); line-height: 1.4; font-style: italic; }
 .hook-copy-hint { font-size: 0.72rem; color: rgba(255,255,255,0.25); margin-top: 0.75rem; }
 </style>
 
 <script>
 async function generate() {
-  const product = document.getElementById('product').value.trim();
-  if (!product) { alert('Enter a product first'); return; }
+  const topic = document.getElementById('topic').value.trim();
+  if (!topic) { alert('Enter a topic first'); return; }
 
   document.getElementById('results').style.display = 'none';
   document.getElementById('error').style.display = 'none';
   document.getElementById('loading').style.display = 'flex';
-  document.getElementById('generate-btn').disabled = true;
+  const btn = document.getElementById('generate-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
 
   try {
     const res = await fetch('/tools/hook-generator/generate/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        product,
-        audience: document.getElementById('audience').value.trim()
+        topic,
+        platform: document.getElementById('platform').value,
+        niche: document.getElementById('niche').value.trim()
       })
     });
     const data = await res.json();
@@ -95,9 +107,10 @@ async function generate() {
 
     const grid = document.getElementById('hooks-grid');
     grid.innerHTML = data.hooks.map((h, i) => `
-      <div class="hook-card" onclick="copyHook(this, '${h.hook.replace(/'/g, "\\'")}')">
-        <div class="hook-type">${h.type.replace(/_/g,' ')}</div>
-        <div class="hook-text">${h.hook}</div>
+      <div class="hook-card" onclick="copyHook(this, '${(h.hook || '').replace(/'/g, "\\'")}')">
+        <div class="hook-type">${(h.type || '').replace(/_/g,' ')}</div>
+        <div class="hook-text">${h.hook || ''}</div>
+        ${h.trigger ? `<div class="hook-trigger">${h.trigger}</div>` : ''}
         <div class="hook-copy-hint">tap to copy</div>
       </div>
     `).join('');
@@ -109,7 +122,8 @@ async function generate() {
     document.getElementById('error').textContent = e.message;
     document.getElementById('error').style.display = 'block';
   }
-  document.getElementById('generate-btn').disabled = false;
+  btn.disabled = false;
+  btn.textContent = 'Generate Hooks →';
 }
 
 function copyHook(el, text) {
@@ -120,6 +134,6 @@ function copyHook(el, text) {
   });
 }
 
-document.getElementById('product').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+document.getElementById('topic').addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
 </script>
 {% endblock %}
